@@ -142,9 +142,17 @@ def test_asr_tail_audio_preservation():
         engine._current_utterance_id = "utt-12345"
 
     engine._audio_buffer_mgr.feed_bytes(b"\x00" * (22400 * 2))
+    engine._loop = None
 
     # Call on_speech_end
     engine.on_speech_end(reason="VAD_SILENCE")
+
+    # Wait briefly for background thread pool executor
+    import time
+    for _ in range(200):
+        if engine._commit_sync.called:
+            break
+        time.sleep(0.01)
 
     # Verify that final_cached was None, forcing full commit inference
     assert engine._commit_sync.called

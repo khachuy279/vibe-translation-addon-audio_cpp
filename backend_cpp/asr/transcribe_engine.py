@@ -4,6 +4,7 @@ from abc import ABCMeta
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from enum import Enum
 import logging
 import math
 import re
@@ -14,6 +15,17 @@ from typing import Any, AsyncIterator, Dict, Optional
 
 import numpy as np
 import transcribe_cpp
+
+
+class BoundaryState(str, Enum):
+    """VAD-paced boundary state machine states."""
+    NORMAL = "NORMAL"
+    FORCED_PENDING = "FORCED_PENDING"
+
+
+def _is_max_duration_reason(reason: str) -> bool:
+    """Helper to detect any max-duration boundary reason (safe, emergency, or legacy)."""
+    return bool(reason and reason.startswith("MAX_DURATION"))
 
 from backend_cpp.asr.audio_buffer import (
     AudioBufferManager,
@@ -236,6 +248,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         self._state_lock = threading.Lock()
         self._is_speech_active: bool = False
         self._current_utterance_id: str = str(uuid.uuid4())
+        self._current_epoch: int = 0
+        self._current_media_start_time: float = 0.0
+        self._current_media_end_time: float = 0.0
         self._language: str = self._engine_config.language
 
         # Sentence segmentation bounds & toggles
@@ -273,6 +288,10 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         self._deduplicator = CommitDeduplicator(cache_ttl_sec=RECENT_COMMITS_CACHE_SEC)
         self._last_committed_head: str = ""
         self._last_committed_head_time: float = 0.0
+        # VAD-paced boundary controller state (Phase 3C.3)
+        self._boundary_state: BoundaryState = BoundaryState.NORMAL
+        self._forced_boundary_start_dur: float = 0.0
+        self._boundary_silence_samples: int = 0
 
         self._token_queue: Optional[asyncio.Queue] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -340,6 +359,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         split_on_stability: Optional[bool] = None,
         stability_duration_sec: Optional[float] = None,
         max_duration_sec: Optional[float] = None,
+        max_duration_grace_sec: Optional[float] = None,
+        max_duration_require_silence: Optional[bool] = None,
+        boundary_candidate_silence_ms: Optional[int] = None,
         max_chars: Optional[int] = None,
         min_words_to_commit: Optional[int] = None,
     ) -> None:
@@ -353,6 +375,12 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         if max_duration_sec is not None:
             self.sentence_config.max_duration_sec = max_duration_sec
             self._segmenter.max_duration_sec = max_duration_sec
+        if max_duration_grace_sec is not None:
+            self.sentence_config.max_duration_grace_sec = max_duration_grace_sec
+        if max_duration_require_silence is not None:
+            self.sentence_config.max_duration_require_silence = max_duration_require_silence
+        if boundary_candidate_silence_ms is not None:
+            self.sentence_config.boundary_candidate_silence_ms = boundary_candidate_silence_ms
         if max_chars is not None:
             self.sentence_config.max_chars = max_chars
             self._segmenter.max_chars = max_chars
@@ -730,17 +758,87 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
                 with TranscribeEngine._commit_lock:
                     TranscribeEngine._commit_waiting -= 1
 
-    def feed_audio(self, pcm_bytes: bytes, timestamp: float = 0.0, vad_state: int = VAD_STATE_SPEECH) -> None:
-        """Feed incoming 16kHz 16-bit mono PCM bytes."""
+    def feed_audio(
+        self,
+        pcm_bytes: bytes,
+        timestamp: float = 0.0,
+        vad_state: int = VAD_STATE_SPEECH,
+        media_start_time: float = 0.0,
+        media_end_time: float = 0.0,
+        epoch: int = 0,
+    ) -> None:
+        """Feed incoming 16kHz 16-bit mono PCM bytes with frame-aligned boundary checks."""
         if not pcm_bytes:
             return
 
-        dur = self._audio_buffer_mgr.feed_bytes(pcm_bytes, vad_state=vad_state)
+        with self._state_lock:
+            if epoch < self._current_epoch:
+                return
+            if not self._is_speech_active or self._current_media_start_time == 0.0:
+                self._current_epoch = epoch
+                self._current_media_start_time = media_start_time
+            if media_end_time > 0:
+                self._current_media_end_time = max(self._current_media_end_time, media_end_time)
 
-        # Auto-commit if single sentence exceeds maximum length
-        if dur >= self.sentence_config.max_duration_sec:
-            logger.debug(f"Utterance reached max duration ({dur:.1f}s), triggering auto-commit")
-            self.on_speech_end(reason="MAX_DURATION")
+        # Process in frame increments (25ms = 400 samples = 800 bytes) to ensure invariant:
+        # No audio chunk skips past emergency boundary (17.0s) without frame-level detection.
+        frame_bytes = int(DEFAULT_SAMPLE_RATE * 0.025 * 2)  # 800 bytes
+        offset = 0
+        buf_len = len(pcm_bytes)
+
+        while offset < buf_len:
+            chunk_slice = pcm_bytes[offset : offset + frame_bytes]
+            offset += len(chunk_slice)
+            num_samples = len(chunk_slice) // 2
+
+            dur = self._audio_buffer_mgr.feed_bytes(chunk_slice, vad_state=vad_state)
+
+            # Fallback for debugging/testing if VAD-paced soft boundary is disabled
+            if not getattr(self.sentence_config, "max_duration_require_silence", True):
+                if dur >= self.sentence_config.max_duration_sec:
+                    logger.debug(f"Utterance reached max duration ({dur:.1f}s), triggering direct cut")
+                    self.on_speech_end(reason="MAX_DURATION_SAFE")
+                continue
+
+            if dur >= self.sentence_config.max_duration_sec:
+                with self._state_lock:
+                    if self._boundary_state == BoundaryState.NORMAL:
+                        self._boundary_state = BoundaryState.FORCED_PENDING
+                        self._forced_boundary_start_dur = dur
+                        self._boundary_silence_samples = 0
+                        perf.increment_counter("asr.boundary.max_duration_deferred")
+                        logger.info(
+                            f"[BOUNDARY] Utterance reached {dur:.1f}s >= max_duration "
+                            f"({self.sentence_config.max_duration_sec:.1f}s). Entering FORCED_PENDING (grace: "
+                            f"{self.sentence_config.max_duration_grace_sec:.1f}s, candidate probe: "
+                            f"{self.sentence_config.boundary_candidate_silence_ms}ms)..."
+                        )
+
+                if self._boundary_state == BoundaryState.FORCED_PENDING:
+                    is_silence = (vad_state != VAD_STATE_SPEECH)
+                    if is_silence:
+                        self._boundary_silence_samples += num_samples
+                        silence_ms = (self._boundary_silence_samples / float(DEFAULT_SAMPLE_RATE)) * 1000.0
+                        candidate_probe_ms = float(getattr(self.sentence_config, "boundary_candidate_silence_ms", 80))
+                        if silence_ms >= candidate_probe_ms:
+                            logger.info(
+                                f"[BOUNDARY SAFE] Confirmed acoustic silence candidate ({silence_ms:.0f}ms >= "
+                                f"{candidate_probe_ms:.0f}ms) at {dur:.1f}s. Committing clean boundary."
+                            )
+                            self.on_speech_end(reason="MAX_DURATION_SAFE")
+                            continue
+                    else:
+                        # Speech active: reset candidate silence probe
+                        self._boundary_silence_samples = 0
+
+                        grace_limit = self.sentence_config.max_duration_sec + self.sentence_config.max_duration_grace_sec
+                        if dur >= grace_limit:
+                            logger.warning(
+                                f"[BOUNDARY EMERGENCY] Grace period expired ({dur:.1f}s >= {grace_limit:.1f}s) "
+                                f"without silence. Triggering emergency failsafe cut."
+                            )
+                            self.on_speech_end(reason="MAX_DURATION_EMERGENCY")
+                            continue
 
     def on_speech_start(self) -> None:
         """Called by VAD on speech onset."""
@@ -751,20 +849,24 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             self._current_utterance_id = str(uuid.uuid4())
             self._last_committed_head = ""
             self._last_committed_head_time = 0.0
+            self._boundary_state = BoundaryState.NORMAL
+            self._boundary_silence_samples = 0
         self._last_polled_samples = 0
         self._last_preview_duration_sec = 0.0
         self._segmenter.reset()
 
-    def on_speech_end(self, reason: str = "VAD_SILENCE") -> None:
+    def on_speech_end(self, reason: str = "VAD_SILENCE", media_end_time: float = 0.0, epoch: int = 0) -> None:
         """Called by VAD, max_duration, or connection end on speech finish."""
         with self._state_lock:
+            self._boundary_state = BoundaryState.NORMAL
+            self._boundary_silence_samples = 0
             pcm_combined, frame_state, _ = self._audio_buffer_mgr.pop_all()
             if pcm_combined is None or len(pcm_combined) == 0:
-                if reason != "MAX_DURATION":
+                if not _is_max_duration_reason(reason):
                     self._is_speech_active = False
                 return
 
-            if reason != "MAX_DURATION":
+            if not _is_max_duration_reason(reason):
                 self._is_speech_active = False
 
             utt_id = self._current_utterance_id
@@ -773,6 +875,13 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             last_samples = self._last_partial_samples
             self._last_partial_text = ""
             self._last_partial_samples = 0
+
+            # Immutable snapshot of utterance metadata at commit scheduling time
+            utt_epoch = self._current_epoch if epoch == 0 else epoch
+            utt_media_start = self._current_media_start_time
+            utt_media_end = max(self._current_media_end_time, media_end_time)
+            self._current_media_start_time = 0.0
+            self._current_media_end_time = 0.0
 
         self._last_polled_samples = 0
         self._last_preview_duration_sec = 0.0
@@ -826,7 +935,7 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         # so that trailing Japanese verb conjugations, particles, and endings (e.g. 〜ました, 〜ません) are never truncated!
         reuse_preview = (
             bool(cached_text and cached_text.strip())
-            and reason != "MAX_DURATION"
+            and not _is_max_duration_reason(reason)
             and diff_samples == 0
         )
         final_cached = cached_text if reuse_preview else None
@@ -834,16 +943,41 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         # Execute final commit asynchronously without blocking the event loop or VAD
         if self._loop and self._loop.is_running():
             asyncio.run_coroutine_threadsafe(
-                self._commit_async(pcm_combined, utt_id, reason=reason, cached_text=final_cached, frame_state=frame_state),
+                self._commit_async(
+                    pcm_combined,
+                    utt_id,
+                    reason=reason,
+                    cached_text=final_cached,
+                    frame_state=frame_state,
+                    epoch=utt_epoch,
+                    media_start_time=utt_media_start,
+                    media_end_time=utt_media_end,
+                ),
                 self._loop,
             )
         else:
             _SYNC_COMMIT_EXECUTOR.submit(
-                self._commit_sync, pcm_combined, utt_id, reason, final_cached, frame_state
+                self._commit_sync,
+                pcm_combined,
+                utt_id,
+                reason,
+                final_cached,
+                frame_state,
+                utt_epoch,
+                utt_media_start,
+                utt_media_end,
             )
 
 
-    def _emit_final(self, text: str, utt_id: str, reason: str) -> None:
+    def _emit_final(
+        self,
+        text: str,
+        utt_id: str,
+        reason: str,
+        epoch: int = 0,
+        media_start_time: float = 0.0,
+        media_end_time: float = 0.0,
+    ) -> None:
         """Emit finalized sentence to client and translation pipeline with descriptive log."""
         if not text or not text.strip():
             return
@@ -856,6 +990,16 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
 
         norm_text = SentenceSegmenter.normalize_for_comparison(clean_text)
         self._deduplicator.record_commit(clean_text, norm_text)
+
+        # Boundary telemetry
+        if reason == "VAD_SILENCE":
+            perf.increment_counter("asr.boundary.vad_silence")
+        elif reason == "MAX_DURATION_SAFE":
+            perf.increment_counter("asr.boundary.max_duration_safe")
+        elif reason == "MAX_DURATION_EMERGENCY":
+            perf.increment_counter("asr.boundary.max_duration_emergency")
+        elif reason == "STABLE_PREFIX":
+            perf.increment_counter("asr.boundary.stable_prefix")
 
         try:
             logger.info(f"[ASR COMMIT] [utt={clean_utt}] [{self.model_key}] [{reason}] ({self._language}): '{clean_text}'")
@@ -873,6 +1017,10 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             "model": self.model_key,
             "commit_method": reason,
             "filtered": False,
+            "epoch": epoch,
+            "media_start_time": media_start_time,
+            "media_end_time": media_end_time,
+            "asr_commit_wall_time": time.time(),
         }
         self._push_message(msg)
 
@@ -883,6 +1031,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         reason: str = "VAD_SILENCE",
         cached_text: Optional[str] = None,
         frame_state: Optional[np.ndarray] = None,
+        epoch: int = 0,
+        media_start_time: float = 0.0,
+        media_end_time: float = 0.0,
     ) -> None:
         """Asynchronously compute final transcription and push to queue."""
         if cached_text:
@@ -896,11 +1047,18 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             )
 
         if text and not self._segmenter.is_text_filtered(text):
-            if reason == "MAX_DURATION":
+            if _is_max_duration_reason(reason):
                 with self._state_lock:
                     self._last_committed_head = text
                     self._last_committed_head_time = time.time()
-            self._emit_final(text, utt_id, reason=reason)
+            self._emit_final(
+                text,
+                utt_id,
+                reason=reason,
+                epoch=epoch,
+                media_start_time=media_start_time,
+                media_end_time=media_end_time,
+            )
         elif text:
             clean_utt = (utt_id or "unknown")[:8]
             logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {self.sentence_config.min_words_to_commit} words): '{text}'")
@@ -913,6 +1071,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         reason: str = "VAD_SILENCE",
         cached_text: Optional[str] = None,
         frame_state: Optional[np.ndarray] = None,
+        epoch: int = 0,
+        media_start_time: float = 0.0,
+        media_end_time: float = 0.0,
     ) -> None:
         if cached_text:
             text = cached_text
@@ -923,11 +1084,18 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             text = self._run_inference(pcm_combined, frame_state=frame_state, is_commit=True, utt_id=utt_id)
 
         if text and not self._segmenter.is_text_filtered(text):
-            if reason == "MAX_DURATION":
+            if _is_max_duration_reason(reason):
                 with self._state_lock:
                     self._last_committed_head = text
                     self._last_committed_head_time = time.time()
-            self._emit_final(text, utt_id, reason=reason)
+            self._emit_final(
+                text,
+                utt_id,
+                reason=reason,
+                epoch=epoch,
+                media_start_time=media_start_time,
+                media_end_time=media_end_time,
+            )
         elif text:
             clean_utt = (utt_id or "unknown")[:8]
             logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {self.sentence_config.min_words_to_commit} words): '{text}'")
@@ -998,6 +1166,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
 
                 with self._state_lock:
                     utt_id = self._current_utterance_id
+                    utt_epoch = self._current_epoch
+                    utt_media_start = self._current_media_start_time
+                    utt_media_end = self._current_media_end_time
 
                 # Run in worker thread non-blocking so the event loop NEVER blocks
                 perf.increment_counter("asr.preview_infers")
@@ -1045,7 +1216,14 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
                     with self._state_lock:
                         self._last_committed_head = preview_text
                         self._last_committed_head_time = time.time()
-                    self._emit_final(preview_text, utt_id, reason="STABLE_PREFIX")
+                    self._emit_final(
+                        preview_text,
+                        utt_id,
+                        reason="STABLE_PREFIX",
+                        epoch=utt_epoch,
+                        media_start_time=utt_media_start,
+                        media_end_time=utt_media_end,
+                    )
                     self._audio_buffer_mgr.slice_after(snapshot_samples, expected_version=snap_ver)
                     self._last_polled_samples = 0
                     self._last_preview_duration_sec = 0.0
@@ -1064,7 +1242,12 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
                         "is_final": False,
                         "language": self._language,
                         "model": self.model_key,
+                        "commit_method": "PREVIEW",
                         "filtered": False,
+                        "epoch": utt_epoch,
+                        "media_start_time": utt_media_start,
+                        "media_end_time": utt_media_end,
+                        "asr_commit_wall_time": time.time(),
                     }
                     self._push_message(out_msg)
             except asyncio.CancelledError:
@@ -1090,10 +1273,14 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
                 if msg is _SENTINEL:
                     q.task_done()
                     break
-                yield msg
-                q.task_done()
+                try:
+                    yield msg
+                finally:
+                    q.task_done()
         except asyncio.CancelledError:
             pass
+        finally:
+            self._loop = None
 
     async def cleanup(self) -> None:
         """Clean up per-session background tasks and buffer."""
@@ -1115,3 +1302,27 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         self._audio_buffer_mgr.clear()
         self._last_polled_samples = 0
         self._last_preview_duration_sec = 0.0
+
+    def reset_stream(self, epoch: Optional[int] = None) -> None:
+        """Reset active utterance state and clear uncommitted audio on stream_reset."""
+        with self._state_lock:
+            if epoch is not None:
+                self._current_epoch = epoch
+            else:
+                self._current_epoch += 1
+            self._current_media_start_time = 0.0
+            self._current_media_end_time = 0.0
+            self._current_utterance_id = str(uuid.uuid4())
+            self._is_speech_active = False
+            self._last_partial_text = ""
+            self._last_partial_samples = 0
+            self._last_committed_head = None
+            self._last_committed_head_time = 0.0
+            self._boundary_state = BoundaryState.NORMAL
+            self._boundary_silence_samples = 0
+            self._max_duration_deferred_logged = False
+        self._audio_buffer_mgr.clear()
+        self._last_polled_samples = 0
+        self._last_preview_duration_sec = 0.0
+        self._segmenter.reset_stability()
+        self._clear_token_queue()

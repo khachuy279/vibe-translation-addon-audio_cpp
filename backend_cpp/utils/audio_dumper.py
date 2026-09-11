@@ -205,18 +205,24 @@ def close_session_dumper(session_id: str) -> None:
                 except Exception:
                     pass
 
-    fut = _DUMP_EXECUTOR.submit(_close)
     try:
+        fut = _DUMP_EXECUTOR.submit(_close)
         fut.result(timeout=5.0)
+    except RuntimeError:
+        # Executor is already shut down; perform close synchronously on current thread
+        try:
+            _close()
+        except Exception:
+            pass
     except Exception as e:
         logger.debug(f"AudioDumper close error: {e}")
 
 
 def flush_dumper(timeout: float = 5.0) -> None:
     """Wait for all pending dump writes to complete."""
-    fut = _DUMP_EXECUTOR.submit(lambda: None)
     try:
+        fut = _DUMP_EXECUTOR.submit(lambda: None)
         fut.result(timeout=timeout)
-    except Exception:
+    except (RuntimeError, Exception):
         pass
 

@@ -1,0 +1,94 @@
+{
+  "file": "Cross_lingual_English_French_Italian_Spanish_6s",
+  "duration_sec": 6.230226757369614,
+  "telemetry_summary": {
+    "polls": 20,
+    "inferences": 10,
+    "splits": 1,
+    "audio_exposure_ratio": 2.7,
+    "cer": 0.31746031746031744,
+    "wer": 0.6153846153846154
+  },
+  "sample_poll_record": {
+    "inference_id": 1,
+    "poll_index": 2,
+    "timestamp_sec": 1789109763.194102,
+    "buffer_duration_sec": 0.66,
+    "buffer_start_sample": 0,
+    "buffer_end_sample": 10560,
+    "sample_count": 10560,
+    "audio_hash": "3b729a757703fb2e",
+    "preview_text": "I'm a.",
+    "previous_preview_text": "I'm a.",
+    "hypothesis_delta": {
+      "insertions": 2,
+      "deletions": 0,
+      "substitutions": 0,
+      "stable_prefix_words": 0
+    },
+    "stable_prefix_text": "I'm a.",
+    "committed_prefix_before": "",
+    "committed_prefix_after": "",
+    "is_stable": false,
+    "did_split": false,
+    "slice_start_sample": null,
+    "slice_end_sample": null,
+    "remaining_buffer_hash": null,
+    "remaining_samples": null,
+    "infer_latency_ms": 112.7691000001505
+  },
+  "mechanism_2": {
+    "test_a": {
+      "num_runs": 20,
+      "audio_hash": "08ddc50c30aaa0e5",
+      "unique_output_count": 1,
+      "outputs": [
+        "I'm alone, all by myself. You see.",
+        "I'm alone, all by myself. You see.",
+        "I'm alone, all by myself. You see."
+      ],
+      "is_bit_identical": true
+    },
+    "test_b": {
+      "evolution": [
+        {
+          "duration_sec": 1.0,
+          "audio_hash": "9c717a4eb67bebc4",
+          "hypothesis": "I'm alone.",
+          "word_distance_to_final": 6
+        },
+        {
+          "duration_sec": 1.5,
+          "audio_hash": "4d0f9307acd17580",
+          "hypothesis": "I'm alone.",
+          "word_distance_to_final": 6
+        },
+        {
+          "duration_sec": 2.0,
+          "audio_hash": "5807d176f4f043a3",
+          "hypothesis": "I'm alone. All by myself.",
+          "word_distance_to_final": 4
+        },
+        {
+          "duration_sec": 2.5,
+          "audio_hash": "49d4275bfcae46f4",
+          "hypothesis": "I'm alone. All by myself.",
+          "word_distance_to_final": 4
+        },
+        {
+          "duration_sec": 3.0,
+          "audio_hash": "08ddc50c30aaa0e5",
+          "hypothesis": "I'm alone, all by myself. You see.",
+          "word_distance_to_final": 0
+        },
+        {
+          "duration_sec": 3.5,
+          "audio_hash": "4f94960bb0863143",
+          "hypothesis": "I'm alone, all by myself. I'm too sad.",
+          "word_distance_to_final": 3
+        }
+      ],
+      "final_reference": "I'm alone, all by myself. You see."
+    }
+  }
+}

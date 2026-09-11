@@ -1,0 +1,117 @@
+{
+  "model_identity": {
+    "model_key": "qwen3-asr-1.7b",
+    "file_path": "D:\\vibe-translation-addon-transcribe_cpp\\backend_cpp\\models\\Qwen3-ASR-1.7B-Q8_0.gguf",
+    "file_size_bytes": 2185030624,
+    "file_size_mb": 2083.81,
+    "sha256": "9a0d81792dfea2d5f278b8a63deb3ea6e02139ce42c2301f32ea19c4f77526b7",
+    "registry_info": {
+      "name": "Qwen3 ASR 1.7B (GGUF)",
+      "family": "qwen3_asr",
+      "architecture_type": "offline_llm",
+      "hf_repo": "handy-computer/Qwen3-ASR-1.7B-gguf",
+      "default_quant": "Q8_0",
+      "file": "Qwen3-ASR-1.7B-Q8_0.gguf",
+      "sample_rate": 16000,
+      "languages": "auto",
+      "vram_estimate_mb": 2100,
+      "context_window_sec": 30,
+      "description": "Alibaba Audio-LLM model ported to transcribe.cpp, 1.61% WER, auto-detect 30 languages"
+    }
+  },
+  "gguf_metadata": {
+    "architecture": "qwen3_asr",
+    "basename": "qwen3-asr",
+    "file_type": "7",
+    "quantization_version": "unknown",
+    "tensor_count": 709,
+    "sample_tensors": {
+      "frontend.mel_filterbank": {
+        "shape": [
+          201,
+          128
+        ],
+        "type": "0"
+      },
+      "frontend.window": {
+        "shape": [
+          400
+        ],
+        "type": "0"
+      },
+      "enc.conv.0.weight": {
+        "shape": [
+          3,
+          3,
+          1,
+          480
+        ],
+        "type": "0"
+      },
+      "enc.conv.0.bias": {
+        "shape": [
+          480
+        ],
+        "type": "0"
+      },
+      "enc.conv.1.weight": {
+        "shape": [
+          3,
+          3,
+          480,
+          480
+        ],
+        "type": "0"
+      }
+    },
+    "raw_keys_count": 75
+  },
+  "runtime_backend": {
+    "transcribe_cpp_version": "0.2.3",
+    "backends_available": [
+      "vulkan",
+      "cpu"
+    ],
+    "torch_cuda_available": true,
+    "gpu_name": "NVIDIA GeForce RTX 5060 Ti"
+  },
+  "loading_lifecycle": {
+    "load_time_sec": 1.891,
+    "native_arch": "qwen3_asr",
+    "native_variant": "qwen3-asr-1.7b",
+    "native_backend": "Vulkan0",
+    "supports_streaming": false,
+    "mem_before": {
+      "ram_mb": 582.28,
+      "vram_mb": 0.0
+    },
+    "mem_after_load": {
+      "ram_mb": 977.66,
+      "vram_mb": 0.0
+    },
+    "mem_during_infer": {
+      "ram_mb": 988.7,
+      "vram_mb": 0.0
+    },
+    "ram_increase_mb": 395.38,
+    "cold_start_ms": 79.1,
+    "warm_inference_ms": 59.7,
+    "singleton_verified": true
+  },
+  "decoder_parameters": {
+    "model_key": "qwen3-asr-1.7b",
+    "active_backend": "Vulkan0",
+    "sample_rate": 16000,
+    "threads": 4,
+    "context_window_sec": 30,
+    "family": "qwen3_asr",
+    "languages_supported": "auto",
+    "official_params_mapping": {
+      "beam_size": "unavailable (transcribe_cpp uses greedy argmax search)",
+      "temperature": "unavailable (fixed greedy argmax)",
+      "repetition_penalty": "unavailable",
+      "max_new_tokens": "256 (internal token cap OutputTruncated)",
+      "timestamp_token": "unavailable (GGUF non-timestamp export)"
+    }
+  }
+}

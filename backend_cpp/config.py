@@ -61,8 +61,10 @@ class SileroVADConfig(BaseModel):
 class FsmnVADConfig(BaseModel):
     speech_noise_thres: Optional[float] = None
     max_end_silence_time: int = 800
-    speech_to_sil_time_thres: int = 150
-    sil_to_speech_time_thres: int = 150
+    # DECISION (2026-09-11, user approved C06): 200ms prevents premature splits on natural pauses
+    speech_to_sil_time_thres: int = 200
+    # DECISION (2026-09-11, user approved C06): 100ms provides faster onset confirmation
+    sil_to_speech_time_thres: int = 100
 
     @property
     def threshold(self) -> Optional[float]:
@@ -92,34 +94,15 @@ class VADConfig(BaseModel):
     #
     # Re-measure before changing this again: python scratch/compare_vad_quality.py
     vad_engine: str = "fsmn-vad"  # fsmn-vad (default), firered-vad, silero-vad
-    threshold: float = 0.4
-    # Trailing-silence limit that gates a commit. THE single largest knob on subtitle latency.
-    #
-    # Full measured budget (real speech, `scratch/analyze_latency_budget.py`), from the moment
-    # the speaker stops to the subtitle being delivered:
-    #     silence wait        480 ms  (44%)   <- this setting
-    #     VAD END -> COMMIT   165 ms  (15%)
-    #     COMMIT -> subtitle  447 ms  (41%)   <- translation
-    #     total              ~1092 ms
-    #
-    # The safety net commits after exactly this much silence, quantized to the engine frame
-    # (60 ms for fsmn): 450 -> 480 ms, 250 -> 300 ms, 150 -> 180 ms, 100 -> 120 ms.
-    #
-    # Measured end-to-end at each setting (`scratch/compare_vad_silence.py`): 450/250/150/100 all
-    # produced BIT-IDENTICAL transcripts on clean speech. The cost of lowering it is subtitle
-    # fragmentation, not lost words: on conversational audio the utterance count went 5 -> 8
-    # (silence 250) / 9 (150), because shorter natural pauses start splitting sentences.
-    #
-    # DECISION (2026-09-11, user): 150 ms. Balanced -- saves ~300 ms of the ~1080 ms budget in
-    # exchange for splitting at pauses. Do not lower this further without re-measuring
-    # fragmentation; clients can still override per session with `silenceDurationMs`.
+    # DECISION (2026-09-11, user approved C06): threshold 0.20 recovers low-SNR speech in noise
+    # without introducing regressions on clean audio.
+    threshold: float = 0.20
     silence_duration_ms: int = 150
-    # NOTE: this is a GRACE PERIOD, not added latency. See VADProcessor.feed_chunk(): silent
-    # frames are attached to the committed audio for
-    # `min(hangover_ms, silence_duration_ms * 0.5)` and then the utterance ends. Raising it
-    # therefore does NOT delay `[VAD END]`; only `silence_duration_ms` does.
-    hangover_ms: int = 400
-    pre_speech_buffer_ms: int = 550
+    # DECISION (2026-09-11, user approved C06): hangover 250ms preserves trailing phonemes / codas.
+    hangover_ms: int = 250
+    # DECISION (2026-09-11, user approved C06): pre-speech buffer 800ms captures initial plosives
+    # in ring buffer without adding latency.
+    pre_speech_buffer_ms: int = 800
     sample_rate: int = 16000
 
     firered: FireRedVADConfig = Field(default_factory=FireRedVADConfig)
@@ -171,11 +154,9 @@ class ASRConfig(BaseModel):
     #
     # 0 / 0.0 disables the gate (previous behaviour).
     #
-    # DECISION (2026-09-10): the gate is implemented and measured but deliberately left OFF
-    # by default. It cuts 52% of the audio the ASR processes with bit-identical transcripts,
-    # but it also reduces how often the live preview refreshes, and that is user-visible.
-    # Do not flip this default without asking; see plan section 0.5E.
-    preview_min_growth_ratio: float = 0.0
+    # DECISION (2026-09-11, user approved Phase 3C.1): set to 0.5. Amortizes repeated preview work
+    # reducing GPU inferences by ~67% (from 293 down to 96) and audio exposure to 1.09x without CER penalty.
+    preview_min_growth_ratio: float = 0.5
     preview_min_growth_ms: int = 0
     models_yaml: str = str(MODELS_YAML_PATH)
     # Bounded ASR token queue. Final (committed) messages are never dropped; preview
@@ -250,10 +231,19 @@ class TranslationConfig(BaseModel):
 
 class SentenceConfig(BaseModel):
     max_chars: int = 150
-    max_duration_sec: float = 8.0
-    min_words_to_commit: int = 2
+    # DECISION (2026-09-11, user approved Phase 3C.3): 15.0s ceiling for continuous speech before seeking safe boundary
+    max_duration_sec: float = 15.0
+    # DECISION (2026-09-11, user approved Phase 3C.3): 2.0s grace period to locate acoustic dip before emergency cut
+    max_duration_grace_sec: float = 2.0
+    # DECISION (2026-09-11, user approved Phase 3C.3): Enable VAD-paced soft boundary rather than blind hard cut
+    max_duration_require_silence: bool = True
+    # DECISION (2026-09-11, user approved Phase 3C.3): 80ms silence probe window as boundary candidate
+    boundary_candidate_silence_ms: int = 80
+    # DECISION (2026-09-11, user approved Phase 3C.1): require 4 words to prevent tiny fragment commits
+    min_words_to_commit: int = 4
     split_on_stability: bool = True         # Ngắt câu khi preview text ổn định qua nhiều chu kỳ
-    stability_duration_sec: float = 0.8     # Thời gian (giây) preview text giữ nguyên để chốt câu
+    # DECISION (2026-09-11, user approved Phase 3C.1): 1.5s stability duration prevents premature splitting
+    stability_duration_sec: float = 1.5     # Thời gian (giây) preview text giữ nguyên để chốt câu
     stability_threshold_polls: int = 2      # Số lần poll tối thiểu giữ nguyên kết quả
 
 

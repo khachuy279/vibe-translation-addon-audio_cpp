@@ -21,18 +21,20 @@
 
   // ── Unified WebSocket Configuration Builder ─────────────────────────────
   function buildWsConfig(cfg) {
-    const silence = cfg.silenceDurationMs || cfg.vadSilenceDurationMs || cfg.silence_duration_ms || 300;
+    const silence = cfg.silenceDurationMs || cfg.vadSilenceDurationMs || cfg.silence_duration_ms || 150;
     return {
       type: "set_config",
       action: "configure",
       targetLang: cfg.targetLang || "vi",
       sourceLang: cfg.sourceLanguage || cfg.sourceLang || "auto",
-      translationModel: cfg.translationModel || "xiaomi",
+      translationModel: cfg.translationModel || "tencent",
       vadEngine: cfg.vadEngine || "fsmn-vad",
-      vadThreshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.5)),
-      threshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.5)),
+      vadThreshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.20)),
+      threshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.20)),
+      hangoverMs: cfg.hangoverMs || 250,
       silenceDurationMs: silence,
-      minWordsToCommit: cfg.minWordsToCommit !== undefined && !isNaN(parseInt(cfg.minWordsToCommit, 10)) ? Math.max(0, parseInt(cfg.minWordsToCommit, 10)) : 2,
+      minWordsToCommit: cfg.minWordsToCommit !== undefined && !isNaN(parseInt(cfg.minWordsToCommit, 10)) ? Math.max(0, parseInt(cfg.minWordsToCommit, 10)) : 4,
+      maxDurationSec: parseFloat(cfg.maxDurationSec || 15.0),
       ttsEnabled: !!cfg.ttsEnabled,
       ttsVoice: cfg.ttsVoice || "speaker_01_0039.wav",
       ttsSpeed: parseFloat(cfg.ttsSpeed || 1.0),
@@ -47,6 +49,7 @@
   let wsClient = null, audioCapture = null, overlayManager = null;
   let captureAbortController = null;
   let isCapturing = false;
+  let streamEpoch = 0;
   // Single-capture-owner coordination (audit finding P1-04).
   //
   // The manifest injects this content script into EVERY frame (`all_frames: true`).
@@ -235,7 +238,32 @@
         !!settings.ttsEnabled
       );
       ttsPlayer.clear();
-      video.addEventListener("seeked", () => ttsPlayer.clear(), { signal });
+      function triggerStreamReset(reason) {
+        streamEpoch++;
+        const mediaTime = video ? video.currentTime : 0.0;
+        console.log(`[BS] Stream Reset triggered: reason=${reason}, epoch=${streamEpoch}, mediaTime=${mediaTime.toFixed(3)}s`);
+        if (wsClient && wsClient.isConnected) {
+          wsClient.sendJSON({
+            type: "stream_reset",
+            epoch: streamEpoch,
+            reason: reason,
+            media_time: mediaTime,
+            mediaTime: mediaTime,
+            wall_time: performance.now()
+          });
+        }
+        if (overlayManager) {
+          overlayManager.clear();
+        }
+        ttsPlayer.clear();
+        if (audioCapture) {
+          audioCapture.setEpoch(streamEpoch);
+        }
+        renderedAcks.clear();
+      }
+
+      video.addEventListener("seeking", () => triggerStreamReset("seek"), { signal });
+      video.addEventListener("pause", () => triggerStreamReset("pause"), { signal });
 
       // Connect to WebSocket Backend
       wsClient = new WSClient("wss://localhost:8765/ws");
@@ -243,11 +271,55 @@
         wsClient.sendJSON(buildWsConfig(settings));
       });
 
+      const renderedAcks = new Set();
+      function handleRenderAck(payload, eventType) {
+        if (!payload || !payload.utterance_id || payload.epoch === undefined) return;
+        // Only ACK when the translated subtitle is updated/rendered (or final ASR update if translation is disabled)
+        const isTargetEvent = eventType === "translation" || (payload.is_final && !settings.targetLang);
+        if (!isTargetEvent) return;
+
+        const rev = payload.render_revision || 1;
+        const ackKey = `${payload.epoch}_${payload.utterance_id}_${rev}`;
+        if (renderedAcks.has(ackKey)) return;
+        renderedAcks.add(ackKey);
+
+        const rxPerf = performance.now();
+        requestAnimationFrame(() => {
+          const renderPerf = performance.now();
+          const v = getVideo() || findVideo();
+          const videoTime = v ? v.currentTime : 0.0;
+          const mediaEnd = payload.media_end_time || 0.0;
+          const speechOffsetLag = Math.max(0.0, videoTime - mediaEnd);
+          const renderCostMs = Math.max(0.0, renderPerf - rxPerf);
+
+          if (wsClient && wsClient.isConnected) {
+            wsClient.sendJSON({
+              type: "client_render_ack",
+              epoch: payload.epoch,
+              utterance_id: payload.utterance_id,
+              render_revision: rev,
+              media_end_time: mediaEnd,
+              video_current_time: videoTime,
+              speech_offset_to_visible_lag_sec: speechOffsetLag,
+              client_render_cost_ms: renderCostMs,
+              asr_commit_wall_time: payload.asr_commit_wall_time || 0.0
+            });
+          }
+        });
+      }
+
       function emitSubtitleEvent(eventType, payload) {
+        if (payload && payload.epoch !== undefined && payload.epoch < streamEpoch) {
+          console.log(`[BS] Generation barrier: Dropped stale ${eventType} from epoch ${payload.epoch} (current=${streamEpoch})`);
+          return;
+        }
         // 1. Render locally if eligible
         handleSubtitleEvent(eventType, payload);
 
-        // 2. Broadcast to other frames (Top frame) only if inside a child iframe
+        // 2. Trigger Client Render Acknowledgement
+        handleRenderAck(payload, eventType);
+
+        // 3. Broadcast to other frames (Top frame) only if inside a child iframe
         if (window !== window.top) {
           try {
             api.runtime.sendMessage({
@@ -271,9 +343,10 @@
 
       // Start Audio Capture module
       audioCapture = new AudioCapture();
-      audioCapture.onChunk = (pcmBuffer, timestamp, chunkIdx) => {
+      audioCapture.setEpoch(streamEpoch);
+      audioCapture.onChunk = (pcmBuffer, timestamp, chunkIdx, chunkStartMediaTime, chunkEndMediaTime, epoch, playbackRate) => {
         if (wsClient && wsClient.isConnected) {
-          wsClient.sendBinary(pcmBuffer, timestamp, chunkIdx);
+          wsClient.sendBinary(pcmBuffer, timestamp, chunkIdx, false, chunkStartMediaTime, chunkEndMediaTime, epoch, playbackRate);
         }
       };
       await audioCapture.start(video);

@@ -157,6 +157,7 @@ async def handle_ws(ws: WebSocket) -> None:
             await asyncio.gather(*workers, return_exceptions=True)
 
             await session.cleanup()
+            session.close()
             close_session_dumper(session.session_id)
             await safe_ws.close()
             perf.record_resource_checkpoint(f"session_end_{session.session_id[:8]}")
@@ -199,6 +200,24 @@ async def _handle_text_message(session: SessionState, text: str) -> None:
                     else None
                 )
 
+        elif action == "stream_reset":
+            epoch = int(msg.get("epoch", session.current_epoch + 1))
+            reason = str(msg.get("reason", "reset"))
+            media_time = float(msg.get("media_time", msg.get("mediaTime", 0.0)))
+            session.handle_stream_reset(epoch=epoch, reason=reason, media_time=media_time)
+
+        elif action == "client_render_ack":
+            session.transport_telemetry.record_render_ack(
+                epoch=int(msg.get("epoch", 0)),
+                utterance_id=str(msg.get("utterance_id", "")),
+                render_revision=int(msg.get("render_revision", 1)),
+                media_end_time=float(msg.get("media_end_time", 0.0)),
+                video_current_time=float(msg.get("video_current_time", 0.0)),
+                speech_offset_to_visible_lag_sec=float(msg.get("speech_offset_to_visible_lag_sec", 0.0)),
+                client_render_cost_ms=float(msg.get("client_render_cost_ms", 0.0)),
+                asr_commit_wall_time=float(msg.get("asr_commit_wall_time", 0.0)),
+            )
+
         elif action == "ping":
             pong_payload = make_pong_msg(msg.get("timestamp", 0))
             await session.send_json(pong_payload)
@@ -210,16 +229,36 @@ async def _handle_text_message(session: SessionState, text: str) -> None:
 def _process_binary_chunk(session: SessionState, data: bytes) -> None:
     """CPU worker parsing audio headers and feeding validated PCM chunks to VAD."""
     perf.increment_counter("ws.audio_chunks_received")
-    pcm_data, capture_ts, chunk_idx = parse_audio_frame(data)
+    frame = parse_audio_frame(data)
+    pcm_data = frame.pcm
 
     if pcm_data is None:
         return
 
-    current_idx = session.record_chunk(chunk_idx)
-    dump_ingress_chunk(session.session_id, current_idx, pcm_data)
+    # Generation barrier: drop frames from older epochs
+    if frame.epoch < session.current_epoch:
+        logger.debug(f"Dropped frame from older epoch {frame.epoch} (current={session.current_epoch})")
+        return
+
+    accepted = session.record_chunk(
+        chunk_idx=frame.chunk_index,
+        pcm_len=len(pcm_data),
+        expected_cadence_ms=frame.chunk_duration_ms,
+    )
+    if not accepted:
+        # Dropped before VAD (duplicate or out-of-order)
+        return
+
+    dump_ingress_chunk(session.session_id, frame.chunk_index or 0, pcm_data)
 
     if session.vad_processor:
-        session.vad_processor.feed_chunk(pcm_data, capture_timestamp=capture_ts)
+        session.vad_processor.feed_chunk(
+            pcm_data,
+            capture_timestamp=frame.capture_timestamp,
+            media_start_time=frame.media_start_time,
+            media_end_time=frame.media_end_time,
+            epoch=frame.epoch,
+        )
 
 
 
@@ -236,12 +275,21 @@ async def _stream_asr_tokens(session: SessionState) -> None:
 
     try:
         async for msg in engine.stream_tokens():
+            msg_epoch = msg.get("epoch")
+            # Strict generation barrier: reject if epoch is missing or different
+            if msg_epoch is None or msg_epoch != session.current_epoch:
+                logger.debug(f"Generation barrier: dropped stale ASR msg with epoch={msg_epoch} != current={session.current_epoch}")
+                continue
+
             if msg.get("type") == "utterance_update":
                 utt_id = msg.get("utterance_id", "")
                 text = msg.get("text", "")
                 is_final = msg.get("is_final", False)
                 stable_text = msg.get("stable_text", "")
                 unstable_text = msg.get("unstable_text", "")
+                media_start = msg.get("media_start_time", 0.0)
+                media_end = msg.get("media_end_time", 0.0)
+                commit_time = msg.get("asr_commit_wall_time", time.time())
 
                 out_msg = make_utterance_update_msg(
                     utt_id=utt_id,
@@ -250,7 +298,14 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                     is_final=is_final,
                     stable_text=stable_text,
                     unstable_text=unstable_text,
+                    epoch=msg_epoch,
+                    media_start_time=media_start,
+                    media_end_time=media_end,
+                    asr_commit_wall_time=commit_time,
                 )
+
+                if msg_epoch is None or msg_epoch != session.current_epoch:
+                    continue
 
                 sent = await session.send_json(out_msg)
                 if not sent:
@@ -271,6 +326,10 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                                 "text": text,
                                 "source_lang": msg.get("language", session.config.get("source_lang", "auto")),
                                 "target_lang": target_l,
+                                "epoch": msg_epoch,
+                                "media_start_time": media_start,
+                                "media_end_time": media_end,
+                                "asr_commit_wall_time": commit_time,
                                 "_queued_at": time.perf_counter(),
                             })
                         except asyncio.QueueFull:
@@ -290,6 +349,11 @@ async def _process_translation_item(
     dedup_state: TranslationDedupState,
 ) -> None:
     """Process a single translation queue item with safe deduplication and dual delivery."""
+    item_epoch = item.get("epoch")
+    if item_epoch is None or item_epoch != session.current_epoch:
+        logger.debug(f"Generation barrier: Dropped translation item with epoch={item_epoch} != current={session.current_epoch}")
+        return
+
     text = item.get("text", "")
     utt_id = item.get("utterance_id", "")
     src_lang = item.get("source_lang", "auto")
@@ -325,12 +389,21 @@ async def _process_translation_item(
     logger.info(f"[TRANSLATE] [utt={clean_utt}] ({src_lang} -> {tgt_lang} in {elapsed_ms}ms): '{text}' => '{translated}'")
     ctx.add(text, translated)
 
+    # Generation barrier: verify session epoch has not advanced during translation inference
+    if item_epoch is None or item_epoch != session.current_epoch:
+        logger.debug(f"Generation barrier: Discarded completed translation from old epoch {item_epoch} (current={session.current_epoch})")
+        return
+
     # 1. Dedicated "translation" message
     trans_msg = make_translation_msg(
         utt_id=utt_id,
         translated=translated,
         elapsed_ms=elapsed_ms,
         target_lang=tgt_lang,
+        epoch=item_epoch,
+        media_start_time=item.get("media_start_time", 0.0),
+        media_end_time=item.get("media_end_time", 0.0),
+        asr_commit_wall_time=item.get("asr_commit_wall_time", 0.0),
     )
 
     # 2. Updated "utterance_update" message for complete backward compatibility
@@ -339,6 +412,10 @@ async def _process_translation_item(
         text=text,
         translated=translated,
         is_final=True,
+        epoch=item_epoch,
+        media_start_time=item.get("media_start_time", 0.0),
+        media_end_time=item.get("media_end_time", 0.0),
+        asr_commit_wall_time=item.get("asr_commit_wall_time", 0.0),
     )
 
     sent1 = await session.send_json(trans_msg)
@@ -363,6 +440,7 @@ async def _process_translation_item(
                     "text": translated,
                     "voice": session.config.get("tts_voice"),
                     "speed": float(session.config.get("tts_speed", 1.0)),
+                    "epoch": item_epoch,
                     "_queued_at": time.perf_counter(),
                 })
                 logger.info(f"🔊 [TTS QUEUED] Queued for synthesis: '{translated}'")
@@ -401,6 +479,11 @@ async def _process_tts_item(
     dedup_state: TTSDedupState,
 ) -> None:
     """Process a single TTS queue item with deduplication and synthesis."""
+    item_epoch = item.get("epoch")
+    if item_epoch is None or item_epoch != session.current_epoch:
+        logger.debug(f"Generation barrier: Dropped TTS item with epoch={item_epoch} != current={session.current_epoch}")
+        return
+
     text = item.get("text", "")
     utt_id = item.get("utterance_id", "")
     voice = item.get("voice") or session.config.get("tts_voice")
@@ -431,6 +514,11 @@ async def _process_tts_item(
         tts_rtf = (synthesis_ms / 1000.0) / max(0.001, duration_sec)
         perf.record_metric("tts", "rtf", tts_rtf)
         perf.increment_counter("tts.synthesized_utterances")
+
+        # Generation barrier: verify session epoch has not changed during synthesis
+        if item_epoch is None or item_epoch != session.current_epoch:
+            logger.debug(f"Generation barrier: Discarded completed TTS from old epoch {item_epoch} (current={session.current_epoch})")
+            return
 
         if audio_b64:
             out_msg = make_tts_audio_msg(

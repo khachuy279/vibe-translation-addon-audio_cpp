@@ -37,6 +37,10 @@
         <span class="btn-icon">⚡</span>
         <span>Test</span>
       </button>
+      <button id="btnReset" class="btn btn-outline" title="Khôi phục cài đặt mặc định">
+        <span class="btn-icon">↺</span>
+        <span>Reset</span>
+      </button>
     </div>
 
     <!-- Active Model HUD Chip -->
@@ -70,8 +74,8 @@
         <div class="setting-group flex-1">
           <label for="selVadEngine">🎙️ VAD Engine</label>
           <select id="selVadEngine">
-            <option value="firered-vad" selected>FireRed VAD</option>
-            <option value="fsmn-vad">FSMN-VAD</option>
+            <option value="fsmn-vad" selected>FSMN-VAD</option>
+            <option value="firered-vad">FireRed VAD</option>
             <option value="silero-vad">Silero VAD</option>
           </select>
         </div>
@@ -81,25 +85,25 @@
         <div class="setting-group flex-1">
           <div class="label-with-value">
             <label>⏱️ VAD Silence</label>
-            <span class="val-badge"><span id="valVadSilence">450</span>ms</span>
+            <span class="val-badge"><span id="valVadSilence">150</span>ms</span>
           </div>
-          <input type="range" id="rangeVadSilence" min="300" max="1500" step="50" value="450">
+          <input type="range" id="rangeVadSilence" min="50" max="1000" step="25" value="150">
         </div>
         <div class="setting-group flex-1">
           <div class="label-with-value">
             <label>🎯 Threshold</label>
-            <span class="val-badge"><span id="valVadThreshold">0.35</span></span>
+            <span class="val-badge"><span id="valVadThreshold">0.20</span></span>
           </div>
-          <input type="range" id="rangeVadThreshold" min="0.10" max="0.90" step="0.05" value="0.35">
+          <input type="range" id="rangeVadThreshold" min="0.05" max="0.90" step="0.05" value="0.20">
         </div>
       </div>
 
       <div class="setting-group">
         <div class="label-with-value">
           <label>📝 Min Words</label>
-          <span class="val-badge"><span id="valMinWords">2</span> words</span>
+          <span class="val-badge"><span id="valMinWords">4</span> words</span>
         </div>
-        <input type="range" id="rangeMinWords" min="0" max="5" step="1" value="2">
+        <input type="range" id="rangeMinWords" min="0" max="8" step="1" value="4">
       </div>
 
       <!-- Section: Translation -->

@@ -23,8 +23,38 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   const btnStart = document.getElementById("btnStart");
   const btnStop = document.getElementById("btnStop");
   const btnTest = document.getElementById("btnTest");
+  const btnReset = document.getElementById("btnReset");
   const statusBadge = document.getElementById("statusBadge");
   const messageArea = document.getElementById("messageArea");
+
+  // Default settings aligned with backend_cpp/config.py
+  const DEFAULT_SETTINGS = {
+    asrEngine: "qwen3-asr-1.7b",
+    vadEngine: "fsmn-vad",
+    vadSilenceDurationMs: 150,
+    silenceDurationMs: 150,
+    silence_duration_ms: 150,
+    vadThreshold: 0.20,
+    vad_threshold: 0.20,
+    threshold: 0.20,
+    minWordsToCommit: 4,
+    min_words_to_commit: 4,
+    sourceLanguage: "auto",
+    targetLang: "vi",
+    translationModel: "tencent",
+    subPosY: 10,
+    subWidth: 80,
+    origFontSize: 10,
+    transFontSize: 21,
+    fontWeight: 600,
+    fontFamily: "default",
+    maxLines: 2,
+    ttsEnabled: false,
+    ttsVoice: "speaker_01_0039.wav",
+    ttsSpeed: "1.0",
+    ttsDucking: true,
+    duckingLevel: 0.25,
+  };
 
   const selAsrEngine = document.getElementById("selAsrEngine");
   const selVadEngine = document.getElementById("selVadEngine");
@@ -149,15 +179,15 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     const refAudioText = voiceObj ? (voiceObj.text || "") : "";
 
     const duckingPercent = parseInt(rangeDuckingLevel ? rangeDuckingLevel.value : 25, 10);
-    const speedVal = selTtsSpeed ? (selTtsSpeed.value || "1.0") : "1.0";
-    const vadSilenceMs = parseInt(rangeVadSilence ? rangeVadSilence.value : 600, 10) || 600;
-    const rawThresh = rangeVadThreshold ? parseFloat(rangeVadThreshold.value) : 0.5;
-    const vadThresholdVal = isNaN(rawThresh) ? 0.5 : rawThresh;
-    const rawMinWords = rangeMinWords ? parseInt(rangeMinWords.value, 10) : 2;
-    const minWords = isNaN(rawMinWords) ? 2 : Math.max(0, rawMinWords);
+    const speedVal = selTtsSpeed ? (selTtsSpeed.value || DEFAULT_SETTINGS.ttsSpeed) : DEFAULT_SETTINGS.ttsSpeed;
+    const vadSilenceMs = parseInt(rangeVadSilence ? rangeVadSilence.value : DEFAULT_SETTINGS.silenceDurationMs, 10) || DEFAULT_SETTINGS.silenceDurationMs;
+    const rawThresh = rangeVadThreshold ? parseFloat(rangeVadThreshold.value) : DEFAULT_SETTINGS.vadThreshold;
+    const vadThresholdVal = isNaN(rawThresh) ? DEFAULT_SETTINGS.vadThreshold : rawThresh;
+    const rawMinWords = rangeMinWords ? parseInt(rangeMinWords.value, 10) : DEFAULT_SETTINGS.minWordsToCommit;
+    const minWords = isNaN(rawMinWords) ? DEFAULT_SETTINGS.minWordsToCommit : Math.max(0, rawMinWords);
     const cfg = {
-      asrEngine: selAsrEngine ? selAsrEngine.value : undefined,
-      vadEngine: selVadEngine ? selVadEngine.value : undefined,
+      asrEngine: selAsrEngine ? selAsrEngine.value : DEFAULT_SETTINGS.asrEngine,
+      vadEngine: selVadEngine ? selVadEngine.value : DEFAULT_SETTINGS.vadEngine,
       vadSilenceDurationMs: vadSilenceMs,
       silenceDurationMs: vadSilenceMs,
       silence_duration_ms: vadSilenceMs,
@@ -166,24 +196,24 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       threshold: vadThresholdVal,
       minWordsToCommit: minWords,
       min_words_to_commit: minWords,
-      sourceLanguage: selSourceLang ? selSourceLang.value : "auto",
-      targetLang: selTargetLang ? selTargetLang.value : "vi",
-      translationModel: selTranslationModel ? selTranslationModel.value : "xiaomi",
-      subPosY: parseInt(rangeSubPosY ? rangeSubPosY.value : 10, 10) || 10,
-      subWidth: parseInt(rangeSubWidth ? rangeSubWidth.value : 80, 10) || 80,
-      origFontSize: parseInt(rangeOrigSize ? rangeOrigSize.value : 13, 10) || 13,
-      transFontSize: parseInt(rangeTransSize ? rangeTransSize.value : 17, 10) || 17,
-      fontWeight: parseInt(rangeFontWeight ? rangeFontWeight.value : 600, 10) || 600,
-      fontFamily: selFontFamily ? selFontFamily.value : "default",
-      maxLines: parseInt(rangeMaxLines ? rangeMaxLines.value : 3, 10) || 3,
+      sourceLanguage: selSourceLang ? selSourceLang.value : DEFAULT_SETTINGS.sourceLanguage,
+      targetLang: selTargetLang ? selTargetLang.value : DEFAULT_SETTINGS.targetLang,
+      translationModel: selTranslationModel ? selTranslationModel.value : DEFAULT_SETTINGS.translationModel,
+      subPosY: parseInt(rangeSubPosY ? rangeSubPosY.value : DEFAULT_SETTINGS.subPosY, 10) || DEFAULT_SETTINGS.subPosY,
+      subWidth: parseInt(rangeSubWidth ? rangeSubWidth.value : DEFAULT_SETTINGS.subWidth, 10) || DEFAULT_SETTINGS.subWidth,
+      origFontSize: parseInt(rangeOrigSize ? rangeOrigSize.value : DEFAULT_SETTINGS.origFontSize, 10) || DEFAULT_SETTINGS.origFontSize,
+      transFontSize: parseInt(rangeTransSize ? rangeTransSize.value : DEFAULT_SETTINGS.transFontSize, 10) || DEFAULT_SETTINGS.transFontSize,
+      fontWeight: parseInt(rangeFontWeight ? rangeFontWeight.value : DEFAULT_SETTINGS.fontWeight, 10) || DEFAULT_SETTINGS.fontWeight,
+      fontFamily: selFontFamily ? selFontFamily.value : DEFAULT_SETTINGS.fontFamily,
+      maxLines: parseInt(rangeMaxLines ? rangeMaxLines.value : DEFAULT_SETTINGS.maxLines, 10) || DEFAULT_SETTINGS.maxLines,
       ttsEnabled: isTts,
       ttsVoice: selectedVoiceId,
       ttsInstruct: "",
       ttsRefAudio: refAudioPath,
       ttsRefText: refAudioText,
       ttsSpeed: speedVal,
-      ttsDucking: selTtsDucking ? (selTtsDucking.value === "true") : true,
-      duckingLevel: isNaN(duckingPercent) ? 0.25 : duckingPercent / 100,
+      ttsDucking: selTtsDucking ? (selTtsDucking.value === "true") : DEFAULT_SETTINGS.ttsDucking,
+      duckingLevel: isNaN(duckingPercent) ? DEFAULT_SETTINGS.duckingLevel : duckingPercent / 100,
     };
     return cfg;
   }
@@ -193,7 +223,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     if (valVadThreshold && rangeVadThreshold) valVadThreshold.textContent = parseFloat(rangeVadThreshold.value).toFixed(2);
     if (valMinWords && rangeMinWords) {
       const mw = parseInt(rangeMinWords.value, 10);
-      valMinWords.textContent = isNaN(mw) ? "2" : mw;
+      valMinWords.textContent = isNaN(mw) ? String(DEFAULT_SETTINGS.minWordsToCommit) : mw;
     }
     if (valSubPosY && rangeSubPosY) valSubPosY.textContent = rangeSubPosY.value;
     if (valSubWidth && rangeSubWidth) valSubWidth.textContent = rangeSubWidth.value;
@@ -201,7 +231,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     if (valTransSize && rangeTransSize) valTransSize.textContent = rangeTransSize.value;
     if (valFontWeight && rangeFontWeight) valFontWeight.textContent = rangeFontWeight.value;
     if (valMaxLines && rangeMaxLines) valMaxLines.textContent = rangeMaxLines.value;
-    if (valTtsSpeed && selTtsSpeed) valTtsSpeed.textContent = selTtsSpeed.value || "1.0";
+    if (valTtsSpeed && selTtsSpeed) valTtsSpeed.textContent = selTtsSpeed.value || DEFAULT_SETTINGS.ttsSpeed;
     if (valDuckingLevel && rangeDuckingLevel) valDuckingLevel.textContent = rangeDuckingLevel.value;
   }
 
@@ -448,9 +478,9 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       const payload = {
         asr_engine: newAsr,
         vad_engine: newVad,
-        silence_duration_ms: parseInt(rangeVadSilence ? rangeVadSilence.value : 600, 10) || 600,
-        vad_threshold: !isNaN(parseFloat(rangeVadThreshold?.value)) ? parseFloat(rangeVadThreshold.value) : 0.5,
-        min_words_to_commit: !isNaN(parseInt(rangeMinWords?.value, 10)) ? Math.max(0, parseInt(rangeMinWords.value, 10)) : 2,
+        silence_duration_ms: parseInt(rangeVadSilence ? rangeVadSilence.value : DEFAULT_SETTINGS.silenceDurationMs, 10) || DEFAULT_SETTINGS.silenceDurationMs,
+        vad_threshold: !isNaN(parseFloat(rangeVadThreshold?.value)) ? parseFloat(rangeVadThreshold.value) : DEFAULT_SETTINGS.vadThreshold,
+        min_words_to_commit: !isNaN(parseInt(rangeMinWords?.value, 10)) ? Math.max(0, parseInt(rangeMinWords.value, 10)) : DEFAULT_SETTINGS.minWordsToCommit,
         source_lang: newLang,
         tts_enabled: chkEnableTts ? chkEnableTts.checked : false,
         tts_voice: selTtsVoice ? selTtsVoice.value : undefined,
@@ -1016,7 +1046,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       }
       if (s.minWordsToCommit !== undefined && rangeMinWords) {
         const mw = parseInt(s.minWordsToCommit, 10);
-        rangeMinWords.value = isNaN(mw) ? 2 : Math.max(0, mw);
+        rangeMinWords.value = isNaN(mw) ? DEFAULT_SETTINGS.minWordsToCommit : Math.max(0, mw);
         rangeMinWords.dataset.userEdited = "true";
       }
       if (s.sourceLanguage || s.sourceLang) {
@@ -1223,6 +1253,79 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     ws.onerror = () => { showMsg("❌ Cannot reach backend", "error"); btnTest.disabled = false; btnTest.textContent = "🔌 Test"; };
     setTimeout(() => { if (ws.readyState === 0) { ws.close(); showMsg("❌ Timeout", "error"); btnTest.disabled = false; btnTest.textContent = "🔌 Test"; } }, 5000);
   });
+
+  if (btnReset) {
+    btnReset.addEventListener("click", async () => {
+      // 1. Remove persisted settings from storage
+      await api.storage.local.remove("bs_settings");
+
+      // 2. Reset UI controls to defaults
+      if (selAsrEngine) selAsrEngine.value = DEFAULT_SETTINGS.asrEngine;
+      if (selVadEngine) selVadEngine.value = DEFAULT_SETTINGS.vadEngine;
+      if (rangeVadSilence) {
+        rangeVadSilence.value = DEFAULT_SETTINGS.silenceDurationMs;
+        delete rangeVadSilence.dataset.userEdited;
+      }
+      if (rangeVadThreshold) {
+        rangeVadThreshold.value = DEFAULT_SETTINGS.vadThreshold;
+        delete rangeVadThreshold.dataset.userEdited;
+      }
+      if (rangeMinWords) {
+        rangeMinWords.value = DEFAULT_SETTINGS.minWordsToCommit;
+        delete rangeMinWords.dataset.userEdited;
+      }
+      if (selSourceLang) {
+        selSourceLang.value = DEFAULT_SETTINGS.sourceLanguage;
+        savedPreferredLang = DEFAULT_SETTINGS.sourceLanguage;
+      }
+      if (selTargetLang) selTargetLang.value = DEFAULT_SETTINGS.targetLang;
+      if (selTranslationModel) selTranslationModel.value = DEFAULT_SETTINGS.translationModel;
+
+      if (chkEnableTts) chkEnableTts.checked = DEFAULT_SETTINGS.ttsEnabled;
+      if (selTtsSpeed) selTtsSpeed.value = DEFAULT_SETTINGS.ttsSpeed;
+      if (selTtsDucking) selTtsDucking.value = DEFAULT_SETTINGS.ttsDucking ? "true" : "false";
+      if (rangeDuckingLevel) rangeDuckingLevel.value = Math.round(DEFAULT_SETTINGS.duckingLevel * 100);
+
+      if (rangeSubPosY) rangeSubPosY.value = DEFAULT_SETTINGS.subPosY;
+      if (rangeSubWidth) rangeSubWidth.value = DEFAULT_SETTINGS.subWidth;
+      if (rangeOrigSize) rangeOrigSize.value = DEFAULT_SETTINGS.origFontSize;
+      if (rangeTransSize) rangeTransSize.value = DEFAULT_SETTINGS.transFontSize;
+      if (rangeFontWeight) rangeFontWeight.value = DEFAULT_SETTINGS.fontWeight;
+      if (selFontFamily) selFontFamily.value = DEFAULT_SETTINGS.fontFamily;
+      if (rangeMaxLines) rangeMaxLines.value = DEFAULT_SETTINGS.maxLines;
+
+      updateRangeLabels();
+
+      // 3. Save clean defaults
+      await api.storage.local.set({ bs_settings: DEFAULT_SETTINGS });
+
+      // 4. Propagate to active capturing frames if any
+      const tab = await fetchActiveTab();
+      if (tab && isCapturingNow) {
+        await broadcastToFrames("update_settings", { settings: DEFAULT_SETTINGS });
+      }
+
+      // 5. Sync to backend configuration
+      try {
+        await fetchBackend("/api/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            asr_engine: DEFAULT_SETTINGS.asrEngine,
+            vad_engine: DEFAULT_SETTINGS.vadEngine,
+            silence_duration_ms: DEFAULT_SETTINGS.silenceDurationMs,
+            vad_threshold: DEFAULT_SETTINGS.vadThreshold,
+            min_words_to_commit: DEFAULT_SETTINGS.minWordsToCommit,
+            source_lang: DEFAULT_SETTINGS.sourceLanguage,
+            target_lang: DEFAULT_SETTINGS.targetLang,
+            tts_enabled: DEFAULT_SETTINGS.ttsEnabled,
+          }),
+        });
+      } catch (e) {}
+
+      showMsg("↺ Đã đưa toàn bộ cài đặt về mặc định", "success");
+    });
+  }
 
   // ── Live update settings with 150ms debounce for sliders ──────
   let _settingDebounceTimer = null;

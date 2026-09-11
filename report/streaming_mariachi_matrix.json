@@ -1,0 +1,28 @@
+{
+  "audio_duration_sec": 23.0,
+  "m0_production": {
+    "name": "M0_Production_Loop",
+    "split_on_stability": true,
+    "final_text": "Freeways completely stopped. Oh, you're still coming to my parents' house, right? Um. I can't really hear you, man. What? Mariachi band playing live music, yeah. Dave, I can't. They're really loud, and I can't hear you. I'm really loud right now. I'm sorry. What were you saying? It actually started raining like crazy. It's raining and thundering like crazy, man. I know it's rich.",
+    "commit_count": 6,
+    "inserted_words": 65,
+    "preview_audio_sec": 61.71,
+    "loop_amplification_factor": 2.68,
+    "splits": 1
+  },
+  "m1_no_split": {
+    "name": "M1_No_Split",
+    "split_on_stability": false,
+    "final_text": "Freeways completely stopped. Oh, you're still coming to my parents' house, right? Um. I can't really hear you, man. What? Mariachi band playing live music, yeah. Dave, I can't. They're really loud, and I can't hear. Sorry. What were you saying? You're still coming to my parents' house, right? It actually started raining like crazy. It's raining and thundering like crazy, man. I know it's rich.",
+    "commit_count": 5,
+    "inserted_words": 66,
+    "preview_audio_sec": 70.2,
+    "loop_amplification_factor": 3.05,
+    "splits": 0
+  },
+  "m3_pure_acoustic": {
+    "text": "Oh, you're still coming to my parents' house, right? Um, I can't really hear you, babe. What? Mariachi band playing live music, yeah. Dave, I can't. They're really loud, babe. I can't hear you. Dave. Yeah, they're being really loud right now. I'm sorry. What were you saying? You're still coming to my parents' house, right? It actually started raining like crazy. What? It's raining and thundering like crazy, babe. I can't hear you. Where are you? Out of nowhere.",
+    "word_count": 80,
+    "infer_ms": 1047.0
+  }
+}

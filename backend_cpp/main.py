@@ -360,16 +360,47 @@ async def websocket_endpoint(ws: WebSocket):
     await handle_ws(ws)
 
 
-def main():
-    """Server runner with SSL certificates support."""
-    from backend_cpp.utils.ssl_utils import ensure_ssl_certificates
-    cert_path, key_path = ensure_ssl_certificates()
+import time
+from backend_cpp.ws.session_state import ACTIVE_SESSIONS, LAST_DISCONNECTED_REPORT
 
-    ssl_kwargs = {
-        "ssl_certfile": cert_path,
-        "ssl_keyfile": key_path,
-    }
-    logger.info(f"🔒 WSS (SSL) enabled with cert: {cert_path}")
+
+@app.get("/api/telemetry/transport")
+async def get_transport_telemetry():
+    """Return P4-A audio transport telemetry for active session or last closed session."""
+    from backend_cpp.ws import session_state
+    if session_state.ACTIVE_SESSIONS:
+        latest_sess = list(session_state.ACTIVE_SESSIONS.values())[-1]
+        summary = latest_sess.transport_telemetry.get_summary()
+        summary["session_id"] = latest_sess.session_id
+        summary["status"] = "active"
+        summary["duration_sec"] = round(time.time() - latest_sess.connected_at, 2)
+        return summary
+    elif session_state.LAST_DISCONNECTED_REPORT:
+        report = dict(session_state.LAST_DISCONNECTED_REPORT)
+        report["status"] = "disconnected"
+        return report
+    else:
+        return {"status": "no_session", "message": "No transport session recorded"}
+
+
+def main():
+    """Server runner with SSL certificates support and fallback."""
+    import argparse
+    parser = argparse.ArgumentParser(description="Bilingual Subtitle Backend")
+    parser.add_argument("--no-ssl", action="store_true", help="Run without SSL (plain HTTP/WS mode)")
+    args, _ = parser.parse_known_args()
+
+    ssl_kwargs = {}
+    if not args.no_ssl:
+        from backend_cpp.utils.ssl_utils import ensure_ssl_certificates
+        cert_path, key_path = ensure_ssl_certificates()
+        ssl_kwargs = {
+            "ssl_certfile": cert_path,
+            "ssl_keyfile": key_path,
+        }
+        logger.info(f"🔒 WSS (SSL) enabled with cert: {cert_path}")
+    else:
+        logger.warning("⚠️ Running in plain HTTP/WS mode (--no-ssl)")
 
     uvicorn.run(
         app,
@@ -383,3 +414,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

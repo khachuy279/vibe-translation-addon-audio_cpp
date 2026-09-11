@@ -64,7 +64,7 @@ class SentenceSegmenter:
     def __init__(
         self,
         max_chars: int = 150,
-        max_duration_sec: float = 8.0,
+        max_duration_sec: float = 15.0,
         min_words_to_commit: int = 1,
         split_on_stability: bool = True,
         stability_duration_sec: float = 0.8,

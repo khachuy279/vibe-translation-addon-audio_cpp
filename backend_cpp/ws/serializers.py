@@ -22,6 +22,10 @@ def make_utterance_update_msg(
     is_final: bool = False,
     stable_text: str = "",
     unstable_text: str = "",
+    epoch: int = 0,
+    media_start_time: float = 0.0,
+    media_end_time: float = 0.0,
+    asr_commit_wall_time: float = 0.0,
 ) -> Dict[str, Any]:
     """Generate live speech transcription update message."""
     return {
@@ -39,6 +43,10 @@ def make_utterance_update_msg(
         "is_final": is_final,
         "isFinal": is_final,
         "filtered": False,
+        "epoch": epoch,
+        "media_start_time": media_start_time,
+        "media_end_time": media_end_time,
+        "asr_commit_wall_time": asr_commit_wall_time,
     }
 
 
@@ -47,6 +55,10 @@ def make_translation_msg(
     translated: str,
     elapsed_ms: int,
     target_lang: str,
+    epoch: int = 0,
+    media_start_time: float = 0.0,
+    media_end_time: float = 0.0,
+    asr_commit_wall_time: float = 0.0,
 ) -> Dict[str, Any]:
     """Generate final translation message."""
     return {
@@ -62,6 +74,10 @@ def make_translation_msg(
         "translateTimeMs": elapsed_ms,
         "target_lang": target_lang,
         "targetLang": target_lang,
+        "epoch": epoch,
+        "media_start_time": media_start_time,
+        "media_end_time": media_end_time,
+        "asr_commit_wall_time": asr_commit_wall_time,
     }
 
 

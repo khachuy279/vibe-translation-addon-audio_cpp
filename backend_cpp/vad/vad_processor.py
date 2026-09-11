@@ -156,7 +156,14 @@ class VADProcessor:
             if enabled is not None:
                 self.enabled = enabled
 
-    def feed_chunk(self, pcm_data: bytes, capture_timestamp: float = 0.0) -> None:
+    def feed_chunk(
+        self,
+        pcm_data: bytes,
+        capture_timestamp: float = 0.0,
+        media_start_time: float = 0.0,
+        media_end_time: float = 0.0,
+        epoch: int = 0,
+    ) -> None:
         """Process incoming 16kHz 16-bit mono PCM bytes.
 
         Uses deterministic Audio Sample Clock for speech/silence duration tracking.
@@ -166,7 +173,7 @@ class VADProcessor:
 
         if not self.enabled:
             if self.on_speech_chunk:
-                self.on_speech_chunk(pcm_data, capture_timestamp)
+                self.on_speech_chunk(pcm_data, capture_timestamp, VAD_STATE_SPEECH, media_start_time, media_end_time, epoch)
             return
 
         self._ensure_model()
@@ -197,9 +204,13 @@ class VADProcessor:
             buf_len = len(raw_buf)
             offset = 0
 
+            frame_dur_sec = self._frame_samples / float(self.sample_rate)
+
             while buf_len - offset >= frame_size:
                 frame_end = offset + frame_size
                 frame_ts = capture_timestamp + (offset / (self.sample_rate * 2.0))
+                frame_media_start = media_start_time + (offset / (self.sample_rate * 2.0))
+                frame_media_end = frame_media_start + frame_dur_sec
 
                 # Convert to float32 normalized [-1.0, 1.0] using pre-allocated buffer
                 samples_int16 = np.frombuffer(raw_buf, dtype=np.int16, count=self._frame_samples, offset=offset)
@@ -234,52 +245,53 @@ class VADProcessor:
 
                         # Flush pre-speech buffer (tagged as PRE_ROLL)
                         while state.pre_speech_ring:
-                            pre_bytes, pre_ts = state.pre_speech_ring.popleft()
+                            pre_item = state.pre_speech_ring.popleft()
+                            pre_bytes, pre_ts = pre_item[0], pre_item[1]
+                            pre_m_start = pre_item[2] if len(pre_item) > 2 else frame_media_start
+                            pre_m_end = pre_item[3] if len(pre_item) > 3 else frame_media_end
+                            pre_ep = pre_item[4] if len(pre_item) > 4 else epoch
                             if self.on_speech_chunk:
-                                callbacks.append((self.on_speech_chunk, (pre_bytes, pre_ts, VAD_STATE_PRE_ROLL)))
+                                callbacks.append((self.on_speech_chunk, (pre_bytes, pre_ts, VAD_STATE_PRE_ROLL, pre_m_start, pre_m_end, pre_ep)))
 
                     frame_bytes = bytes(raw_buf[offset:frame_end])
                     if self.on_speech_chunk:
-                        callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_SPEECH)))
+                        callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_SPEECH, frame_media_start, frame_media_end, epoch)))
 
                 elif state.is_speech:
-                    if vad_event == "END":
-                        # Immediate speech end signaled by engine
-                        state.is_speech = False
-                        state.silence_samples = 0
-                        logger.info(
-                            f"[VAD END] Speech end detected by engine ({self.vad_engine})"
-                        )
-                        if self.on_speech_end:
-                            callbacks.append((self.on_speech_end, ()))
-                    elif is_speech_frame:
+                    if is_speech_frame and vad_event != "END":
+                        # Active speech continues: reset silence accumulator
                         state.silence_samples = 0
                         frame_bytes = bytes(raw_buf[offset:frame_end])
                         if self.on_speech_chunk:
-                            callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_SPEECH)))
+                            callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_SPEECH, frame_media_start, frame_media_end, epoch)))
                     else:
-                        # In speech but frame is silent -> accumulate silence
+                        # Grace Decay (DECISION 2026-09-11, user approved C06):
+                        # On silent frames OR engine END events, do not hard-cut immediately.
+                        # Retain trailing tail audio within grace hangover window to protect codas.
+                        # If speech returns before silence_duration_ms, the utterance continues seamlessly.
+                        # If silence reaches silence_duration_ms, commit [VAD END] without added latency.
                         state.silence_samples += self._frame_samples
                         silence_elapsed_ms = (state.silence_samples / self.sample_rate) * 1000.0
                         total_silence_limit_ms = float(self.silence_duration_ms)
-                        grace_hangover_ms = min(float(self.hangover_ms), total_silence_limit_ms * 0.5)
+                        grace_hangover_ms = min(float(self.hangover_ms), total_silence_limit_ms)
 
                         if silence_elapsed_ms <= grace_hangover_ms:
                             frame_bytes = bytes(raw_buf[offset:frame_end])
                             if self.on_speech_chunk:
-                                callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_NON_SPEECH)))
-                        elif silence_elapsed_ms >= total_silence_limit_ms:
+                                callbacks.append((self.on_speech_chunk, (frame_bytes, frame_ts, VAD_STATE_NON_SPEECH, frame_media_start, frame_media_end, epoch)))
+
+                        if silence_elapsed_ms >= total_silence_limit_ms:
                             state.is_speech = False
                             state.silence_samples = 0
                             logger.info(
                                 f"[VAD END] Speech end detected ({self.vad_engine}, threshold={self.threshold:.2f}) after {silence_elapsed_ms:.0f}ms silence"
                             )
                             if self.on_speech_end:
-                                callbacks.append((self.on_speech_end, ()))
+                                callbacks.append((self.on_speech_end, ("VAD_SILENCE", frame_media_end, epoch)))
                 else:
                     # Idle silence: add to pre-speech ring buffer
                     frame_bytes = bytes(raw_buf[offset:frame_end])
-                    state.pre_speech_ring.append((frame_bytes, frame_ts))
+                    state.pre_speech_ring.append((frame_bytes, frame_ts, frame_media_start, frame_media_end, epoch))
 
                 offset = frame_end
 
@@ -293,16 +305,25 @@ class VADProcessor:
                 try:
                     cb(*args)
                 except TypeError:
-                    if len(args) == 3:
-                        cb(args[0], args[1])
+                    if len(args) == 6:
+                        try:
+                            cb(args[0], args[1], args[2])
+                        except TypeError:
+                            cb(args[0], args[1])
+                    elif len(args) == 3:
+                        try:
+                            cb(args[0])
+                        except TypeError:
+                            cb()
                     else:
-                        raise
+                        cb()
                 elapsed_ms = (time.perf_counter() - t0) * 1000.0
                 self._callback_count += 1
                 self._total_callback_time_ms += elapsed_ms
                 if elapsed_ms > 100.0:
                     logger.warning(
-                        f"⚠️ Slow VAD callback {getattr(cb, '__name__', str(cb))} took {elapsed_ms:.1f}ms"
+                        f"VAD callback {getattr(cb, '__name__', str(cb))} took {elapsed_ms:.1f}ms! "
+                        "Blocking the feed loop causes audio pipeline lag."
                     )
             except Exception as e:
                 logger.error(f"Error in VAD callback {getattr(cb, '__name__', str(cb))}: {e}", exc_info=True)
