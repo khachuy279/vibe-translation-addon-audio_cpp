@@ -1,0 +1,116 @@
+[
+  {
+    "engine": "silero-vad",
+    "audio_sec": 24.0,
+    "median_ms": 323.87,
+    "ms_per_audio_sec": 13.49,
+    "rtf": 0.0135,
+    "segments": 9,
+    "speech_sec": 16.1,
+    "speech_ratio": 0.671,
+    "median_segment_sec": 2.1,
+    "first_segments": [
+      [
+        0.5,
+        3.2
+      ],
+      [
+        3.7,
+        4.0
+      ],
+      [
+        4.3,
+        6.6
+      ],
+      [
+        7.8,
+        9.9
+      ],
+      [
+        10.9,
+        13.0
+      ],
+      [
+        14.3,
+        16.3
+      ]
+    ],
+    "start_events": 9
+  },
+  {
+    "engine": "fsmn-vad",
+    "audio_sec": 24.0,
+    "median_ms": 1318.91,
+    "ms_per_audio_sec": 54.95,
+    "rtf": 0.055,
+    "segments": 8,
+    "speech_sec": 18.5,
+    "speech_ratio": 0.771,
+    "median_segment_sec": 2.55,
+    "first_segments": [
+      [
+        0.7,
+        3.7
+      ],
+      [
+        4.4,
+        7.1
+      ],
+      [
+        7.9,
+        10.4
+      ],
+      [
+        11.0,
+        13.7
+      ],
+      [
+        14.4,
+        16.9
+      ],
+      [
+        17.5,
+        20.1
+      ]
+    ],
+    "start_events": 8
+  },
+  {
+    "engine": "firered-vad",
+    "audio_sec": 24.0,
+    "median_ms": 2602.99,
+    "ms_per_audio_sec": 108.46,
+    "rtf": 0.1085,
+    "segments": 8,
+    "speech_sec": 19.1,
+    "speech_ratio": 0.796,
+    "median_segment_sec": 2.55,
+    "first_segments": [
+      [
+        0.5,
+        3.6
+      ],
+      [
+        3.8,
+        7.0
+      ],
+      [
+        7.8,
+        10.3
+      ],
+      [
+        10.9,
+        13.6
+      ],
+      [
+        14.3,
+        16.7
+      ],
+      [
+        17.4,
+        20.0
+      ]
+    ],
+    "start_events": 8
+  }
+]

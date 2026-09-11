@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilingual Subtitle</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="popup">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎬 Bilingual Subtitle</h1>
+      <span id="statusBadge" class="badge badge-disconnected">Disconnected</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="btnStart" class="btn btn-primary">▶ Start Capture</button>
+      <button id="btnStop" class="btn btn-secondary" disabled>⏹ Stop</button>
+      <button id="btnTest" class="btn btn-outline">🔌 Test</button>
+    </div>
+
+    <!-- Settings -->
+    <div class="settings">
+      <!-- Active Model Status Info -->
+      <div class="model-info-banner">
+        <span class="model-info-icon">🧠</span>
+        <span class="model-info-label">Model:</span>
+        <span id="lblActiveModel" class="model-info-value" title="Mô hình ASR đang được nạp trong VRAM">--</span>
+      </div>
+
+      <!-- Engine & VAD Hot-Swap Selection -->
+      <div class="setting-row">
+        <div class="setting-group flex-1">
+          <label for="selAsrEngine">🤖 ASR Engine</label>
+          <select id="selAsrEngine">
+            <option value="qwen3-asr-1.7b" selected>Qwen3 ASR 1.7B (GGUF) ⚡</option>
+            <option value="qwen3-asr-0.6b">Qwen3 ASR 0.6B (GGUF)</option>
+            <option value="sensevoice-small">SenseVoice Small (GGUF)</option>
+          </select>
+        </div>
+        <div class="setting-group flex-1">
+          <label for="selVadEngine">🎙️ VAD Engine</label>
+          <select id="selVadEngine">
+            <option value="fsmn-vad" selected>FSMN-VAD (FunASR)</option>
+            <option value="silero-vad">Silero VAD</option>
+            <option value="firered-vad">FireRed VAD</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- VAD Silence Duration Slider (100ms - 1000ms) -->
+      <div class="setting-group">
+        <label for="rangeVadSilence">⏱️ VAD Silence (<span id="valVadSilence">300</span>ms)</label>
+        <input type="range" id="rangeVadSilence" min="100" max="1000" step="50" value="300">
+      </div>
+
+      <div class="setting-group">
+        <label for="selSourceLang">🌍 Source Language</label>
+        <select id="selSourceLang">
+          <option value="auto" selected>Auto-detect (Qwen / Whisper / SenseVoice)</option>
+          <option value="ja">Japanese (ja)</option>
+          <option value="en">English (en)</option>
+          <option value="zh">Chinese (zh)</option>
+          <option value="yue">Cantonese (yue)</option>
+          <option value="ko">Korean (ko)</option>
+          <option value="vi">Vietnamese (vi)</option>
+          <option value="ru">Russian (ru)</option>
+          <option value="de">German (de)</option>
+          <option value="fr">French (fr)</option>
+          <option value="es">Spanish (es)</option>
+          <option value="pt">Portuguese (pt)</option>
+          <option value="it">Italian (it)</option>
+          <option value="ar">Arabic (ar)</option>
+          <option value="hi">Hindi (hi)</option>
+          <option value="id">Indonesian (id)</option>
+          <option value="ms">Malay (ms)</option>
+          <option value="th">Thai (th)</option>
+          <option value="tr">Turkish (tr)</option>
+          <option value="nl">Dutch (nl)</option>
+          <option value="pl">Polish (pl)</option>
+          <option value="cs">Czech (cs)</option>
+          <option value="sv">Swedish (sv)</option>
+          <option value="da">Danish (da)</option>
+          <option value="fi">Finnish (fi)</option>
+          <option value="fil">Filipino (fil)</option>
+          <option value="fa">Persian (fa)</option>
+          <option value="el">Greek (el)</option>
+          <option value="ro">Romanian (ro)</option>
+          <option value="hu">Hungarian (hu)</option>
+          <option value="mk">Macedonian (mk)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label for="selTargetLang">🎯 Target Language</label>
+        <select id="selTargetLang">
+          <option value="vi">Vietnamese</option>
+          <option value="en">English</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="zh">Chinese</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+        </select>
+      </div>
+
+      <!-- TTS Dubbing Section -->
+      <div class="setting-group">
+        <div class="toggle-row" id="ttsToggleRow">
+          <span class="toggle-label">🎙️ TTS Dubbing</span>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="chkEnableTts">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div id="ttsOptionsPanel" style="display: none;" class="tts-options-panel">
+        <div class="setting-group">
+          <label for="selTtsVoice">🎭 Giọng đọc (Voice Clone)</label>
+          <select id="selTtsVoice">
+            <option value="audio.wav" selected>👩 Giọng Nữ 1 (audio.wav)</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-group flex-1">
+            <label for="selTtsSpeed">⚡ Tốc độ (<span id="valTtsSpeed">1.0</span>x)</label>
+            <select id="selTtsSpeed">
+              <option value="0.9">0.9x (Chậm)</option>
+              <option value="1.0" selected>1.0x (Chuẩn)</option>
+              <option value="1.1">1.1x (Hơi nhanh)</option>
+              <option value="1.2">1.2x (Nhanh)</option>
+              <option value="1.3">1.3x (Rất nhanh)</option>
+            </select>
+          </div>
+          <div class="setting-group flex-1">
+            <label for="selTtsDucking">🔉 Auto-Ducking</label>
+            <select id="selTtsDucking">
+              <option value="true" selected>Bật (Hạ tiếng gốc)</option>
+              <option value="false">Tắt</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-group" id="duckingSliderRow">
+          <label for="rangeDuckingLevel">🔉 Tiếng gốc khi lồng tiếng (<span id="valDuckingLevel">25</span>%)</label>
+          <input type="range" id="rangeDuckingLevel" min="0" max="100" step="5" value="25">
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-group flex-1">
+          <label for="rangeSubPosY">📐 Height (<span id="valSubPosY">10</span>%)</label>
+          <input type="range" id="rangeSubPosY" min="0" max="80" step="1" value="10">
+        </div>
+        <div class="setting-group flex-1">
+          <label for="rangeSubWidth">↔️ Width (<span id="valSubWidth">80</span>%)</label>
+          <input type="range" id="rangeSubWidth" min="30" max="100" step="1" value="80">
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-group flex-1">
+          <label for="rangeOrigSize">🔤 Orig Size (<span id="valOrigSize">13</span>px)</label>
+          <input type="range" id="rangeOrigSize" min="10" max="26" value="13">
+        </div>
+        <div class="setting-group flex-1">
+          <label for="rangeTransSize">🔠 Trans Size (<span id="valTransSize">17</span>px)</label>
+          <input type="range" id="rangeTransSize" min="12" max="36" value="17">
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label for="selFontFamily">✏️ Font Family</label>
+        <select id="selFontFamily">
+          <option value="default">Noto Sans + CJK (Default)</option>
+          <option value="Noto Sans">Noto Sans (Latin / Vi / En)</option>
+          <option value="Noto Sans JP">Noto Sans JP (Japanese)</option>
+          <option value="Noto Sans SC">Noto Sans SC (Chinese)</option>
+          <option value="Segoe UI">Segoe UI</option>
+          <option value="Roboto">Roboto</option>
+          <option value="Inter">Inter</option>
+          <option value="Arial">Arial</option>
+          <option value="Outfit">Outfit</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-group flex-1">
+          <label for="rangeFontWeight">🏋️ Font Weight (<span id="valFontWeight">600</span>)</label>
+          <input type="range" id="rangeFontWeight" min="300" max="900" step="100" value="600">
+        </div>
+        <div class="setting-group flex-1">
+          <label for="rangeMaxLines">📑 Max Lines (<span id="valMaxLines">3</span>)</label>
+          <input type="range" id="rangeMaxLines" min="1" max="6" value="3">
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="messageArea" class="message-area"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

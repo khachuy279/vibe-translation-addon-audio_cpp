@@ -1,0 +1,65 @@
+# ==========================================
+# Vibe Translation Addon — .gitignore
+# ==========================================
+
+# 1. User specified exclusions: Sub-repos & external directories
+transcribe.cpp/
+docs/
+
+# 2. Models & Model Weights (large files)
+backend_cpp/models/
+models/
+backend_cpp/convert/temp/
+backend_cpp/convert/bin/
+*.gguf
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.engine
+*.blob
+
+# 3. Security & Certificates
+*.pem
+*.key
+backend_cpp/cert.pem
+backend_cpp/key.pem
+
+# 4. Audio Dumps & Large Test Artifacts
+debug_audio/
+*.log
+
+# 5. Compressed Archives
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.7z
+*.rar
+
+# 6. Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+ENV/
+
+# 7. IDE, OS & System Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# 8. Temporary Performance Reports & Logs
+perf_report.json
+perf_report_summary.txt
+backend_cpp/perf_test_summary.json
+backend_cpp/perf_test_summary_summary.txt

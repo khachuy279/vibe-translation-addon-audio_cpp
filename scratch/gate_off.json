@@ -1,0 +1,809 @@
+{
+  "schema_version": 1,
+  "kind": "backend_cpp_baseline",
+  "work_item": "W2.1",
+  "generated_at": "2026-09-11 00:01:12",
+  "environment": {
+    "python": "3.13.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+    "cpu_count": 12,
+    "ram_rss_mb": 6407.1,
+    "ram_total_mb": 65438.0,
+    "torch": "2.12.0+cu130",
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 5060 Ti",
+    "vram_total_mb": 16310.4,
+    "asr_model": "qwen3-asr-1.7b",
+    "asr_backend": "vulkan",
+    "asr_threads": 4,
+    "poll_interval_ms": 350,
+    "vad_engine": "firered-vad",
+    "translation_base": "tencent",
+    "tts_enabled": true,
+    "sentence": {
+      "max_duration_sec": 8.0,
+      "stability_duration_sec": 0.8,
+      "stability_threshold_polls": 2,
+      "min_words_to_commit": 2
+    },
+    "max_sessions": 1,
+    "token_queue_maxsize": 64
+  },
+  "micro_benchmarks": {
+    "snapshot_and_normalize": {
+      "benchmark": "snapshot_and_normalize",
+      "note": "snapshot = AudioBufferManager.get_snapshot_if_newer() over the FULL utterance; normalize = SpeechNormalizer.process() over the FULL utterance. Both run before every preview inference.",
+      "rows": [
+        {
+          "audio_sec": 1.0,
+          "audio_bytes": 32000,
+          "pcm_float32_bytes": 64000,
+          "snapshot": {
+            "runs": 3,
+            "median_ms": 0.148,
+            "min_ms": 0.132,
+            "max_ms": 0.169,
+            "peak_alloc_bytes": 193696
+          },
+          "normalize": {
+            "runs": 3,
+            "median_ms": 0.8,
+            "min_ms": 0.766,
+            "max_ms": 0.928,
+            "peak_alloc_bytes": 131692
+          },
+          "pre_infer_ms": 0.948,
+          "pre_infer_ms_per_audio_sec": 0.948
+        },
+        {
+          "audio_sec": 2.0,
+          "audio_bytes": 64000,
+          "pcm_float32_bytes": 128000,
+          "snapshot": {
+            "runs": 3,
+            "median_ms": 0.163,
+            "min_ms": 0.16,
+            "max_ms": 0.164,
+            "peak_alloc_bytes": 385752
+          },
+          "normalize": {
+            "runs": 3,
+            "median_ms": 0.801,
+            "min_ms": 0.789,
+            "max_ms": 1.239,
+            "peak_alloc_bytes": 260492
+          },
+          "pre_infer_ms": 0.964,
+          "pre_infer_ms_per_audio_sec": 0.482
+        },
+        {
+          "audio_sec": 4.0,
+          "audio_bytes": 128000,
+          "pcm_float32_bytes": 256000,
+          "snapshot": {
+            "runs": 3,
+            "median_ms": 0.18,
+            "min_ms": 0.176,
+            "max_ms": 0.185,
+            "peak_alloc_bytes": 769880
+          },
+          "normalize": {
+            "runs": 3,
+            "median_ms": 0.96,
+            "min_ms": 0.85,
+            "max_ms": 1.185,
+            "peak_alloc_bytes": 518092
+          },
+          "pre_infer_ms": 1.14,
+          "pre_infer_ms_per_audio_sec": 0.285
+        },
+        {
+          "audio_sec": 6.0,
+          "audio_bytes": 192000,
+          "pcm_float32_bytes": 384000,
+          "snapshot": {
+            "runs": 3,
+            "median_ms": 0.229,
+            "min_ms": 0.212,
+            "max_ms": 0.306,
+            "peak_alloc_bytes": 1154016
+          },
+          "normalize": {
+            "runs": 3,
+            "median_ms": 0.955,
+            "min_ms": 0.918,
+            "max_ms": 1.005,
+            "peak_alloc_bytes": 775692
+          },
+          "pre_infer_ms": 1.184,
+          "pre_infer_ms_per_audio_sec": 0.197
+        },
+        {
+          "audio_sec": 8.0,
+          "audio_bytes": 256000,
+          "pcm_float32_bytes": 512000,
+          "snapshot": {
+            "runs": 3,
+            "median_ms": 0.26,
+            "min_ms": 0.254,
+            "max_ms": 0.26,
+            "peak_alloc_bytes": 1538144
+          },
+          "normalize": {
+            "runs": 3,
+            "median_ms": 1.112,
+            "min_ms": 1.089,
+            "max_ms": 1.645,
+            "peak_alloc_bytes": 1033324
+          },
+          "pre_infer_ms": 1.372,
+          "pre_infer_ms_per_audio_sec": 0.172
+        }
+      ],
+      "scaling": {
+        "duration_ratio_longest_over_shortest": 8.0,
+        "cost_ratio_longest_over_shortest": 1.45,
+        "alloc_ratio_longest_over_shortest": 7.9,
+        "alloc_scales_with_duration": true,
+        "verdict": "Allocation grows proportionally with utterance length (the audit's claim holds for allocation, not for wall-clock time). Compare these absolute milliseconds against the native inference cost before optimizing them."
+      }
+    },
+    "copy_chain": {
+      "benchmark": "copy_chain",
+      "note": "Each stage is a real production call except the row marked is_reference_only. peak_alloc_bytes is measured with tracemalloc. The audit previously listed these boundaries as unquantified.",
+      "audio_sec": 1.0,
+      "stages": [
+        {
+          "runs": 3,
+          "median_ms": 0.083,
+          "min_ms": 0.063,
+          "max_ms": 0.087,
+          "peak_alloc_bytes": 4239,
+          "stage": "ws.parse_audio_frame",
+          "input_bytes": 3284,
+          "output_bytes": 3200
+        },
+        {
+          "runs": 3,
+          "median_ms": 0.143,
+          "min_ms": 0.138,
+          "max_ms": 0.179,
+          "peak_alloc_bytes": 193560,
+          "stage": "asr.audio_buffer.get_snapshot_if_newer (full utterance)",
+          "input_bytes": 32000,
+          "output_bytes": 64000
+        },
+        {
+          "runs": 3,
+          "median_ms": 0.119,
+          "min_ms": 0.118,
+          "max_ms": 0.121,
+          "peak_alloc_bytes": 129680,
+          "stage": "asr.speech_normalizer.sanitize_input",
+          "input_bytes": 64000,
+          "output_bytes": 64000
+        },
+        {
+          "runs": 3,
+          "median_ms": 0.391,
+          "min_ms": 0.389,
+          "max_ms": 0.455,
+          "peak_alloc_bytes": 4276,
+          "stage": "REFERENCE numpy per-frame convert (400-sample frames)",
+          "input_bytes": 32000,
+          "output_bytes": 64000,
+          "native_frame_samples": 400,
+          "is_reference_only": true
+        }
+      ],
+      "total_median_ms": 0.736,
+      "total_ms_per_audio_sec": 0.736,
+      "vad_engine": null
+    },
+    "vad_cost": {
+      "benchmark": "vad_cost",
+      "note": "Real VADProcessor.feed_chunk() cost, fresh processor per repeat, warm-up excluded. Compare against the per-frame NumPy conversion reference in copy_chain to see whether the model or the array bookkeeping dominates.",
+      "audio_sec": 2.0,
+      "rows": [
+        {
+          "runs": 3,
+          "median_ms": 356.115,
+          "min_ms": 344.688,
+          "max_ms": 365.212,
+          "peak_alloc_bytes": 117507,
+          "engine": "firered-vad",
+          "native_frame_samples": 400,
+          "frames_per_audio_sec": 40.0,
+          "speech_frames_passed_to_asr": 0,
+          "rtf": 0.1781,
+          "ms_per_audio_sec": 178.058
+        },
+        {
+          "runs": 3,
+          "median_ms": 198.637,
+          "min_ms": 195.459,
+          "max_ms": 200.081,
+          "peak_alloc_bytes": 267348,
+          "engine": "fsmn-vad",
+          "native_frame_samples": 960,
+          "frames_per_audio_sec": 16.7,
+          "speech_frames_passed_to_asr": 33,
+          "rtf": 0.0993,
+          "ms_per_audio_sec": 99.319
+        }
+      ]
+    },
+    "vad_engine_tradeoff": {
+      "benchmark": "vad_engine_tradeoff",
+      "audio_file": "D:\\vibe-translation-addon-transcribe_cpp\\wav_test\\OSR_us_000_0010_16k.wav",
+      "audio_sec": 24.0,
+      "note": "Cost alone is not enough to choose a VAD engine -- detection coverage matters too. Compare speech_ratio and segments before switching the default.",
+      "cheapest_engine": "silero-vad",
+      "rows": [
+        {
+          "engine": "silero-vad",
+          "available": true,
+          "median_ms": 320.27,
+          "ms_per_audio_sec": 13.34,
+          "rtf": 0.0133,
+          "segments": 9,
+          "speech_sec": 16.1,
+          "speech_ratio": 0.671,
+          "median_segment_sec": 2.1,
+          "first_segments": [
+            [
+              0.5,
+              3.2
+            ],
+            [
+              3.7,
+              4.0
+            ],
+            [
+              4.3,
+              6.6
+            ],
+            [
+              7.8,
+              9.9
+            ],
+            [
+              10.9,
+              13.0
+            ],
+            [
+              14.3,
+              16.3
+            ]
+          ],
+          "cost_multiple_vs_cheapest": 1.0,
+          "speech_ratio_delta_vs_cheapest": 0.0
+        },
+        {
+          "engine": "fsmn-vad",
+          "available": true,
+          "median_ms": 1390.22,
+          "ms_per_audio_sec": 57.93,
+          "rtf": 0.0579,
+          "segments": 8,
+          "speech_sec": 18.5,
+          "speech_ratio": 0.771,
+          "median_segment_sec": 2.55,
+          "first_segments": [
+            [
+              0.7,
+              3.7
+            ],
+            [
+              4.4,
+              7.1
+            ],
+            [
+              7.9,
+              10.4
+            ],
+            [
+              11.0,
+              13.7
+            ],
+            [
+              14.4,
+              16.9
+            ],
+            [
+              17.5,
+              20.1
+            ]
+          ],
+          "cost_multiple_vs_cheapest": 4.34,
+          "speech_ratio_delta_vs_cheapest": 0.1
+        },
+        {
+          "engine": "firered-vad",
+          "available": true,
+          "median_ms": 2608.55,
+          "ms_per_audio_sec": 108.69,
+          "rtf": 0.1087,
+          "segments": 8,
+          "speech_sec": 19.1,
+          "speech_ratio": 0.796,
+          "median_segment_sec": 2.55,
+          "first_segments": [
+            [
+              0.5,
+              3.6
+            ],
+            [
+              3.8,
+              7.0
+            ],
+            [
+              7.8,
+              10.3
+            ],
+            [
+              10.9,
+              13.6
+            ],
+            [
+              14.3,
+              16.7
+            ],
+            [
+              17.4,
+              20.0
+            ]
+          ],
+          "cost_multiple_vs_cheapest": 8.15,
+          "speech_ratio_delta_vs_cheapest": 0.125
+        }
+      ]
+    }
+  },
+  "end_to_end_scenarios": {
+    "preview_cost": {
+      "benchmark": "preview_cost_e2e",
+      "wall_sec": 55.65,
+      "validity": {
+        "valid": true,
+        "inferences_observed": 112
+      },
+      "vad_engine": "fsmn-vad",
+      "repeats": 2,
+      "durations_requested": [
+        1.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0
+      ],
+      "rows": [
+        {
+          "audio_sec": 1.0,
+          "infer_ms": {
+            "count": 30,
+            "min": 53.691,
+            "avg": 76.321,
+            "p50": 78.49,
+            "p90": 92.57,
+            "p99": 97.032,
+            "max": 98.372
+          },
+          "rtf": {
+            "count": 30,
+            "min": 0.043,
+            "avg": 0.08,
+            "p50": 0.076,
+            "p90": 0.103,
+            "p99": 0.15,
+            "max": 0.164
+          }
+        },
+        {
+          "audio_sec": 2.0,
+          "infer_ms": {
+            "count": 30,
+            "min": 69.794,
+            "avg": 90.733,
+            "p50": 90.155,
+            "p90": 103.352,
+            "p99": 105.625,
+            "max": 105.675
+          },
+          "rtf": {
+            "count": 30,
+            "min": 0.029,
+            "avg": 0.041,
+            "p50": 0.04,
+            "p90": 0.05,
+            "p99": 0.053,
+            "max": 0.053
+          }
+        },
+        {
+          "audio_sec": 4.0,
+          "infer_ms": {
+            "count": 27,
+            "min": 89.95,
+            "avg": 112.965,
+            "p50": 113.929,
+            "p90": 128.611,
+            "p99": 134.84,
+            "max": 136.698
+          },
+          "rtf": {
+            "count": 27,
+            "min": 0.023,
+            "avg": 0.028,
+            "p50": 0.027,
+            "p90": 0.034,
+            "p99": 0.036,
+            "max": 0.036
+          }
+        },
+        {
+          "audio_sec": 6.0,
+          "infer_ms": {
+            "count": 18,
+            "min": 108.005,
+            "avg": 130.738,
+            "p50": 129.815,
+            "p90": 145.811,
+            "p99": 149.954,
+            "max": 150.743
+          },
+          "rtf": {
+            "count": 18,
+            "min": 0.018,
+            "avg": 0.022,
+            "p50": 0.021,
+            "p90": 0.026,
+            "p99": 0.028,
+            "max": 0.028
+          }
+        },
+        {
+          "audio_sec": 8.0,
+          "infer_ms": {
+            "count": 7,
+            "min": 73.041,
+            "avg": 119.764,
+            "p50": 128.376,
+            "p90": 150.924,
+            "p99": 151.282,
+            "max": 151.322
+          },
+          "rtf": {
+            "count": 7,
+            "min": 0.009,
+            "avg": 0.016,
+            "p50": 0.017,
+            "p90": 0.021,
+            "p99": 0.021,
+            "max": 0.021
+          }
+        }
+      ],
+      "infer_cost_scaling_longest_over_shortest": 1.57,
+      "counters": {
+        "asr.total_inferences": 112,
+        "asr.preview_infers": 100,
+        "asr.commit_inferences": 12,
+        "asr.cached_preview_reuse": 0,
+        "asr.preview_lock_skipped": 0,
+        "asr.commit_lock_timeout": 0
+      },
+      "client_events": {
+        "utterances": 0,
+        "messages": 0
+      },
+      "lock_wait_ms": {
+        "count": 112,
+        "min": 0.004,
+        "avg": 1.398,
+        "p50": 0.006,
+        "p90": 0.008,
+        "p99": 23.387,
+        "max": 116.596
+      },
+      "resources": {
+        "ram_rss_mb": 6411.4
+      }
+    },
+    "backpressure": {
+      "benchmark": "backpressure_e2e",
+      "wall_sec": 11.21,
+      "validity": {
+        "valid": true,
+        "inferences_observed": 14,
+        "delivered_to_client": 0,
+        "delivery_measurable": false,
+        "delivery_note": "Inferences ran but the client received no messages. Measured cause: the synthetic harmonic test signal does not produce a transcript, so TranscribeEngine._emit_final() drops the empty text and nothing is sent. Cost metrics (infer_ms, rtf, lock waits, RSS) remain valid; delivery must be measured with real speech via --audio-file."
+      },
+      "vad_engine": "fsmn-vad",
+      "audio_sec_pushed": 16.0,
+      "speed": 4.0,
+      "tts_enabled": false,
+      "delivery": {
+        "final_utterances": 0,
+        "translations": 0
+      },
+      "counter_delta": {
+        "asr.commit_inferences": 6,
+        "asr.preview_infers": 8,
+        "asr.preview_polls": 8,
+        "asr.total_inferences": 14,
+        "ws.audio_chunks_received": 390,
+        "ws.sessions_connected": 1
+      },
+      "queue_wait_ms": {
+        "translation": {
+          "count": 0
+        },
+        "tts": {
+          "count": 0
+        }
+      },
+      "resources": {
+        "ram_rss_mb_before": 6411.4,
+        "ram_rss_mb_after": 6413.3,
+        "ram_rss_delta_mb": 1.9
+      }
+    },
+    "session_scaling": {
+      "benchmark": "session_scaling_e2e",
+      "levels": [
+        1,
+        2,
+        4
+      ],
+      "audio_sec_per_session": 6.0,
+      "note": "config.ws.max_sessions was forced to 0 for this measurement, then restored.",
+      "rows": [
+        {
+          "sessions": 1,
+          "wall_sec": 11.59,
+          "validity": {
+            "valid": true,
+            "inferences_observed": 15
+          },
+          "lock_wait_ms": {
+            "count": 15,
+            "min": 0.005,
+            "avg": 2.375,
+            "p50": 0.006,
+            "p90": 0.007,
+            "p99": 30.573,
+            "max": 35.549
+          },
+          "infer_ms": {
+            "count": 15,
+            "min": 68.454,
+            "avg": 109.469,
+            "p50": 117.679,
+            "p90": 133.252,
+            "p99": 199.176,
+            "max": 209.332
+          },
+          "counters": {
+            "asr.total_inferences": 15,
+            "asr.preview_lock_skipped": 0,
+            "asr.commit_lock_timeout": 0,
+            "asr.final_dropped": 0
+          },
+          "ram_rss_mb": 6413.3
+        },
+        {
+          "sessions": 2,
+          "wall_sec": 11.61,
+          "validity": {
+            "valid": true,
+            "inferences_observed": 18
+          },
+          "lock_wait_ms": {
+            "count": 18,
+            "min": 0.005,
+            "avg": 21.67,
+            "p50": 0.006,
+            "p90": 37.488,
+            "p99": 241.214,
+            "max": 265.031
+          },
+          "infer_ms": {
+            "count": 18,
+            "min": 76.569,
+            "avg": 114.042,
+            "p50": 116.541,
+            "p90": 140.303,
+            "p99": 143.178,
+            "max": 143.554
+          },
+          "counters": {
+            "asr.total_inferences": 18,
+            "asr.preview_lock_skipped": 15,
+            "asr.commit_lock_timeout": 0,
+            "asr.final_dropped": 0
+          },
+          "ram_rss_mb": 6420.4
+        },
+        {
+          "sessions": 4,
+          "wall_sec": 11.6,
+          "validity": {
+            "valid": true,
+            "inferences_observed": 33
+          },
+          "lock_wait_ms": {
+            "count": 33,
+            "min": 0.004,
+            "avg": 32.53,
+            "p50": 0.006,
+            "p90": 57.684,
+            "p99": 417.269,
+            "max": 456.849
+          },
+          "infer_ms": {
+            "count": 33,
+            "min": 69.35,
+            "avg": 108.625,
+            "p50": 107.629,
+            "p90": 139.851,
+            "p99": 150.911,
+            "max": 154.436
+          },
+          "counters": {
+            "asr.total_inferences": 33,
+            "asr.preview_lock_skipped": 33,
+            "asr.commit_lock_timeout": 0,
+            "asr.final_dropped": 0
+          },
+          "ram_rss_mb": 6447.0
+        }
+      ]
+    },
+    "real_audio": {
+      "benchmark": "real_audio_e2e",
+      "audio_file": "D:\\vibe-translation-addon-transcribe_cpp\\wav_test\\OSR_us_000_0010_16k.wav",
+      "audio_sec": 24.0,
+      "speed": 1.0,
+      "tts_enabled": false,
+      "wall_sec": 30.52,
+      "validity": {
+        "valid": true,
+        "inferences_observed": 38,
+        "delivered_to_client": 7,
+        "delivery_measurable": true
+      },
+      "vad_engine": "fsmn-vad",
+      "delivery": {
+        "final_utterances": 7,
+        "final_messages": 14,
+        "preview_updates": 23,
+        "translations": 7,
+        "tts_audio_messages": 0,
+        "note": "final_messages is about 2x final_utterances BY DESIGN: _process_translation_item() re-sends a final utterance_update for backward compatibility. Do not read that as duplicate transcripts."
+      },
+      "transcripts": [
+        {
+          "utterance_id": "e5dad0d1-4efa-4cb2-a59e-2a84dcc45ee0",
+          "text": "The birch canoe slid on the smooth planks.",
+          "language": null
+        },
+        {
+          "utterance_id": "27c1fa3e-c2c2-46d7-b7d7-7c47380ebc01",
+          "text": "Glue the sheet to the dark blue background.",
+          "language": null
+        },
+        {
+          "utterance_id": "1bcec84f-aefb-4064-b44d-ae0610497e47",
+          "text": "It is easy to tell the depth of a well.",
+          "language": null
+        },
+        {
+          "utterance_id": "d0ac1044-a10a-4076-8268-4bcbf60e0dcc",
+          "text": "These days, a chicken leg is a rare dish.",
+          "language": null
+        },
+        {
+          "utterance_id": "02720edf-9d83-4703-9939-aa5a58aa9d27",
+          "text": "Rice is often served in round bowls.",
+          "language": null
+        },
+        {
+          "utterance_id": "79e8fa1d-fc81-467a-b8b4-5fa1bd022721",
+          "text": "The juice of lemons makes fine punch.",
+          "language": null
+        },
+        {
+          "utterance_id": "ed7bc015-d133-470d-9815-ecbe60432419",
+          "text": "The box was thrown beside the park truck.",
+          "language": null
+        }
+      ],
+      "preview_amplification": {
+        "speech_ms": 24000,
+        "preview_audio_ms": 54600,
+        "commit_audio_ms": 17940,
+        "factor_vs_speech": 2.27
+      },
+      "asr": {
+        "infer_ms": {
+          "count": 38,
+          "min": 72.913,
+          "avg": 133.871,
+          "p50": 146.194,
+          "p90": 162.772,
+          "p99": 233.759,
+          "max": 246.713
+        },
+        "rtf": {
+          "count": 38,
+          "min": 0.053,
+          "avg": 0.076,
+          "p50": 0.074,
+          "p90": 0.103,
+          "p99": 0.124,
+          "max": 0.133
+        },
+        "lock_wait_ms": {
+          "count": 38,
+          "min": 0.005,
+          "avg": 4.205,
+          "p50": 0.005,
+          "p90": 0.87,
+          "p99": 62.65,
+          "max": 75.566
+        }
+      },
+      "translation": {
+        "queue_wait_ms": {
+          "count": 7,
+          "min": 0.027,
+          "avg": 0.034,
+          "p50": 0.031,
+          "p90": 0.044,
+          "p99": 0.055,
+          "max": 0.056
+        },
+        "infer_ms": {
+          "count": 7,
+          "min": 390.982,
+          "avg": 493.002,
+          "p50": 437.741,
+          "p90": 649.019,
+          "p99": 719.761,
+          "max": 727.621
+        },
+        "tokens_per_sec": {
+          "count": 7,
+          "min": 54.974,
+          "avg": 62.852,
+          "p50": 63.965,
+          "p90": 64.776,
+          "p99": 65.309,
+          "max": 65.369
+        }
+      },
+      "counters": {
+        "asr.total_inferences": 38,
+        "asr.preview_infers": 31,
+        "asr.commit_inferences": 7,
+        "asr.cached_preview_reuse": 1,
+        "asr.preview_audio_ms": 54600,
+        "asr.commit_audio_ms": 17940,
+        "asr.preview_skipped_growth": 0,
+        "translation.queue_full_dropped": 0,
+        "translation.short_words_filtered": 0,
+        "tts.queue_full_dropped": 0,
+        "asr.preview_dropped": 0,
+        "asr.preview_evicted": 0
+      },
+      "resources": {
+        "ram_rss_mb_before": 5758.7,
+        "ram_rss_mb_after": 6414.9,
+        "ram_rss_delta_mb": 656.2
+      }
+    }
+  }
+}

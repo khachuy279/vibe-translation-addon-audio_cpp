@@ -1,0 +1,61 @@
+# Catalog cấu hình các mô hình dịch (Translation Models) cho Vibe Translation
+# Tương tự như models.yaml của ASR, file này cho phép thêm/sửa/xóa model dịch linh hoạt.
+
+default_model: tencent
+
+models:
+  tencent-1.8b:
+    name: Hunyuan-MT2 1.8B (Tencent)
+    model: unsloth/Hy-MT2-1.8B-GGUF
+    gguf_file: Hy-MT2-1.8B-UD-Q8_K_XL.gguf
+    temperature: 0.7
+    top_p: 0.6
+    top_k: 20
+    repetition_penalty: 1.05
+    prompt_style: tencent
+    aliases:
+      - hy-mt2-1.8b
+      - tencent-1.8
+    description: Siêu nhanh, nhẹ (~2.0GB, Q8_K_XL)
+
+  tencent:
+    name: Hunyuan-MT2 7B (Tencent)
+    model: unsloth/Hy-MT2-7B-GGUF
+    gguf_file: Hy-MT2-7B-UD-Q4_K_XL.gguf
+    temperature: 0.7
+    top_p: 0.6
+    top_k: 20
+    repetition_penalty: 1.05
+    prompt_style: tencent
+    aliases:
+      - hy-mt2-7b
+      - tencent-7b
+    description: Chất lượng cao (~4.6GB, Q4_K_XL)
+
+  xiaomi:
+    name: MiLM-MT 4.6B (Xiaomi)
+    model: mradermacher/MiLMMT-46-4B-v1.0-GGUF
+    gguf_file: MiLMMT-46-4B-v1.0.Q4_K_M.gguf
+    temperature: 0.0
+    top_p: 1.0
+    top_k: 1
+    repetition_penalty: 1.0
+    prompt_style: milmmt
+    aliases:
+      - milmmt
+    description: Nhanh & Nhẹ (~2.5GB)
+
+  gemmax:
+    name: GemmaX2 28-9B v0.2 (Xiaomi)
+    model: mradermacher/GemmaX2-28-9B-v0.2-i1-GGUF
+    gguf_file: GemmaX2-28-9B-v0.2.i1-Q4_K_M.gguf
+    temperature: 0.0
+    top_p: 1.0
+    top_k: 1
+    repetition_penalty: 1.0
+    prompt_style: gemmax
+    aliases:
+      - gemma
+      - gemmax2
+      - gemmax-9b
+    description: Chất lượng cao 28 ngôn ngữ (~5.8GB)

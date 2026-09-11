@@ -1,0 +1,78 @@
+{
+  "manifest_version": 3,
+  "name": "Bilingual Subtitle",
+  "version": "0.4.1",
+  "description": "Real-time bilingual subtitles for videos using local AI (Whisper + LLM)",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bilingual-subtitle@local",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "wss://localhost:8765/*",
+    "http://localhost:8765/*",
+    "http://localhost:1234/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; connect-src 'self' wss://localhost:8765 ws://localhost:8765 http://localhost:8765 http://localhost:1234"
+  },
+  "background": {
+    "scripts": [
+      "background/service-worker.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "all_frames": true,
+      "match_origin_as_fallback": true,
+      "js": [
+        "lib/ws-client.js",
+        "lib/subtitle-renderer.js",
+        "content/overlay-manager.js",
+        "content/content-script.js"
+      ],
+      "css": [
+        "content/overlay.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Bilingual Subtitle",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "lib/audio-processor.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
