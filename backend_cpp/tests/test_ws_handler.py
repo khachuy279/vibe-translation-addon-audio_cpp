@@ -49,7 +49,40 @@ class TestWSHandlerRefactor(unittest.IsolatedAsyncioTestCase):
         self.session.vad_processor.feed_chunk.assert_called_once_with(
             dummy_pcm,
             capture_timestamp=12345.67,
+            media_start_time=12345.67,
+            media_end_time=12345.68,
+            epoch=0,
         )
+
+    def test_binary_chunk_fast_forwards_epoch_on_desync(self):
+        """Verify that an audio frame with a newer epoch advances session.current_epoch."""
+        import json
+        dummy_pcm = b"\x00\x00" * 160
+        header_dict = {
+            "type": "audio_chunk",
+            "captureTimestamp": 12345.678,
+            "chunkIndex": 1,
+            "chunkStartMediaTime": 10.0,
+            "chunkEndMediaTime": 10.064,
+            "epoch": 3,
+            "playbackRate": 1.0,
+            "chunkDurationMs": 64.0,
+        }
+        header_json = json.dumps(header_dict).encode("utf-8")
+        frame_bytes = struct.pack("<I", len(header_json)) + header_json + dummy_pcm
+
+        self.assertEqual(self.session.current_epoch, 0)
+        _process_binary_chunk(self.session, frame_bytes)
+        self.assertEqual(self.session.current_epoch, 3)
+
+    async def test_set_config_syncs_epoch(self):
+        """Verify that set_config with an epoch synchronizes session.current_epoch."""
+        import json
+        from backend_cpp.ws.ws_handler import _handle_text_message
+        self.assertEqual(self.session.current_epoch, 0)
+        msg = json.dumps({"type": "set_config", "epoch": 5})
+        await _handle_text_message(self.session, msg)
+        self.assertEqual(self.session.current_epoch, 5)
 
     def test_dedup_dataclasses(self):
         """Verify TranslationDedupState and TTSDedupState dataclasses."""

@@ -25,6 +25,7 @@
     return {
       type: "set_config",
       action: "configure",
+      epoch: streamEpoch,
       targetLang: cfg.targetLang || "vi",
       sourceLang: cfg.sourceLanguage || cfg.sourceLang || "auto",
       translationModel: cfg.translationModel || "tencent",
@@ -215,6 +216,7 @@
       return { success: false, error: "Not the designated capture owner" };
     }
     try {
+      streamEpoch = 0;
       if (msg.settings) Object.assign(settings, msg.settings);
       let video = findVideo();
       if (!video) {
@@ -239,6 +241,7 @@
       );
       ttsPlayer.clear();
       function triggerStreamReset(reason) {
+        if (!isCapturing) return;
         streamEpoch++;
         const mediaTime = video ? video.currentTime : 0.0;
         console.log(`[BS] Stream Reset triggered: reason=${reason}, epoch=${streamEpoch}, mediaTime=${mediaTime.toFixed(3)}s`);
@@ -388,6 +391,7 @@
 
   async function cleanup() {
     isCapturing = false;
+    streamEpoch = 0;
     if (captureAbortController) {
       try { captureAbortController.abort(); } catch (e) {}
       captureAbortController = null;

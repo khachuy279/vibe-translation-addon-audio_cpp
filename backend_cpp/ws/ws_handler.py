@@ -179,6 +179,13 @@ async def _handle_text_message(session: SessionState, text: str) -> None:
 
         if action in ("set_config", "configure"):
             session.apply_config(msg)
+            if "epoch" in msg and msg["epoch"] is not None:
+                cfg_epoch = int(msg["epoch"])
+                if cfg_epoch > session.current_epoch:
+                    logger.info(
+                        f"Session {session.session_id}: Synchronizing epoch from {session.current_epoch} to {cfg_epoch} via config"
+                    )
+                    session.handle_stream_reset(epoch=cfg_epoch, reason="config_sync")
             logger.info(
                 f"Session {session.session_id}: config updated "
                 f"(vad={session.config.get('vad_engine')}, "
@@ -239,6 +246,14 @@ def _process_binary_chunk(session: SessionState, data: bytes) -> None:
     if frame.epoch < session.current_epoch:
         logger.debug(f"Dropped frame from older epoch {frame.epoch} (current={session.current_epoch})")
         return
+
+    # Generation barrier fast-forward: if incoming audio frame has a newer epoch than current session,
+    # advance session epoch so downstream VAD & ASR emissions stay strictly synchronized.
+    if frame.epoch > session.current_epoch:
+        logger.info(
+            f"Session {session.session_id}: Advancing epoch from {session.current_epoch} to {frame.epoch} from audio frame"
+        )
+        session.handle_stream_reset(epoch=frame.epoch, reason="frame_epoch_advance", media_time=frame.media_start_time)
 
     accepted = session.record_chunk(
         chunk_idx=frame.chunk_index,

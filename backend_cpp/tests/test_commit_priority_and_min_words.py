@@ -73,6 +73,7 @@ async def test_ws_handler_drops_short_utterance_for_translation():
             "text": "Yeah",
             "is_final": True,
             "language": "en",
+            "epoch": 0,
         }
         yield {
             "type": "utterance_update",
@@ -80,6 +81,7 @@ async def test_ws_handler_drops_short_utterance_for_translation():
             "text": "Hello how are you",
             "is_final": True,
             "language": "en",
+            "epoch": 0,
         }
 
     session.asr_engine.stream_tokens = mock_stream
