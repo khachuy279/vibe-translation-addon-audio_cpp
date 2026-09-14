@@ -1,0 +1,54 @@
+default_model: qwen3-asr-1.7b
+
+models:
+  qwen3-asr-1.7b:
+    name: Qwen3 ASR 1.7B (GGUF Q8_0)
+    family: qwen3_asr
+    task: asr
+    mode: offline
+    file: qwen3-asr-1.7b-q8_0.gguf
+    hf_repo: audio-cpp/audio.cpp-gguf
+    hf_filename: Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf
+    sample_rate: 16000
+    languages: auto
+    vram_estimate_mb: 2500
+    description: Alibaba Qwen3 Audio-LLM model via audio.cpp, multilingual 30+ languages
+    aliases:
+      - qwen3
+      - qwen3-asr
+      - qwen3-1.7b
+      - qwen
+
+  nemotron-3.5-streaming:
+    name: Nemotron 3.5 ASR Streaming 0.6B (GGUF Q8_0)
+    family: nemotron_asr
+    task: asr
+    mode: streaming
+    file: nemotron-3.5-asr-streaming-0.6b-q8_0.gguf
+    hf_repo: audio-cpp/audio.cpp-gguf
+    hf_filename: Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf
+    sample_rate: 16000
+    languages: auto
+    vram_estimate_mb: 950
+    description: NVIDIA Nemotron 3.5 Streaming ASR 0.6B via audio.cpp, ultra-fast streaming
+    aliases:
+      - nemotron
+      - nemotron-3.5
+      - nemotron-streaming
+
+  voxtral-mini-4b-realtime:
+    name: Voxtral Mini 4B Realtime 2602 (GGUF Q4_K)
+    family: voxtral_realtime
+    task: asr
+    mode: streaming
+    file: voxtral-mini-4b-realtime-2602-q4_k.gguf
+    hf_repo: audio-cpp/audio.cpp-gguf
+    hf_filename: Voxtral-Mini-4B-Realtime-2602-GGUF/voxtral-mini-4b-realtime-2602-q4_k.gguf
+    sample_rate: 16000
+    languages: auto
+    vram_estimate_mb: 3200
+    description: Voxtral Mini 4B Realtime model via audio.cpp, high-accuracy conversational ASR
+    aliases:
+      - voxtral
+      - voxtral-mini
+      - voxtral-4b

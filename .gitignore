@@ -4,13 +4,14 @@
 
 # 1. User specified exclusions: Sub-repos & external directories
 transcribe.cpp/
+audio.cpp/
 docs/
+external/
+debug/
 
-# 2. Models & Model Weights (large files)
-backend_cpp/models/
+# 2. Models & Model Weights (large files > 50MB)
+backend_audio_cpp/models/
 models/
-backend_cpp/convert/temp/
-backend_cpp/convert/bin/
 *.gguf
 *.bin
 *.pt
@@ -20,17 +21,24 @@ backend_cpp/convert/bin/
 *.engine
 *.blob
 
+# 2b. Native Binaries & Large CUDA DLLs
+backend_audio_cpp/bin/
+*.dll
+*.exe
+*.so
+*.dylib
+*.lib
+
 # 3. Security & Certificates
 *.pem
 *.key
-backend_cpp/cert.pem
-backend_cpp/key.pem
+backend_audio_cpp/cert.pem
+backend_audio_cpp/key.pem
 
 # 4. Audio Dumps & Large Test Artifacts
 debug_audio/
 data/
-scratch/npm-cache/
-scratch/pnpm/
+scratch/
 *.log
 
 # 5. Compressed Archives
@@ -64,5 +72,3 @@ Thumbs.db
 # 8. Temporary Performance Reports & Logs
 perf_report.json
 perf_report_summary.txt
-backend_cpp/perf_test_summary.json
-backend_cpp/perf_test_summary_summary.txt

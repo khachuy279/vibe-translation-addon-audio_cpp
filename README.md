@@ -1,226 +1,192 @@
-# Vibe Translation Addon — Real-Time Video Subtitle & Neural Translation
+# Vibe Translation Addon — Real-Time Video Subtitle, Neural Translation & Voice Cloning (`audio.cpp`)
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Firefox Extension](https://img.shields.io/badge/Firefox-Manifest%20V3-FF7139.svg)](https://addons.mozilla.org/)
-[![Hardware](https://img.shields.io/badge/Hardware-NVIDIA%20CUDA%20%2F%20Vulkan-76B900.svg)](https://developer.nvidia.com/)
+[![Hardware](https://img.shields.io/badge/Hardware-NVIDIA%20CUDA-76B900.svg)](https://developer.nvidia.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A high-performance, fully offline, sub-second latency system for **real-time audio capture, streaming speech recognition (ASR), semantic sentence boundary detection, neural translation, and voice synthesis (TTS)** directly in your browser.
+A high-performance, completely offline, low-latency system for **real-time audio capture, streaming speech recognition (ASR via native `audio.cpp` CUDA runtime), CJK-aware sentence boundary detection, neural machine translation (Hunyuan-MT2 7B), and zero-shot voice cloning synthesis (OmniVoice-GGUF)** directly in your browser.
 
-Designed for desktop PCs with NVIDIA GPUs (tested on RTX 5060 Ti / 40-series / 30-series), it delivers live bilingual subtitles and voice-over over any video streaming platform (YouTube, Bilibili, Coursera, Twitter, Twitch, etc.) with **zero cloud API dependencies, zero data leakage, and complete privacy**.
+Tested and benchmarked on **NVIDIA GeForce RTX 5060 Ti**, delivering live bilingual subtitles and voice-over dubbing on any video streaming platform (YouTube, Bilibili, Coursera, Twitch, etc.) with **zero cloud dependencies, zero data leakage, and complete privacy**.
 
----
-
-## 🚀 Key Highlights
-
-- **⚡ Sub-Second End-to-End Latency**: From the moment speech finishes to the translated subtitle appearing on screen in **~780 ms**.
-- **🧠 Namo Turn Detector v1 (Semantic EOU)**: State-of-the-art multilingual mmBERT turn detector (`backend_cpp/models/namo`) prioritizing semantic completeness (#1 Priority) over acoustic silence. Sentences commit **~380–580 ms earlier** than standard VAD-only timeout.
-- **🎙️ Mandatory Intelligent Stream VAD**: Official **FSMN-VAD** (default: ~58 ms CPU per audio-second, threshold 0.45, 500 ms silence, 300 ms hangover), **FireRed-VAD**, and **Silero-VAD** with dynamic threshold tuning and zero dropped frames.
-- **🔊 Intelligent Speech Normalizer**: Soft-knee AGC (Automatic Gain Control) with Background Music (BGM) resistance, plosive dampening, and clean pre-roll boundary management.
-- **🤖 Multi-Model GPU ASR (`transcribe.cpp`)**:
-  - **Qwen3-ASR (1.7B & 0.6B GGUF)**: Audio-LLM delivering top accuracy (CER ~10.02% Strict).
-  - **SenseVoiceSmall (Non-autoregressive)**: Ultra-fast (~20 ms inference) with continuous, fine-grained token emission, achieving a **22.5% early Namo EOU commit rate**.
-  - **Nemotron 3.5 Streaming (0.6B)**: Native C++ streaming inference via `session.stream(...)` with 240 ms lookahead (`att_context_right: 3`).
-- **🌐 Offline LLM Translation**: Fast neural machine translation powered by **Hunyuan-MT2 7B / 1.8B GGUF** via `llama-cpp-python` with a rolling context window (3 dialogue turns) for grammatical flow and pronoun consistency.
-- **🛡️ Robust Concurrency & Clean Architecture**:
-  - `CoalescingTokenQueue`: Event-loop-safe queue with latest-wins preview coalescing and lossless final commits without CPython internal mutations.
-  - Non-blocking ONNX Namo inference (`asyncio.to_thread`).
-  - Strict generation & epoch barriers preventing stale subtitle desyncs during video seeks.
-- **🗣️ Synchronized Voice Cloning (TTS)**: PyTorch OmniVoice Vietnamese TTS engine for cloned speech voice-overs synthesized in parallel (~500 ms).
-- **🧩 Firefox Extension (Manifest V3)**: Low-overhead binary WebSocket streaming via Web Audio API, responsive popup controls, and customizable floating subtitle overlay.
+Repository: [https://github.com/khachuy279/vibe-translation-addon-audio_cpp](https://github.com/khachuy279/vibe-translation-addon-audio_cpp)
 
 ---
 
-## 🏛️ System Architecture
+## 🚀 Key Highlights & Modular Architecture
 
-```mermaid
-flowchart TD
-    subgraph Browser ["Firefox Browser Extension (Manifest V3)"]
-        A[HTML5 Video Audio] -->|Web Audio API| B[PCM 16kHz Mono Chunks]
-        B -->|Binary WebSocket Frame| C[WebSocket Client]
-        M[Floating Subtitle Overlay] <---|JSON Subtitle| C
-        N[TTS Audio Player] <---|Base64 WAV Audio| C
-    end
+- **⚡ Sub-Second E2E Pipeline Overhead**: Total latency from speech end to translated subtitle on screen & voice-cloned audio is **~400ms - 800ms**.
+- **🎙️ Streaming Silero VAD v5 Engine**: Pure NumPy + ONNX Runtime execution on CPU (keeps GPU 100% free for LLMs).
+  - **Chunk Slicing**: 512-sample (32ms @ 16kHz) frames with 64-sample context buffer.
+  - **Latency:** `< 0.2 ms` per frame.
+  - **RTF:** `0.0047` (~212x faster than real-time playback).
+- **🤖 Multilingual ASR Streaming (`audio.cpp` CUDA C++ runtime)**:
+  - Powered by native `audiocpp_server.exe` CUDA backend on port 8089.
+  - Supported Models in `backend_audio_cpp/models.yaml`:
+    - `qwen3-asr-1.7b`: Alibaba Qwen3 Audio-LLM 1.7B (`qwen3-asr-1.7b-q8_0.gguf`)
+    - `nemotron-3.5-streaming`: NVIDIA Nemotron 3.5 Streaming 0.6B (`nemotron-3.5-asr-streaming-0.6b-q8_0.gguf`)
+    - `voxtral-mini-4b-realtime`: Voxtral Mini 4B Realtime 2602 (`voxtral-mini-4b-realtime-2602-q4_k.gguf`)
+  - **Live Model Switching:** Hot-swap ASR models live from the Firefox extension popup without restarting the backend.
+- **🧠 Sentence Boundary & Commit Manager (`SentenceConfig`)**:
+  - **CJK & Latin Token Counting (`count_content_tokens`)**: Accurately counts Japanese (Kanji/Hiragana/Katakana), Chinese (Hanzi), Korean (Hangul), and Latin words to prevent false utterance drops on spaceless scripts.
+  - Multi-tier commit criteria: VAD Silence Timeout (`silence_duration_ms`), Stability Split, Max Duration (`8.0s`), and Max Characters (`150`).
+- **🌐 Neural Machine Translation (`Hunyuan-MT2 7B`)**:
+  - Model: **Hunyuan-MT2 7B** (`Hy-MT2-7B-UD-Q4_K_XL.gguf`, ~4.78GB) offloaded to GPU via `llama-cpp-python` CUDA backend.
+  - **Generation Speed:** **69.5 tokens/second** on RTX 5060 Ti.
+  - **Translation Latency:** `250ms - 800ms` per sentence with zero hallucination.
+- **🗣️ Zero-Shot Voice Cloning TTS (`OmniVoice-GGUF`)**:
+  - Model: `omnivoice-q8_0.gguf` (~1.35GB) running via native `audio.cpp` CUDA backend.
+  - **Zero-Shot Speaker Reference:** Synthesizes natural Vietnamese voice cloning from reference audio sample `backend_audio_cpp/voices/speaker_01_0039.wav`.
+  - **Real-Time Factor (RTF):** **~0.13 - 0.46** (2.2x to 7.6x faster than real-time playback).
+  - **Prompt & Embedding Caching:** Caches speaker embeddings in VRAM for instant subsequent voice generation.
+- **🛡️ Decoupled Async Pipeline & Concurrent VRAM Management**:
+  - Runs all 4 models simultaneously on GPU/CPU with **~9.0 GB VRAM total** (out of 16 GB), leaving > 6.9 GB free VRAM without OOM.
+  - Decoupled worker queues (`_translation_worker`, `_tts_worker`) for non-blocking real-time playback.
 
-    subgraph Backend ["backend_cpp (FastAPI / Uvicorn)"]
-        C <-->|wss://localhost:8765/ws| D[ws_handler.py]
-        D -->|Audio Frames| E[VADProcessor - FSMN / Silero / FireRed]
-        E -->|Speech Segments| F[AudioBufferManager - Ring Buffer]
-        F -->|Preview Polling 350ms| G[SpeechNormalizer - Soft-Knee AGC]
-        G -->|Normalized Audio| H[ASR Engine - transcribe.cpp]
-        H -->|Live Partial Text| J{Sentence Boundary Engine}
-        
-        J -- "1. Namo EOU >= 0.70 & Silence >= 120ms" --> K[Commit Sentence: NAMO_EOU]
-        J -- "2. Acoustic Silence >= vad_silence_ms" --> K[Commit Sentence: VAD_SILENCE]
-        J -- "3. Max Duration / Stability reached" --> K[Commit Sentence: HARD_CUT]
-        
-        K -->|Committed Sentence| L[LocalGGUFTranslator - Hunyuan-MT2]
-        L -->|Translated Subtitle| D
-        L -.->|Optional Voice-over| P[OmniVoice TTS Engine]
-        P -.->|Synthesized Speech| D
-    end
+---
+
+## 🏛️ End-to-End Pipeline Workflow
+
 ```
-
----
-
-## 🎯 Sentence Boundary Decision Engine
-
-The pipeline uses a strict 3-tier hybrid commit hierarchy:
-
-1. **Priority #1 — Namo Turn Detector (Semantic EOU):**
-   - Model: `videosdk-live/Namo-Turn-Detector-v1-Multilingual` (`backend_cpp/models/namo/model_quant.onnx`).
-   - When partial preview text reaches `min_tokens` (default: 3) and Namo predicts $P(\text{EOU}) \ge 0.70$ with trailing acoustic silence $\ge 120\text{ ms}$, the sentence commits immediately (`NAMO_EOU`).
-   - Subtitles and translations appear on screen **380–580 ms sooner** than waiting for acoustic silence timeouts.
-2. **Priority #2 — VAD Silence Timeout (`silence_duration_ms`):**
-   - Acoustic fallback (default: 500 ms) when speech pauses mid-sentence or without clear linguistic closing markers.
-3. **Priority #3 — Safety Limits (`max_duration_sec` & `split_on_stability`):**
-   - Prevents buffer runaway on continuous background speech without natural pauses.
-
----
-
-## 📊 ASR Model Matrix & Performance Comparison
-
-Evaluated on real conversational speech (332.03s audio stream, 45 golden dialogue turns):
-
-| Model | Architecture Type | Inference Method | Latency | CER (Strict) | Namo EOU Ratio | Best Use Case |
-|---|---|:---:|:---:|:---:|:---:|---|
-| **SenseVoiceSmall** | Non-autoregressive | `session.run()` | **~20 ms** | 12.71% | 🏆 **22.5% (20 commits)** | **Fastest real-time response, smoothest subtitle pacing** |
-| **Qwen3-ASR 1.7B** | Audio-LLM GGUF | `session.run()` | ~134 ms | **10.02%** | 19.3% (17 commits) | **Highest accuracy & complex terminology** |
-| **Qwen3-ASR 0.6B** | Audio-LLM GGUF | `session.run()` | ~75 ms | 14.80% | 15.2% | Low VRAM (~650 MB) budget |
-| **Nemotron 3.5 Streaming** | FastConformer RNNT | `session.stream()` | Streaming | 26.04% | 3.1% | Native continuous streaming |
+[Firefox Extension (Manifest V3)]
+       │
+       ▼ (Binary Audio Frame: Format A / 16kHz PCM16 Mono)
+[WebSocket Gateway] (wss://localhost:8765/ws)
+       │
+       ├─► [SileroVADEngine (CPU ONNX)] ──────────► Voice Active Segments
+       │                                                    │
+       ▼                                                    ▼
+[AudioCppASREngine] ◄───────────────────────────────────────┘
+       │ (audio.cpp CUDA - Qwen3 / Nemotron / Voxtral)
+       ├─► Live Partial Previews ──► WebSocket Out (`utterance_update`, is_final=False)
+       ▼
+[SentenceCommitter (CJK Token Count)]
+       │ (VAD Silence / Stability / Max Duration / Min Words)
+       ▼ (Committed Final Utterance)
+[SessionState.translation_queue]
+       │
+       ▼
+[HyMTTranslator] (Hunyuan-MT2 7B on CUDA GPU)
+       │
+       ├─► [WebSocket Out] ──► Subtitle Updates (`translation`, `utterance_update`)
+       │
+       ▼ (Optional TTS Dubbing)
+[SessionState.tts_queue]
+       │
+       ▼
+[OmniVoiceTTSEngine] (OmniVoice-GGUF Voice Cloning via audio.cpp CUDA)
+       │
+       ▼
+[WebSocket Out] ──► Audio Playback (`tts_audio` base64 WAV 24kHz)
+```
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-├── backend_cpp/                 # Main Python + native C++ backend service
-│   ├── asr/                     # Audio buffer, ASR engine & boundary detectors
-│   │   ├── audio_buffer.py      # Audio ring buffer with trailing silence calculation
-│   │   ├── namo_detector.py     # Namo Turn Detector v1 (ONNX Runtime, mmBERT)
-│   │   ├── sentence_segmenter.py# CJK & Latin prefix stripping, stability detector
-│   │   ├── speech_normalizer.py # AGC, smootherstep curve & BGM resistance
-│   │   └── transcribe_engine.py # Streaming ASR coordinator & CoalescingTokenQueue
-│   ├── models/                  # Local model weights directory (git-ignored)
-│   │   ├── namo/                # Namo Turn Detector weights & tokenizer
-│   │   └── fsmn_vad/            # FSMN-VAD model snapshot
-│   ├── translation/             # Offline GGUF neural translation
-│   │   ├── local_translator.py  # llama-cpp-python engine with lazy locks
-│   │   ├── model_registry.py    # Catalog loader for translation models
-│   │   └── prompt_strategies.py # Context-aware few-shot prompts
-│   ├── tts/                     # Real-time voice cloning engine
-│   │   ├── audio_processor.py   # Audio resampling & WAV packaging
-│   │   └── omnivoice_engine.py  # PyTorch OmniVoice Vietnamese TTS singleton
-│   ├── vad/                     # Streaming Voice Activity Detection
-│   │   ├── engines.py           # Safe, optional-import engines (FSMN, Silero, FireRed)
-│   │   └── vad_processor.py     # Deterministic sample clock & state machine
-│   ├── ws/                      # WebSocket protocol & connection management
-│   │   ├── frame_protocol.py    # Binary audio frame header serialization
-│   │   ├── session_state.py     # Session state & epoch barrier coordinator
-│   │   └── ws_handler.py        # Pipeline coordinator & async workers
-│   ├── config.py                # Centralized configuration (pure Python defaults)
-│   ├── main.py                  # Server entrypoint (Uvicorn / FastAPI)
-│   ├── models.yaml              # ASR model catalog & parameters
-│   ├── translation_models.yaml  # Translation model catalog (Hunyuan-MT2)
-│   └── requirements.txt         # Core dependencies
-├── benchmarks/                  # Multi-model sweep & benchmark suites
-│   ├── namo_benchmark.py        # Namo Turn Detector multi-model comparison
-│   └── sentence_config_sweep.py # VAD & boundary parameter sweeps
-├── extension_firefox/           # Firefox Add-on (Manifest V3)
-│   ├── background/              # Background service worker
-│   ├── content/                 # Content script & floating subtitle renderer
-│   ├── popup/                   # Extension popup UI (VAD sensitivity, model selection)
-│   └── manifest.json            # Extension manifest
-└── report/                      # Comprehensive benchmark & architecture reports
+vibe-translation-addon-audio_cpp/
+├── backend_audio_cpp/
+│   ├── asr/              # AudioCppASREngine & ModelRegistry (models.yaml)
+│   ├── bin/              # Native audiocpp_server.exe CUDA binary & DLLs
+│   ├── commit/           # SentenceCommitter & SentenceConfig (CJK token support)
+│   ├── models/           # Local models storage (.gguf, .onnx)
+│   ├── translation/      # HyMTTranslator (Hunyuan-MT2 7B) & model_registry
+│   ├── tts/              # OmniVoiceTTSEngine & VoiceManager (voices.json)
+│   ├── vad/              # SileroVADEngine & VADStreamState
+│   ├── utils/            # SSL certificate generator & CUDA helpers
+│   ├── ws/               # WebSocket handler, frame protocol, serializers, session state
+│   ├── config.py         # App configuration dataclasses
+│   ├── models.yaml       # ASR models catalog
+   ├── translation_models.yaml # Translation models catalog
+│   └── main.py           # FastAPI + WSS server entry point (:8765)
+├── extension_firefox/    # Firefox Manifest V3 Extension (Popup UI & Content Overlay)
+├── benchmarks/           # Automated benchmark suite (VAD, ASR, Translation, TTS, E2E)
+├── report/               # Markdown benchmark reports & tts_samples/
+└── wav_test/             # Multi-language test audio samples
 ```
 
 ---
 
-## 🛠️ Getting Started
+## 📊 Benchmark Summary & Performance Metrics
 
-### 1. Prerequisites
+All modules have been benchmarked against multi-language audio samples in `wav_test/` on RTX 5060 Ti:
 
-- **Operating System**: Windows 10/11 or Linux
-- **Python**: 3.10, 3.11, 3.12, or 3.13
-- **GPU**: NVIDIA GPU with Vulkan or CUDA support (Recommended: 6 GB+ VRAM)
-- **Browser**: Mozilla Firefox
+| Module | Benchmark Script | Key Metric | Measured Performance | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| **VAD** | `benchmarks/bench_vad.py` | Latency / RTF | **0.15 ms / 0.0047 (212x real-time)** | ✅ PASS |
+| **ASR** | `benchmarks/bench_asr.py` | Streaming RTF / Accuracy | **0.52 RTF (1.9x real-time) / 97.3% accuracy** | ✅ PASS |
+| **Live Switching**| `benchmarks/bench_e2e_pipeline.py` | Hot-swap ASR Models | **Qwen3 1.7B ➔ Nemotron 3.5 ➔ Voxtral 4B (Instant)** | ✅ PASS |
+| **Translation**| `benchmarks/bench_translation.py` | Generation Speed / Latency | **69.5 TPS / ~249ms - 835ms** | ✅ PASS |
+| **TTS Voice Clone**| `benchmarks/bench_tts.py` | RTF / Output Format | **0.131 RTF (7.6x real-time) / 24kHz Mono WAV** | ✅ PASS |
+| **E2E Pipeline** | `benchmarks/bench_e2e_pipeline.py` | Full E2E Streaming | **Smooth live subtitles + voice dubbing over WSS** | ✅ PASS |
 
-### 2. Installation
+Full detailed reports are available in [report/](file:///d:/vibe-translation-addon-transcribe_cpp/report/):
+- `report/01_vad_benchmark_report.md`
+- `report/02_asr_sentence_commit_report.md`
+- `report/02b_asr_dynamic_model_switching_report.md`
+- `report/02c_speech_normalization_benchmark_report.md`
+- `report/03_translation_benchmark_report.md`
+- `report/04_tts_benchmark_report.md`
+- `report/05_final_e2e_report.md`
 
-```powershell
-# Clone the repository
-git clone https://github.com/khachuy279/vibe-translation-addon-transcribe_cpp.git
-cd vibe-translation-addon-transcribe_cpp
+---
 
-# Create and activate virtual environment
-python -m venv .venv
-.venv\Scripts\activate
+## 🛠️ Installation & Setup
 
-# Install core backend dependencies
-pip install -r backend_cpp/requirements.txt
+### 1. Requirements
+- **OS**: Windows 10/11 x64
+- **GPU**: NVIDIA GPU with CUDA support (e.g. RTX 3060 / 4060 / 5060 Ti)
+- **Python**: 3.10 / 3.11 / 3.12 / 3.13
+- **Browser**: Firefox (Manifest V3)
+
+### 2. Model Downloads & Placement
+Place all model files inside `backend_audio_cpp/models/`:
+
+1. **ASR Models**:
+   - `qwen3-asr-1.7b-q8_0.gguf` (Download from [audio-cpp/audio.cpp-gguf Qwen3-ASR-1.7B-GGUF](https://huggingface.co/audio-cpp/audio.cpp-gguf/tree/main/Qwen3-ASR-1.7B-GGUF))
+   - `nemotron-3.5-asr-streaming-0.6b-q8_0.gguf` (Download from [audio-cpp/audio.cpp-gguf Nemotron-3.5-ASR-Streaming-0.6B-GGUF](https://huggingface.co/audio-cpp/audio.cpp-gguf/tree/main/Nemotron-3.5-ASR-Streaming-0.6B-GGUF))
+   - `voxtral-mini-4b-realtime-2602-q4_k.gguf` (Download from [audio-cpp/audio.cpp-gguf Voxtral-Mini-4B-Realtime-2602-GGUF](https://huggingface.co/audio-cpp/audio.cpp-gguf/tree/main/Voxtral-Mini-4B-Realtime-2602-GGUF))
+2. **Translation Model**:
+   - `Hy-MT2-7B-UD-Q4_K_XL.gguf` (Download from `unsloth/Hy-MT2-7B-GGUF`)
+3. **TTS Model**:
+   - `omnivoice-q8_0.gguf` (Download from [audio-cpp/audio.cpp-gguf OmniVoice-GGUF](https://huggingface.co/audio-cpp/audio.cpp-gguf/tree/main/OmniVoice-GGUF))
+4. **VAD Model**:
+   - `silero_vad.onnx`
+
+### 3. Voice Clone Reference Audio
+Place reference speaker `.wav` files inside `backend_audio_cpp/voices/` (e.g. `speaker_01_0039.wav`) and update `backend_audio_cpp/voices/voices.json`.
+
+---
+
+## 🚀 Running the Backend Server
+
+Launch the backend server (automatically generates SSL certificates for WSS):
+
+```bash
+python backend_audio_cpp/main.py
 ```
 
-### 3. Model Weights Setup
+The server starts on:
+- **HTTPS API**: `https://localhost:8765`
+- **WSS Endpoint**: `wss://localhost:8765/ws`
 
-Place weights in `backend_cpp/models/`:
-- **Namo Turn Detector**: Files (`model_quant.onnx`, `config.json`, `tokenizer.json`, etc.) in `backend_cpp/models/namo/` (auto-downloaded from Hugging Face if missing).
-- **ASR Models**: GGUF files in `backend_cpp/models/` (e.g., `Qwen3-ASR-1.7B-Q8_0.gguf`, `SenseVoiceSmall-F32.gguf`).
-- **Translation Models**: GGUF files in `backend_cpp/models/` (e.g., `Hy-MT2-7B-UD-Q4_K_XL.gguf`, `Hy-MT2-1.8B-UD-Q8_K_XL.gguf`).
-- **VAD Models**: Automatically downloaded to `backend_cpp/models/fsmn_vad/`.
+---
 
-### 4. Running the Backend Server
+## 🧩 Installing the Firefox Extension
 
-Start the local WebSocket service:
-
-```powershell
-python -m uvicorn backend_cpp.main:app --host 127.0.0.1 --port 8765
-```
-
-The server pre-warms ASR, VAD, and Translation models and listens at `wss://localhost:8765/ws`.
-
-### 5. Installing the Firefox Extension
-
-1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
-2. Click **"Load Temporary Add-on..."**.
+1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on...**
 3. Select `extension_firefox/manifest.json`.
-4. Open any video tab (e.g. YouTube). Click the **Vibe Translation** extension icon to connect and start real-time subtitles.
-
----
-
-## 🧪 Testing & Verification
-
-Run the full automated test suite (**219 functional tests passing**):
-
-```powershell
-# Run full test suite
-python -m pytest backend_cpp/tests/ -v
-
-# Run Namo Turn Detector multi-model benchmark
-python benchmarks/namo_benchmark.py
-```
-
----
-
-## ⚙️ Key Configuration Options
-
-Configured directly in [`backend_cpp/config.py`](file:///d:/vibe-translation-addon-transcribe_cpp/backend_cpp/config.py):
-
-| Setting | Default | Description |
-|---|---|---|
-| `vad.vad_engine` | `"fsmn-vad"` | VAD engine: `fsmn-vad`, `firered-vad`, `silero-vad` |
-| `vad.threshold` | `0.45` | Unified speech onset probability threshold |
-| `vad.silence_duration_ms` | `500` | Acoustic silence required for VAD commit |
-| `vad.hangover_ms` | `300` | Trailing speech hangover to preserve soft word codas |
-| `namo.enabled` | `True` | Enable Namo Turn Detector semantic boundary commits |
-| `namo.confidence_threshold`| `0.70` | Confidence threshold for Namo EOU ($0.70$ default, $0.75$ strict) |
-| `namo.require_silence_ms` | `120` | Trailing silence required before Namo early commit |
-| `asr.active_model` | `"qwen3-asr-1.7b"` | Active ASR model (`qwen3-asr-1.7b`, `sensevoice-small`, etc.) |
-| `translation.base` | `"tencent"` | Active translation model profile (`tencent` 7B or `tencent-1.8b`) |
-| `translation.use_context` | `True` | Enable rolling context window for discourse coherence |
+4. Open any video page (YouTube, Twitch, Coursera, etc.), open the extension popup:
+   - **🤖 ASR Engine**: Select `Qwen3 ASR 1.7B`, `Nemotron 3.5 Streaming`, or `Voxtral Mini 4B Realtime`.
+   - **🎙️ VAD Engine**: `Silero VAD`.
+   - **🌐 Translation Model**: `Hunyuan-MT2 7B`.
+   - **🎭 Voice Clone**: Select your reference voice (e.g. `speaker_01_0039.wav`).
+   - Click **Start** to enjoy live bilingual subtitles and voice cloning dubbing!
 
 ---
 
 ## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+MIT License. Free for personal and commercial usage.

@@ -13,15 +13,10 @@ class AudioCapture {
     this.chunkIndex = 0;
     // 1024 samples @ 16kHz = 64ms chunk (divides 4096 buffer exactly by 4, 0 lost samples)
     this.chunkSize = 1024;
-    this.onChunk = null; // callback(pcmData, captureTimestamp, chunkIndex, chunkStartMediaTime, chunkEndMediaTime, epoch, playbackRate)
+    this.onChunk = null; // callback(pcmData: ArrayBuffer, captureTimestamp: number, chunkIndex: number)
     this.onError = null;
     this.residualSamples = new Float32Array(0);
     this.resamplePhase = 0.0;
-    this.epoch = 0;
-  }
-
-  setEpoch(epoch) {
-    this.epoch = epoch;
   }
 
 
@@ -149,8 +144,6 @@ class AudioCapture {
       }
 
       const baseTimestamp = this.audioContext ? this.audioContext.currentTime : 0;
-      const baseMediaTime = this.videoElement ? this.videoElement.currentTime : 0.0;
-      const playbackRate = this.videoElement ? (this.videoElement.playbackRate || 1.0) : 1.0;
       let offset = 0;
 
       while (combined.length - offset >= chunkSize) {
@@ -162,15 +155,11 @@ class AudioCapture {
 
         // Monotonic timestamp offset per chunk
         const chunkTime = baseTimestamp + (offset / 16000.0);
-        const chunkDurationSec = chunkSize / 16000.0;
-        const chunkStartMediaTime = baseMediaTime + (offset / 16000.0) * playbackRate;
-        const chunkEndMediaTime = chunkStartMediaTime + chunkDurationSec * playbackRate;
-
         const idx = this.chunkIndex++;
         if (idx === 0 || idx % 200 === 0) {
-          console.log(`[AudioCapture] Emitted audio chunk #${idx} (${pcmData.byteLength} bytes, rate: ${actualSampleRate}Hz->16kHz, media: ${chunkStartMediaTime.toFixed(3)}s->${chunkEndMediaTime.toFixed(3)}s, epoch: ${this.epoch})`);
+          console.log(`[AudioCapture] Emitted audio chunk #${idx} (${pcmData.byteLength} bytes, rate: ${actualSampleRate}Hz->16kHz)`);
         }
-        this.onChunk(pcmData.buffer, chunkTime, idx, chunkStartMediaTime, chunkEndMediaTime, this.epoch, playbackRate);
+        this.onChunk(pcmData.buffer, chunkTime, idx);
         offset += chunkSize;
       }
 

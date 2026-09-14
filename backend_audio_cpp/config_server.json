@@ -1,0 +1,38 @@
+{
+  "host": "127.0.0.1",
+  "port": 8089,
+  "backend": "cuda",
+  "device": 0,
+  "threads": 4,
+  "lazy_load": true,
+  "max_loaded_models": 3,
+  "models": [
+    {
+      "id": "qwen3-asr-1.7b",
+      "family": "qwen3_asr",
+      "path": "D:/vibe-translation-addon-transcribe_cpp/backend_audio_cpp/models/qwen3-asr-1.7b-q8_0.gguf",
+      "task": "asr",
+      "mode": "offline"
+    },
+    {
+      "id": "nemotron-3.5-streaming",
+      "family": "nemotron_asr",
+      "path": "D:/vibe-translation-addon-transcribe_cpp/backend_audio_cpp/models/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf",
+      "task": "asr",
+      "mode": "streaming"
+    },
+    {
+      "id": "voxtral-mini-4b-realtime",
+      "family": "voxtral_realtime",
+      "path": "D:/vibe-translation-addon-transcribe_cpp/backend_audio_cpp/models/voxtral-mini-4b-realtime-2602-q4_k.gguf",
+      "task": "asr",
+      "mode": "streaming"
+    },
+    {
+      "id": "omnivoice",
+      "family": "omnivoice",
+      "path": "D:/vibe-translation-addon-transcribe_cpp/backend_audio_cpp/models/omnivoice-q8_0.gguf",
+      "task": "tts"
+    }
+  ]
+}

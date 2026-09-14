@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bilingual Subtitle",
-  "version": "0.6.0",
+  "version": "0.5.2",
   "description": "Real-time bilingual subtitles for videos using transcribe.cpp",
   "browser_specific_settings": {
     "gecko": {
@@ -16,17 +16,14 @@
   "permissions": [
     "activeTab",
     "storage",
-    "scripting",
-    "webNavigation"
+    "scripting"
   ],
   "host_permissions": [
+    "<all_urls>",
     "wss://localhost:8765/*",
     "https://localhost:8765/*",
     "http://localhost:8765/*",
     "http://localhost:1234/*"
-  ],
-  "optional_host_permissions": [
-    "<all_urls>"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; connect-src 'self' wss://localhost:8765 ws://localhost:8765 https://localhost:8765 http://localhost:8765 http://localhost:1234"

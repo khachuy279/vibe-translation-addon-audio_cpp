@@ -37,10 +37,6 @@
         <span class="btn-icon">⚡</span>
         <span>Test</span>
       </button>
-      <button id="btnReset" class="btn btn-outline" title="Khôi phục cài đặt mặc định">
-        <span class="btn-icon">↺</span>
-        <span>Reset</span>
-      </button>
     </div>
 
     <!-- Active Model HUD Chip -->
@@ -63,20 +59,14 @@
           <label for="selAsrEngine">🤖 ASR Engine</label>
           <select id="selAsrEngine">
             <option value="qwen3-asr-1.7b" selected>Qwen3 ASR 1.7B ⚡</option>
-            <option value="qwen3-asr-0.6b">Qwen3 ASR 0.6B</option>
-            <option value="sensevoice-small">SenseVoice Small</option>
-            <option value="cohere-transcribe">Cohere Transcribe (03-2026)</option>
-            <option value="voxtral-mini-4b">Voxtral Mini 4B Realtime</option>
-            <option value="whisper-large-v3-turbo">Whisper Large V3 Turbo</option>
-            <option value="nemotron-3.5-streaming">Nemotron 3.5 Streaming</option>
+            <option value="nemotron-3.5-streaming">Nemotron 3.5 Streaming (0.6B)</option>
+            <option value="voxtral-mini-4b-realtime">Voxtral Mini 4B Realtime</option>
           </select>
         </div>
         <div class="setting-group flex-1">
           <label for="selVadEngine">🎙️ VAD Engine</label>
           <select id="selVadEngine">
-            <option value="fsmn-vad" selected>FSMN-VAD</option>
-            <option value="firered-vad">FireRed VAD</option>
-            <option value="silero-vad">Silero VAD</option>
+            <option value="silero-vad" selected>Silero VAD</option>
           </select>
         </div>
       </div>
@@ -85,25 +75,25 @@
         <div class="setting-group flex-1">
           <div class="label-with-value">
             <label>⏱️ VAD Silence</label>
-            <span class="val-badge"><span id="valVadSilence">500</span>ms</span>
+            <span class="val-badge"><span id="valVadSilence">450</span>ms</span>
           </div>
-          <input type="range" id="rangeVadSilence" min="50" max="1000" step="25" value="500">
+          <input type="range" id="rangeVadSilence" min="300" max="1500" step="50" value="450">
         </div>
         <div class="setting-group flex-1">
           <div class="label-with-value">
             <label>🎯 Threshold</label>
-            <span class="val-badge"><span id="valVadThreshold">0.45</span></span>
+            <span class="val-badge"><span id="valVadThreshold">0.50</span></span>
           </div>
-          <input type="range" id="rangeVadThreshold" min="0.05" max="0.90" step="0.05" value="0.45">
+          <input type="range" id="rangeVadThreshold" min="0.10" max="0.90" step="0.05" value="0.50">
         </div>
       </div>
 
       <div class="setting-group">
         <div class="label-with-value">
           <label>📝 Min Words</label>
-          <span class="val-badge"><span id="valMinWords">1</span> words</span>
+          <span class="val-badge"><span id="valMinWords">2</span> words</span>
         </div>
-        <input type="range" id="rangeMinWords" min="0" max="8" step="1" value="1">
+        <input type="range" id="rangeMinWords" min="0" max="5" step="1" value="2">
       </div>
 
       <!-- Section: Translation -->
@@ -114,10 +104,7 @@
       <div class="setting-group">
         <label for="selTranslationModel">🌐 Translation Model</label>
         <select id="selTranslationModel">
-          <option value="tencent-1.8b">Hunyuan-MT2 1.8B (Tencent) ⚡ Siêu nhanh (~2.0GB)</option>
-          <option value="tencent" selected>Hunyuan-MT2 7B (Tencent) 🎯 Chuẩn (~4.6GB)</option>
-          <option value="xiaomi">MiLM-MT 4.6B (Xiaomi) ⚡ Nhanh (~2.5GB)</option>
-          <option value="gemmax">GemmaX2 28-9B v0.2 (Xiaomi) 🌟 Cao cấp (~5.8GB)</option>
+          <option value="tencent" selected>Hunyuan-MT2 7B (Tencent) 🎯 Chuẩn (~4.78GB)</option>
         </select>
       </div>
 

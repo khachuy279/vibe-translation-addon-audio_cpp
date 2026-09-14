@@ -187,7 +187,7 @@ class WSClient {
     }
   }
 
-  sendBinary(pcmData, captureTimestamp, chunkIndex, isPreSpeech = false, chunkStartMediaTime = 0.0, chunkEndMediaTime = 0.0, epoch = 0, playbackRate = 1.0) {
+  sendBinary(pcmData, captureTimestamp, chunkIndex, isPreSpeech = false) {
     if (!this.isConnected || !pcmData) return;
 
     let byteLength = 0;
@@ -221,11 +221,6 @@ class WSClient {
       chunkDurationMs,
       samples,
       isPreSpeech,
-      chunkStartMediaTime,
-      chunkEndMediaTime,
-      mediaCurrentTime: chunkStartMediaTime,
-      epoch,
-      playbackRate,
     };
 
     if (this.port) {
