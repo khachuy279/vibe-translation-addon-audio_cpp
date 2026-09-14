@@ -100,6 +100,8 @@ class SessionState:
         self._last_partial_text: str = ""
         self._last_capture_ts: float = 0.0
         self._last_chunk_idx: Optional[int] = None
+        self._stream_time_sec: float = 0.0
+        self._last_feed_wall_time: float = 0.0
 
         # ASR Engine & Commit
         self.asr_engine: AudioCppASREngine = AudioCppASREngine.get_instance()
@@ -124,6 +126,8 @@ class SessionState:
         self._last_partial_text = ""
         self._last_capture_ts = 0.0
         self._last_chunk_idx = None
+        self._stream_time_sec = 0.0
+        self._last_feed_wall_time = 0.0
 
     def apply_config(self, new_config: Dict[str, Any]) -> None:
         """Dynamically update parameters on the fly."""
@@ -175,21 +179,31 @@ class SessionState:
 
     def feed_pcm(self, pcm_bytes: bytes, capture_ts: float, chunk_idx: Optional[int]) -> None:
         """Feed incoming PCM chunks into VAD frame slicer and accumulate speech."""
-        # Auto-detect Seek / Audio Discontinuity
-        if self._last_capture_ts > 0.0:
-            # 1. Backward seek check (time regression > 0.5s)
+        now_wall = time.perf_counter()
+
+        # 1. Wall-clock gap check (client paused/seeked/buffered for > 0.6s)
+        if self._last_feed_wall_time > 0.0 and (now_wall - self._last_feed_wall_time) > 0.6:
+            logger.info(
+                f"⏩ [PAUSE/SEEK GAP] Gap of {now_wall - self._last_feed_wall_time:.2f}s "
+                f"between audio feeds. Resetting VAD stream state."
+            )
+            self.reset_vad_and_buffers(f"wall_clock_gap_{now_wall - self._last_feed_wall_time:.2f}s")
+
+        self._last_feed_wall_time = now_wall
+
+        # 2. Auto-detect Seek / Audio Discontinuity via capture_ts or chunk_idx
+        if capture_ts > 0.0 and self._last_capture_ts > 0.0:
             if capture_ts < (self._last_capture_ts - 0.5):
                 self.reset_vad_and_buffers(f"backward seek ({self._last_capture_ts:.2f}s -> {capture_ts:.2f}s)")
-            # 2. Forward seek / large gap check (time gap > 3.0s)
             elif (capture_ts - self._last_capture_ts) > 3.0:
                 self.reset_vad_and_buffers(f"forward gap ({self._last_capture_ts:.2f}s -> {capture_ts:.2f}s)")
-            # 3. Chunk index sequence drop check
-            elif chunk_idx is not None and self._last_chunk_idx is not None:
-                if chunk_idx < (self._last_chunk_idx - 5) or (self._last_chunk_idx > 10 and chunk_idx <= 2):
-                    self.reset_vad_and_buffers(f"chunk index reset ({self._last_chunk_idx} -> {chunk_idx})")
 
-        self._last_capture_ts = capture_ts
+        if capture_ts > 0.0:
+            self._last_capture_ts = capture_ts
+
         if chunk_idx is not None:
+            if self._last_chunk_idx is not None and (chunk_idx < self._last_chunk_idx - 5 or (self._last_chunk_idx > 10 and chunk_idx <= 2)):
+                self.reset_vad_and_buffers(f"chunk index reset ({self._last_chunk_idx} -> {chunk_idx})")
             self._last_chunk_idx = chunk_idx
             self.chunk_index = chunk_idx
         else:
@@ -197,12 +211,16 @@ class SessionState:
 
         self._frame_buffer.extend(pcm_bytes)
         bytes_per_frame = 512 * 2  # 1024 bytes = 512 samples @ 16-bit
+        frame_duration_sec = 512 / 16000.0  # 0.032s per 32ms frame
 
         while len(self._frame_buffer) >= bytes_per_frame:
             frame = bytes(self._frame_buffer[:bytes_per_frame])
             del self._frame_buffer[:bytes_per_frame]
 
-            res = self.vad_engine.process_frame(frame, capture_ts, self.vad_state)
+            self._stream_time_sec += frame_duration_sec
+            frame_ts = self._stream_time_sec
+
+            res = self.vad_engine.process_frame(frame, frame_ts, self.vad_state)
 
             if res.event == "SPEECH_START":
                 self._speech_buffer.clear()
