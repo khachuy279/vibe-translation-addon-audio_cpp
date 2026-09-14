@@ -5,7 +5,7 @@
   "device": 0,
   "threads": 4,
   "lazy_load": true,
-  "max_loaded_models": 3,
+  "max_loaded_models": 2,
   "models": [
     {
       "id": "qwen3-asr-1.7b",
