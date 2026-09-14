@@ -18,7 +18,11 @@ import threading
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import torch
+
+try:
+    import torch
+except ImportError:
+    torch = None  # type: ignore[assignment]
 
 from backend_cpp.config import MODELS_DIR, config
 from backend_cpp.vad.stream_state import VADStreamState
@@ -76,9 +80,9 @@ class SileroModelProbe:
 
 
 DEFAULT_THRESHOLDS: Dict[str, float] = {
-    "firered-vad": config.vad.threshold,
-    "silero-vad": config.vad.threshold,
-    "fsmn-vad": config.vad.threshold,
+    "firered-vad": config.vad.get_engine_profile("firered-vad").threshold,
+    "silero-vad": config.vad.get_engine_profile("silero-vad").threshold,
+    "fsmn-vad": config.vad.get_engine_profile("fsmn-vad").threshold,
 }
 SUPPORTED_VAD_ENGINES: Tuple[str, ...] = tuple(DEFAULT_THRESHOLDS.keys())
 

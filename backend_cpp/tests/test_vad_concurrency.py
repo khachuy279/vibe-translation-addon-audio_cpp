@@ -7,7 +7,27 @@ import pytest
 
 from backend_cpp.vad.vad_processor import VADProcessor
 
-TEST_WAV = Path(__file__).resolve().parent.parent.parent / "wav_test" / "OSR_us_000_0010_16k.wav"
+def _find_test_wav() -> Path:
+    root = Path(__file__).resolve().parent.parent.parent
+    candidates = [
+        root / "wav_test" / "OSR_us_000_0010_16k.wav",
+        root / "transcribe.cpp" / "samples" / "jfk.wav",
+        root / "docs" / "FireRedVAD" / "assets" / "hello_en.wav",
+    ]
+    for cand in candidates:
+        if cand.exists():
+            return cand
+    for cand in sorted((root / "wav_test").glob("*.wav")):
+        try:
+            with wave.open(str(cand), "rb") as wf:
+                if wf.getframerate() == 16000 and wf.getnchannels() == 1:
+                    return cand
+        except Exception:
+            continue
+    raise FileNotFoundError("No 16kHz mono test wav found")
+
+
+TEST_WAV = _find_test_wav()
 
 
 def _load_test_speech(start_sec: float = 1.0, duration_sec: float = 1.0) -> bytes:
@@ -131,6 +151,34 @@ def test_vad_force_end_outside_lock():
     vad.force_end()
     assert len(callback_executed) == 1
     assert vad._state.is_speech is False
+
+
+def test_vad_force_end_flushes_pre_speech_ring_5tuple():
+    """Verify force_end correctly unpacks 5-element pre_speech_ring tuples (H-01 regression test)."""
+    received_chunks = []
+    ended = []
+
+    vad = VADProcessor(
+        vad_engine="fsmn-vad",
+        on_speech_chunk=lambda *args: received_chunks.append(args),
+        on_speech_end=lambda *args: ended.append(args),
+    )
+
+    with vad._lock:
+        vad._state.is_speech = True
+        # Populate pre_speech_ring with 5-element tuple: (frame_bytes, frame_ts, frame_media_start, frame_media_end, epoch)
+        vad._state.pre_speech_ring.append((b"\x00" * 320, 1.23, 10.0, 10.02, 1))
+        vad._state.pre_speech_ring.append((b"\x01" * 320, 1.25, 10.02, 10.04, 1))
+
+    # Must not raise ValueError: too many values to unpack
+    vad.force_end()
+    assert len(received_chunks) == 2
+    assert len(ended) == 1
+    assert received_chunks[0][0] == b"\x00" * 320
+    assert received_chunks[0][2] == 2  # VAD_STATE_PRE_ROLL
+    assert received_chunks[0][3] == 10.0
+    assert received_chunks[0][4] == 10.02
+    assert received_chunks[0][5] == 1
 
 
 def test_vad_engine_factory_official_engines():

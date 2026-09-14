@@ -41,8 +41,20 @@ from backend_cpp.utils.perf_profiler import perf
 
 logger = logging.getLogger("perf_baseline")
 
+from backend_cpp.config import PROJECT_ROOT
+
 # 16 kHz mono 16-bit speech, used when no --audio-file is given.
-DEFAULT_REFERENCE_AUDIO = "wav_test/OSR_us_000_0010_16k.wav"
+def _resolve_default_reference_audio() -> str:
+    for cand in [
+        "wav_test/OSR_us_000_0010_16k.wav",
+        "wav_test/English_multiple_kinds_of_noise_88s.wav",
+        "wav_test/Chinese_noise_28s.wav",
+    ]:
+        if (PROJECT_ROOT / cand).exists():
+            return cand
+    return "wav_test/English_multiple_kinds_of_noise_88s.wav"
+
+DEFAULT_REFERENCE_AUDIO = _resolve_default_reference_audio()
 
 
 def load_wav_pcm16(path: Path, max_sec: Optional[float] = None) -> bytes:

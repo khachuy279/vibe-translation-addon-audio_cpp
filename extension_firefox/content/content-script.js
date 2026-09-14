@@ -329,8 +329,8 @@
               action: "BROADCAST_SUBTITLE",
               eventType,
               payload
-            }).catch(() => {});
-          } catch (e) {}
+            }).catch(() => { });
+          } catch (e) { }
         }
       }
 
@@ -393,20 +393,20 @@
     isCapturing = false;
     streamEpoch = 0;
     if (captureAbortController) {
-      try { captureAbortController.abort(); } catch (e) {}
+      try { captureAbortController.abort(); } catch (e) { }
       captureAbortController = null;
     }
     ttsPlayer.destroy();
     if (audioCapture) {
-      try { audioCapture.stop(); } catch (e) {}
+      try { audioCapture.stop(); } catch (e) { }
       audioCapture = null;
     }
     if (wsClient) {
-      try { wsClient.disconnect(); } catch (e) {}
+      try { wsClient.disconnect(); } catch (e) { }
       wsClient = null;
     }
     if (overlayManager) {
-      try { overlayManager.destroy(); } catch (e) {}
+      try { overlayManager.destroy(); } catch (e) { }
       overlayManager = null;
     }
   }
@@ -491,7 +491,7 @@
     // 1. Scan direct DOM
     try {
       document.querySelectorAll("video").forEach(v => allVideos.push(v));
-    } catch (e) {}
+    } catch (e) { }
 
     // 2. Scan Shadow DOMs recursively (linear element traversal)
     function collectVideosAndShadowRoots(root) {
@@ -505,7 +505,7 @@
             }
           });
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     collectVideosAndShadowRoots(document.body || document.documentElement);
 
@@ -517,9 +517,9 @@
           if (doc) {
             collectVideosAndShadowRoots(doc.body || doc.documentElement);
           }
-        } catch (e) {}
+        } catch (e) { }
       });
-    } catch (e) {}
+    } catch (e) { }
 
     if (!allVideos.length) return null;
 

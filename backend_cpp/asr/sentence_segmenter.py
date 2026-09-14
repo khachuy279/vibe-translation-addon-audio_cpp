@@ -66,13 +66,17 @@ class SentenceSegmenter:
         max_chars: int = 150,
         max_duration_sec: float = 15.0,
         min_words_to_commit: int = 1,
+        min_words_to_emit_final: Optional[int] = None,
         split_on_stability: bool = True,
-        stability_duration_sec: float = 0.8,
-        stability_threshold_polls: int = 3,
+        stability_duration_sec: float = 2.0,
+        stability_threshold_polls: int = 2,
     ):
         self.max_chars = max_chars
         self.max_duration_sec = max_duration_sec
         self.min_words_to_commit = min_words_to_commit
+        self.min_words_to_emit_final = (
+            min_words_to_emit_final if min_words_to_emit_final is not None else min_words_to_commit
+        )
         self.split_on_stability = split_on_stability
         self.stability_duration_sec = stability_duration_sec
         self.stability_threshold_polls = stability_threshold_polls
@@ -93,10 +97,23 @@ class SentenceSegmenter:
         self.reset_stability()
 
     def is_text_filtered(self, text: str) -> bool:
-        """Check if text is too short to commit."""
+        """Check if preview / intermediate text is too short to commit."""
         if not text or not text.strip():
             return True
         return count_content_tokens(text.strip()) < self.min_words_to_commit
+
+    def is_final_too_short(self, text: str) -> bool:
+        """Check if final commit text is too short to emit.
+        
+        Preserves natural short turns (e.g. 'はい。', 'Yes.', 'OK.') while discarding
+        empty or punctuation-only strings.
+        """
+        if not text or not text.strip():
+            return True
+        cleaned = RE_PUNCTUATION.sub('', text).strip()
+        if not cleaned:
+            return True
+        return count_content_tokens(text.strip()) < self.min_words_to_emit_final
 
     def should_commit(self, text: str, audio_duration_sec: float) -> bool:
         """Check if audio or text bounds exceed single sentence limits."""
@@ -137,6 +154,21 @@ class SentenceSegmenter:
         clean_prefix = prefix.strip()
         if clean_text.lower().startswith(clean_prefix.lower()):
             remainder = clean_text[len(clean_prefix):].strip()
+            return RE_LEADING_PUNCT_OR_SPACE.sub('', remainder).strip()
+
+        # Character-level prefix match for CJK or normalized prefix match
+        if t_norm.startswith(p_norm):
+            p_len = len(p_norm)
+            accum_len = 0
+            cut_idx = len(clean_text)
+            for i, ch in enumerate(clean_text):
+                norm_ch = cls.normalize_for_comparison(ch)
+                if norm_ch:
+                    accum_len += len(norm_ch)
+                    if accum_len >= p_len:
+                        cut_idx = i + 1
+                        break
+            remainder = clean_text[cut_idx:].strip()
             return RE_LEADING_PUNCT_OR_SPACE.sub('', remainder).strip()
 
         # Word-level prefix removal

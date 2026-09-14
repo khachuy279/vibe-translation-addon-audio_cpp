@@ -32,6 +32,7 @@ class SessionConfigPayload(BaseModel):
     threshold: Optional[float] = None
     silence_duration_ms: Optional[int] = Field(default=None, alias="silenceDurationMs")
     hangover_ms: Optional[int] = Field(default=None, alias="hangoverMs")
+    pre_speech_buffer_ms: Optional[int] = Field(default=None, alias="preSpeechBufferMs")
     vad_enabled: Optional[bool] = Field(default=None, alias="vadEnabled")
     tts_enabled: Optional[bool] = Field(default=None, alias="ttsEnabled")
     tts_voice: Optional[str] = Field(default=None, alias="ttsVoice")
@@ -50,7 +51,6 @@ class SessionConfigPayload(BaseModel):
     boundary_candidate_silence_ms: Optional[int] = Field(default=None, alias="boundaryCandidateSilenceMs")
     max_chars: Optional[int] = Field(default=None, alias="maxChars")
     min_words_to_commit: Optional[int] = Field(default=None, alias="minWordsToCommit")
-    preview_min_growth_ratio: Optional[float] = Field(default=None, alias="previewMinGrowthRatio")
 
 
 class SessionConfig:
@@ -66,7 +66,8 @@ class SessionConfig:
             "vad_threshold": config.vad.threshold,
             "silence_duration_ms": config.vad.silence_duration_ms,
             "hangover_ms": config.vad.hangover_ms,
-            "vad_enabled": config.vad.enabled,
+            "pre_speech_buffer_ms": config.vad.pre_speech_buffer_ms,
+            "vad_enabled": True,
             "min_words_to_commit": config.sentence.min_words_to_commit,
             "tts_enabled": config.tts.enabled,
             "tts_voice": config.tts.default_voice,
@@ -341,11 +342,10 @@ class SessionState:
         self.vad_processor = VADProcessor(
             sample_rate=config.vad.sample_rate,
             vad_engine=self.config.get("vad_engine", config.vad.vad_engine),
-            threshold=self.config["vad_threshold"],
-            silence_duration_ms=self.config["silence_duration_ms"],
-            hangover_ms=self.config["hangover_ms"],
-            pre_speech_buffer_ms=config.vad.pre_speech_buffer_ms,
-            enabled=self.config["vad_enabled"],
+            threshold=self.config.get("vad_threshold", config.vad.threshold),
+            silence_duration_ms=self.config.get("silence_duration_ms", config.vad.silence_duration_ms),
+            hangover_ms=self.config.get("hangover_ms", config.vad.hangover_ms),
+            pre_speech_buffer_ms=self.config.get("pre_speech_buffer_ms", config.vad.pre_speech_buffer_ms),
             on_speech_chunk=self.asr_engine.feed_audio,
             on_speech_start=self.asr_engine.on_speech_start,
             on_speech_end=self.asr_engine.on_speech_end,
@@ -426,7 +426,25 @@ class SessionState:
         if parsed.target_lang is not None:
             self.config["target_lang"] = parsed.target_lang
         if parsed.vad_engine is not None:
-            self.config["vad_engine"] = parsed.vad_engine
+            new_vad = parsed.vad_engine.lower().strip()
+            if new_vad in ("none", "off", "disabled"):
+                logger.warning(
+                    f"Session {self.session_id}: VAD is mandatory and cannot be disabled. Ignoring vad_engine='{new_vad}'."
+                )
+            else:
+                old_vad = self.config.get("vad_engine")
+                self.config["vad_engine"] = new_vad
+                if new_vad != old_vad:
+                    profile = config.vad.get_engine_profile(new_vad)
+                    if parsed.vad_threshold is None and parsed.threshold is None:
+                        self.config["vad_threshold"] = profile.threshold
+                    if parsed.silence_duration_ms is None:
+                        self.config["silence_duration_ms"] = profile.silence_duration_ms
+                    if parsed.hangover_ms is None:
+                        self.config["hangover_ms"] = profile.hangover_ms
+                    if parsed.pre_speech_buffer_ms is None:
+                        self.config["pre_speech_buffer_ms"] = profile.pre_speech_buffer_ms
+
         if parsed.vad_threshold is not None:
             self.config["vad_threshold"] = parsed.vad_threshold
         elif parsed.threshold is not None:
@@ -435,8 +453,8 @@ class SessionState:
             self.config["silence_duration_ms"] = parsed.silence_duration_ms
         if parsed.hangover_ms is not None:
             self.config["hangover_ms"] = parsed.hangover_ms
-        if parsed.vad_enabled is not None:
-            self.config["vad_enabled"] = parsed.vad_enabled
+        if parsed.pre_speech_buffer_ms is not None:
+            self.config["pre_speech_buffer_ms"] = parsed.pre_speech_buffer_ms
         if parsed.tts_enabled is not None:
             self.config["tts_enabled"] = parsed.tts_enabled
         if parsed.tts_voice is not None:
@@ -511,16 +529,13 @@ class SessionState:
             if sentence_updates:
                 self.asr_engine.update_sentence_config(**sentence_updates)
 
-            if parsed.preview_min_growth_ratio is not None:
-                self.asr_engine._preview_min_growth_ratio = float(parsed.preview_min_growth_ratio)
-
         if self.vad_processor:
             self.vad_processor.update_config(
                 vad_engine=self.config.get("vad_engine"),
                 threshold=self.config.get("vad_threshold"),
                 silence_duration_ms=self.config.get("silence_duration_ms"),
                 hangover_ms=self.config.get("hangover_ms"),
-                enabled=self.config.get("vad_enabled"),
+                pre_speech_buffer_ms=self.config.get("pre_speech_buffer_ms"),
             )
 
     async def drain_queues(self, timeout: float = 0.5) -> None:

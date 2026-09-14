@@ -1,0 +1,2417 @@
+{
+  "audio_file": "D:\\vibe-translation-addon-transcribe_cpp\\debug_audio\\22d54213-6418-4985-86db-0d1fa892f2dc\\00_ingress_stream.wav",
+  "ground_truth_file": "D:\\vibe-translation-addon-transcribe_cpp\\debug_audio\\22d54213-6418-4985-86db-0d1fa892f2dc\\00_ingress_stream.txt",
+  "audio_duration_sec": 332.032,
+  "offline_baseline": {
+    "name": "Offline Baseline (No Streaming)",
+    "window_sec": 332.032,
+    "step_sec": 332.032,
+    "agreement_steps": 1,
+    "min_agreement_chars": 1,
+    "audio_duration_sec": 332.032,
+    "total_inferences": 17,
+    "total_infer_time_sec": 5.945055300020613,
+    "rtf": 0.017905067282733632,
+    "num_commits": 1,
+    "avg_commit_chars": 837,
+    "est_emission_latency_sec": 5.945055300020613,
+    "cer": 0.10024449877750612,
+    "cer_itn": 0.097799511002445,
+    "hyp_text": "得意先への営業回りを終え夕食を済ませその日私たちは出張先の宿に向かっていたこのホテル初めてですよねうんトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますかだろ来月の出張先のホテルは私に決めさせ花田さんの絶対知らなそうなホテル取りますからえなんか信用できないなあカミちゃんは五年先輩の花田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすま他は満室だって襖があるから二部屋ってことだし部屋選び失敗したなあ本当申し訳ないま私は伏間があれば別に大丈夫ですよあ悪いなもちろんそっちの広い方川北が使っていいかあいいですよ羽田さんあっち使ってくださいあいいから使いなあじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてるないんだからしょうがないよね手違いがあってさああ川北と同じ部屋になったんだあそう二つ部屋があってうん川北と分けて使う感じうんうん行ってくじゃあねはい羽田さんそういうことをちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めてで一年くらい経つからあもう絶対会社にも戻れないって言ってるよ風呂入って一杯やるかはい今度のレッ|endoftext|さっきとまたバベキュしにいかないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねあちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしねまあそれは実は好きな人とかまあまあ何いますよ気になってる人はあいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのもうなんで結婚してるんですその人ああそっか",
+    "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+    "commits": [
+      {
+        "stream_time_sec": 332.032,
+        "text": "得意先への営業回りを終え夕食を済ませその日私たちは出張先の宿に向かっていたこのホテル初めてですよねうんトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますかだろ来月の出張先のホテルは私に決めさせ花田さんの絶対知らなそうなホテル取りますからえなんか信用できないなあカミちゃんは五年先輩の花田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすま他は満室だって襖があるから二部屋ってことだし部屋選び失敗したなあ本当申し訳ないま私は伏間があれば別に大丈夫ですよあ悪いなもちろんそっちの広い方川北が使っていいかあいいですよ羽田さんあっち使ってくださいあいいから使いなあじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてるないんだからしょうがないよね手違いがあってさああ川北と同じ部屋になったんだあそう二つ部屋があってうん川北と分けて使う感じうんうん行ってくじゃあねはい羽田さんそういうことをちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めてで一年くらい経つからあもう絶対会社にも戻れないって言ってるよ風呂入って一杯やるかはい今度のレッ|endoftext|さっきとまたバベキュしにいかないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねあちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしねまあそれは実は好きな人とかまあまあ何いますよ気になってる人はあいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのもうなんで結婚してるんですその人ああそっか",
+        "is_flush": false
+      }
+    ]
+  },
+  "vad_production_baseline": {
+    "name": "Production VAD (FSMN + Dual-Gate)",
+    "cer": 0.0892,
+    "cer_itn": 0.0774
+  },
+  "native_streaming_baseline": {
+    "name": "Native transcribe_cpp stream",
+    "supports_streaming": false,
+    "status": "NotImplementedByModel"
+  },
+  "sweep_results": [
+    {
+      "name": "Win10s_Step1.5s_Agr2_Min2",
+      "window_sec": 10.0,
+      "step_sec": 1.5,
+      "agreement_steps": 2,
+      "min_agreement_chars": 2,
+      "audio_duration_sec": 332.032,
+      "total_inferences": 220,
+      "total_infer_time_sec": 41.39183569996385,
+      "rtf": 0.12466218828294819,
+      "num_commits": 75,
+      "avg_commit_chars": 11.026666666666667,
+      "est_emission_latency_sec": 3.1881447077271083,
+      "cer": 0.09535452322738386,
+      "cer_itn": 0.09168704156479218,
+      "hyp_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねあトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますかだろ来月の出張先のホテルは私に決めさせてくださいえ花田さんの絶対知らなそうなホテル取りますからええなんか信用できないな5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうしたあすまん他は満室だって襖があるから二部屋ってことらしい部屋選び失敗したな本当申し訳ないまあ私はま私はふすまがあれば別に大丈夫ですよあ悪いなもちろんそっちの広い方川北が使っていいからあいいですよ羽田さんあっち使ってくださいあいいから使いなじゃあ遠慮なくはい羽田さんが私に下心を向けることはなかった彼はそういう人だったあの日あの場所でそっか部屋が空いてないながらしょうがないよねね手違いがあってさ川北と同じ部屋になったんだだあそう二つ部屋があってうん乾きたと分けて使う感じうん行っておくじゃあ羽田さんそういうことをちゃんと話すんですねねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんって三崎さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員にも戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ先とまたバベキュしにいかないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしねまあそれはうん実は好きな人とかまあまあ何ますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまく行きそうなうまくは行かないですかねそうなの結婚してるんですその人ああそっか",
+      "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+      "commits": [
+        {
+          "stream_time_sec": 12.0,
+          "text": "得意先への営業回りを",
+          "cumulative_length": 10,
+          "infer_duration_ms": 164.41590001340955,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 15.0,
+          "text": "終え夕食を済ましその",
+          "cumulative_length": 20,
+          "infer_duration_ms": 236.6836000001058,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 18.0,
+          "text": "日私たちは出張先の宿に向か",
+          "cumulative_length": 33,
+          "infer_duration_ms": 296.81570001412183,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 21.0,
+          "text": "っていたこのホテル初めてです",
+          "cumulative_length": 47,
+          "infer_duration_ms": 236.45480000413954,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 24.0,
+          "text": "よね",
+          "cumulative_length": 49,
+          "infer_duration_ms": 286.9094000197947,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 27.0,
+          "text": "あトラベルダウで星39でさ温泉がいいらしいよ温泉",
+          "cumulative_length": 73,
+          "infer_duration_ms": 269.98769998317584,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 30.0,
+          "text": "やった相変わらず何も",
+          "cumulative_length": 83,
+          "infer_duration_ms": 301.37780000222847,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 33.0,
+          "text": "調べてないんだ羽田さんのホテル",
+          "cumulative_length": 98,
+          "infer_duration_ms": 268.677799962461,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 36.0,
+          "text": "選びのセンス信用してますか",
+          "cumulative_length": 111,
+          "infer_duration_ms": 250.86889998055995,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 39.0,
+          "text": "だろ来月",
+          "cumulative_length": 115,
+          "infer_duration_ms": 238.2540999678895,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 42.0,
+          "text": "の出張先のホテルは私に決めさせてください",
+          "cumulative_length": 135,
+          "infer_duration_ms": 208.94290000433102,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 46.5,
+          "text": "え花田さんの絶対知らなそうなホテル",
+          "cumulative_length": 152,
+          "infer_duration_ms": 287.76499995728955,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 49.5,
+          "text": "取りますから",
+          "cumulative_length": 158,
+          "infer_duration_ms": 296.2901000282727,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 52.5,
+          "text": "ええなんか信用できないな",
+          "cumulative_length": 170,
+          "infer_duration_ms": 325.42830001330003,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 60.0,
+          "text": "5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった",
+          "cumulative_length": 214,
+          "infer_duration_ms": 283.29569997731596,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 72.0,
+          "text": "部屋どう",
+          "cumulative_length": 218,
+          "infer_duration_ms": 85.40149999316782,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 75.0,
+          "text": "したあすまん他は",
+          "cumulative_length": 226,
+          "infer_duration_ms": 180.87560002459213,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 79.5,
+          "text": "満室だって襖があるから",
+          "cumulative_length": 237,
+          "infer_duration_ms": 237.22069995710626,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 82.5,
+          "text": "二部屋ってことらしい",
+          "cumulative_length": 247,
+          "infer_duration_ms": 222.79860003618523,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 85.5,
+          "text": "部屋選び失敗したな",
+          "cumulative_length": 256,
+          "infer_duration_ms": 236.34910001419485,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 91.5,
+          "text": "本当申し訳ない",
+          "cumulative_length": 263,
+          "infer_duration_ms": 163.78499998245388,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 94.5,
+          "text": "まあ私は",
+          "cumulative_length": 267,
+          "infer_duration_ms": 166.20249999687076,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 97.5,
+          "text": "ま私は",
+          "cumulative_length": 270,
+          "infer_duration_ms": 178.09589998796582,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 100.5,
+          "text": "ふすまがあれば別に大丈夫ですよあ悪いなもちろん",
+          "cumulative_length": 293,
+          "infer_duration_ms": 228.76019997056574,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 103.5,
+          "text": "そっちの広い方川北が使っていいから",
+          "cumulative_length": 310,
+          "infer_duration_ms": 273.5058999969624,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 106.5,
+          "text": "あいいですよ羽田さん",
+          "cumulative_length": 320,
+          "infer_duration_ms": 271.15190000040457,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 109.5,
+          "text": "あっち使ってくださいあいいから",
+          "cumulative_length": 335,
+          "infer_duration_ms": 278.13919994514436,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 115.5,
+          "text": "使いな",
+          "cumulative_length": 338,
+          "infer_duration_ms": 178.0979000031948,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 118.5,
+          "text": "じゃあ遠慮なく",
+          "cumulative_length": 345,
+          "infer_duration_ms": 113.50829998264089,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 126.0,
+          "text": "はい",
+          "cumulative_length": 347,
+          "infer_duration_ms": 70.70530002238229,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 136.5,
+          "text": "羽田",
+          "cumulative_length": 349,
+          "infer_duration_ms": 84.32279998669401,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 139.5,
+          "text": "さんが私に下心を向けること",
+          "cumulative_length": 362,
+          "infer_duration_ms": 144.45889997296035,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 145.5,
+          "text": "はなかった彼はそういう人だった",
+          "cumulative_length": 377,
+          "infer_duration_ms": 166.09349998179823,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 156.0,
+          "text": "あの日あの場所で",
+          "cumulative_length": 385,
+          "infer_duration_ms": 106.54989996692166,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 160.5,
+          "text": "そっか",
+          "cumulative_length": 388,
+          "infer_duration_ms": 149.92109994636849,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 163.5,
+          "text": "部屋が空いてないながらしょうがないよね",
+          "cumulative_length": 407,
+          "infer_duration_ms": 213.91839999705553,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 166.5,
+          "text": "ね手違いがあってさ川北と同じ部屋に",
+          "cumulative_length": 424,
+          "infer_duration_ms": 256.995800009463,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 169.5,
+          "text": "なったんだ",
+          "cumulative_length": 429,
+          "infer_duration_ms": 257.45289999758825,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 172.5,
+          "text": "だあそう二つ部屋があって",
+          "cumulative_length": 441,
+          "infer_duration_ms": 222.99780003959313,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 177.0,
+          "text": "うん乾きたと分けて使う感じ",
+          "cumulative_length": 454,
+          "infer_duration_ms": 243.21689998032525,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 181.5,
+          "text": "うん",
+          "cumulative_length": 456,
+          "infer_duration_ms": 216.39289997983724,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 186.0,
+          "text": "行っておくじゃあ",
+          "cumulative_length": 464,
+          "infer_duration_ms": 135.69939997978508,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 192.0,
+          "text": "羽田さんそういうことをちゃんと話すんですね",
+          "cumulative_length": 485,
+          "infer_duration_ms": 172.74660000111908,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 199.5,
+          "text": "ねうんまあね彼はそういう人だった",
+          "cumulative_length": 501,
+          "infer_duration_ms": 149.68819997739047,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 204.0,
+          "text": "何いじってんの",
+          "cumulative_length": 508,
+          "infer_duration_ms": 144.55879997694865,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 207.0,
+          "text": "いじってないですよ",
+          "cumulative_length": 517,
+          "infer_duration_ms": 201.65609999094158,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 210.0,
+          "text": "あいつが俺のイビキうるさかったら",
+          "cumulative_length": 533,
+          "infer_duration_ms": 280.2922999835573,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 213.0,
+          "text": "ごめんって",
+          "cumulative_length": 538,
+          "infer_duration_ms": 221.4292999706231,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 220.5,
+          "text": "三崎さんとはうまくいってるみたいですねまあおかげさまで",
+          "cumulative_length": 565,
+          "infer_duration_ms": 193.3779999963008,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 223.5,
+          "text": "会社辞めて一年くらい経つから",
+          "cumulative_length": 579,
+          "infer_duration_ms": 280.20760003710166,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 226.5,
+          "text": "もう絶対会社員にも戻れないって言ってるよ",
+          "cumulative_length": 599,
+          "infer_duration_ms": 272.15869998326525,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 229.5,
+          "text": "風呂入って",
+          "cumulative_length": 604,
+          "infer_duration_ms": 316.416300018318,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 232.5,
+          "text": "一杯やるか",
+          "cumulative_length": 609,
+          "infer_duration_ms": 272.4760000128299,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 240.0,
+          "text": "はい",
+          "cumulative_length": 611,
+          "infer_duration_ms": 113.48709999583662,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 243.0,
+          "text": "今度の",
+          "cumulative_length": 614,
+          "infer_duration_ms": 187.6184000284411,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 246.0,
+          "text": "連休さ先とまたバベキュしにいかないえ行き",
+          "cumulative_length": 634,
+          "infer_duration_ms": 237.41910001263022,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 249.0,
+          "text": "たいです新しいグリル買っ",
+          "cumulative_length": 646,
+          "infer_duration_ms": 322.6909999502823,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 252.0,
+          "text": "ちゃったんだよね本当",
+          "cumulative_length": 656,
+          "infer_duration_ms": 271.51240000966936,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 259.5,
+          "text": "好きですよね",
+          "cumulative_length": 662,
+          "infer_duration_ms": 152.83460001228377,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 262.5,
+          "text": "ちなみに誰か連れてきてもいいんだぞいないのか",
+          "cumulative_length": 684,
+          "infer_duration_ms": 178.91259997850284,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 265.5,
+          "text": "付き合ってる人とか",
+          "cumulative_length": 693,
+          "infer_duration_ms": 208.331800007727,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 268.5,
+          "text": "いたらちゃんと言いますよ",
+          "cumulative_length": 705,
+          "infer_duration_ms": 216.55489999102429,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 271.5,
+          "text": "ちゃんと言って入",
+          "cumulative_length": 713,
+          "infer_duration_ms": 201.4369999524206,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 274.5,
+          "text": "社してから一回も言われたことないし",
+          "cumulative_length": 730,
+          "infer_duration_ms": 207.7154999715276,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 279.0,
+          "text": "ねまあそれは",
+          "cumulative_length": 736,
+          "infer_duration_ms": 214.80690001044422,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 282.0,
+          "text": "うん実は好きな人とか",
+          "cumulative_length": 746,
+          "infer_duration_ms": 168.2816999964416,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 295.5,
+          "text": "まあまあ何",
+          "cumulative_length": 751,
+          "infer_duration_ms": 92.20349998213351,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 298.5,
+          "text": "ますよ気になって",
+          "cumulative_length": 759,
+          "infer_duration_ms": 143.4472000109963,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 301.5,
+          "text": "る人はいるんじゃ",
+          "cumulative_length": 767,
+          "infer_duration_ms": 178.64910000935197,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 304.5,
+          "text": "その人とはどうなの",
+          "cumulative_length": 776,
+          "infer_duration_ms": 201.11270004417747,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 307.5,
+          "text": "どうなのって言われても",
+          "cumulative_length": 787,
+          "infer_duration_ms": 178.62860002787784,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 313.5,
+          "text": "うまく",
+          "cumulative_length": 790,
+          "infer_duration_ms": 128.83509998209774,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 316.5,
+          "text": "行きそうな",
+          "cumulative_length": 795,
+          "infer_duration_ms": 149.5666000409983,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 319.5,
+          "text": "うまくは行かないですかねそうなの",
+          "cumulative_length": 811,
+          "infer_duration_ms": 135.92050003353506,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 330.0,
+          "text": "結婚してるんですその人ああそっか",
+          "cumulative_length": 827,
+          "infer_duration_ms": 157.8828999772668,
+          "is_flush": false
+        }
+      ]
+    },
+    {
+      "name": "Win12s_Step1.5s_Agr2_Min2",
+      "window_sec": 12.0,
+      "step_sec": 1.5,
+      "agreement_steps": 2,
+      "min_agreement_chars": 2,
+      "audio_duration_sec": 332.032,
+      "total_inferences": 221,
+      "total_infer_time_sec": 47.65788489981787,
+      "rtf": 0.14353401148027262,
+      "num_commits": 75,
+      "avg_commit_chars": 11.0,
+      "est_emission_latency_sec": 3.2156465380082255,
+      "cer": 0.0843520782396088,
+      "cer_itn": 0.08068459657701711,
+      "hyp_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねあトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますかだろ来月の出張先のホテルは私に決めさせてくださいえ花田さんの絶対知らなそうなホテル取りますからえなんか信用できないな5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうしたあすま他は満室だって襖があるから二部屋ってことらしい部屋選び失敗したなあ本当申し訳ないま私はは襖があれば別に大丈夫ですよあ悪いなもちろんそっちの広い方川北が使っていいからあいいですよ羽田さんあっち使ってくださいあいいから使いなじゃあ遠慮なくはい羽田さんが私に下心を向けることはなかった彼はそういう人だったあの日あの場所でそっか部屋が空いてないながらしょうがないよねね手違いがあってさ川北と同じ部屋になったんだあそう二つ部屋があってうん川北と分けて使う感じうんうん言っておくじゃあねおい羽田さんそういうことをちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんってさきさんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員にも戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さざきとまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしねまあそれはん実は好きな人とかまあまあ何ますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまく行きそうなのうまくは行かないですかねそうなのおなんで結婚してるんですその人ああ",
+      "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+      "commits": [
+        {
+          "stream_time_sec": 12.0,
+          "text": "得意先への営業回りを",
+          "cumulative_length": 10,
+          "infer_duration_ms": 168.39349997462705,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 15.0,
+          "text": "終え夕食を済ましその",
+          "cumulative_length": 20,
+          "infer_duration_ms": 240.61259999871254,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 18.0,
+          "text": "日私たちは出張先の宿に向か",
+          "cumulative_length": 33,
+          "infer_duration_ms": 298.8636000081897,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 21.0,
+          "text": "っていたこのホテル初めてです",
+          "cumulative_length": 47,
+          "infer_duration_ms": 349.1846999968402,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 25.5,
+          "text": "よねあトラベルダウで星39でさ温泉が",
+          "cumulative_length": 65,
+          "infer_duration_ms": 356.22760001569986,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 28.5,
+          "text": "いいらしいよ温泉やった",
+          "cumulative_length": 76,
+          "infer_duration_ms": 313.1915000267327,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 31.5,
+          "text": "相変わらず何も調べてないんだ",
+          "cumulative_length": 90,
+          "infer_duration_ms": 351.07490001246333,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 34.5,
+          "text": "羽田さんのホテル選びのセンス信用してます",
+          "cumulative_length": 110,
+          "infer_duration_ms": 312.5845999456942,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 37.5,
+          "text": "かだろ",
+          "cumulative_length": 113,
+          "infer_duration_ms": 271.54439996229485,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 40.5,
+          "text": "来月の出張先のホテルは",
+          "cumulative_length": 124,
+          "infer_duration_ms": 316.6785999783315,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 43.5,
+          "text": "私に決めさせてください",
+          "cumulative_length": 135,
+          "infer_duration_ms": 291.3782999967225,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 46.5,
+          "text": "え花田さんの絶対知らなそうな",
+          "cumulative_length": 149,
+          "infer_duration_ms": 289.4496999797411,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 49.5,
+          "text": "ホテル取りますからえなんか信用でき",
+          "cumulative_length": 166,
+          "infer_duration_ms": 356.8039999809116,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 52.5,
+          "text": "ないな",
+          "cumulative_length": 169,
+          "infer_duration_ms": 334.5778999500908,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 61.5,
+          "text": "5年先輩の羽田さんとは入社してすぐ同じチムになり",
+          "cumulative_length": 193,
+          "infer_duration_ms": 289.6726000471972,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 64.5,
+          "text": "二人で出張に来ることもしょっちゅうだった",
+          "cumulative_length": 213,
+          "infer_duration_ms": 217.71820000139996,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 72.0,
+          "text": "部屋どう",
+          "cumulative_length": 217,
+          "infer_duration_ms": 87.92790002189577,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 75.0,
+          "text": "したあす",
+          "cumulative_length": 221,
+          "infer_duration_ms": 181.82410002918914,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 78.0,
+          "text": "ま他は満室だって",
+          "cumulative_length": 229,
+          "infer_duration_ms": 210.6663000304252,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 81.0,
+          "text": "襖があるから二部屋ってことらしい",
+          "cumulative_length": 245,
+          "infer_duration_ms": 253.40359995607287,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 84.0,
+          "text": "部屋選び失敗",
+          "cumulative_length": 251,
+          "infer_duration_ms": 260.7996999868192,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 87.0,
+          "text": "したなあ本当申し訳ない",
+          "cumulative_length": 262,
+          "infer_duration_ms": 246.387799968943,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 96.0,
+          "text": "ま私は",
+          "cumulative_length": 265,
+          "infer_duration_ms": 204.92009998997673,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 103.5,
+          "text": "は襖があれば別に大丈夫ですよあ悪いなもちろんそっちの広い方",
+          "cumulative_length": 294,
+          "infer_duration_ms": 305.0937000080012,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 106.5,
+          "text": "川北が使っていいからあいいですよ羽田さん",
+          "cumulative_length": 314,
+          "infer_duration_ms": 319.0740999998525,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 109.5,
+          "text": "あっち使ってくださいあいいから",
+          "cumulative_length": 329,
+          "infer_duration_ms": 304.5345999998972,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 112.5,
+          "text": "使いな",
+          "cumulative_length": 332,
+          "infer_duration_ms": 306.4334999653511,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 118.5,
+          "text": "じゃあ遠慮なく",
+          "cumulative_length": 339,
+          "infer_duration_ms": 139.40260000526905,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 129.0,
+          "text": "はい",
+          "cumulative_length": 341,
+          "infer_duration_ms": 74.14919999428093,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 136.5,
+          "text": "羽田",
+          "cumulative_length": 343,
+          "infer_duration_ms": 88.66090001538396,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 139.5,
+          "text": "さんが私に下心を向けること",
+          "cumulative_length": 356,
+          "infer_duration_ms": 146.46300004096702,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 145.5,
+          "text": "はなかった彼はそういう人だった",
+          "cumulative_length": 371,
+          "infer_duration_ms": 189.1998000210151,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 157.5,
+          "text": "あの日あの場所で",
+          "cumulative_length": 379,
+          "infer_duration_ms": 111.10129998996854,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 160.5,
+          "text": "そっか",
+          "cumulative_length": 382,
+          "infer_duration_ms": 153.17760000471026,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 163.5,
+          "text": "部屋が空いてないながらしょうがないよね",
+          "cumulative_length": 401,
+          "infer_duration_ms": 220.45530000468716,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 166.5,
+          "text": "ね手違いがあってさ",
+          "cumulative_length": 410,
+          "infer_duration_ms": 261.53909997083247,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 169.5,
+          "text": "川北と同じ部屋になったんだ",
+          "cumulative_length": 423,
+          "infer_duration_ms": 297.065399994608,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 172.5,
+          "text": "あそう二つ部屋があって",
+          "cumulative_length": 434,
+          "infer_duration_ms": 249.04640001477674,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 175.5,
+          "text": "うん川北と分けて",
+          "cumulative_length": 442,
+          "infer_duration_ms": 256.5184000413865,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 180.0,
+          "text": "使う感じうん",
+          "cumulative_length": 448,
+          "infer_duration_ms": 283.1743999850005,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 183.0,
+          "text": "うん言っておくじゃあねおい",
+          "cumulative_length": 461,
+          "infer_duration_ms": 249.90359996445477,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 189.0,
+          "text": "羽田さんそういうこと",
+          "cumulative_length": 471,
+          "infer_duration_ms": 146.9751000404358,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 192.0,
+          "text": "をちゃんと話すんですね",
+          "cumulative_length": 482,
+          "infer_duration_ms": 197.29510002071038,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 199.5,
+          "text": "うんまあね彼はそういう人だった",
+          "cumulative_length": 497,
+          "infer_duration_ms": 175.41299998993054,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 205.5,
+          "text": "何いじってんの",
+          "cumulative_length": 504,
+          "infer_duration_ms": 189.24639996839687,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 208.5,
+          "text": "いじってないですよあいつが",
+          "cumulative_length": 517,
+          "infer_duration_ms": 277.4943999829702,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 211.5,
+          "text": "俺のイビキうるさかったらごめんって",
+          "cumulative_length": 534,
+          "infer_duration_ms": 282.67720004078,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 220.5,
+          "text": "さきさんとはうまくいってるみたいですねまあおかげさまで",
+          "cumulative_length": 561,
+          "infer_duration_ms": 241.52799998410046,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 223.5,
+          "text": "会社辞めて一年くらい経つから",
+          "cumulative_length": 575,
+          "infer_duration_ms": 275.725900020916,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 226.5,
+          "text": "もう絶対会社員にも戻れないって言ってるよ",
+          "cumulative_length": 595,
+          "infer_duration_ms": 319.7900999803096,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 229.5,
+          "text": "風呂入って",
+          "cumulative_length": 600,
+          "infer_duration_ms": 350.32939998200163,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 232.5,
+          "text": "一杯やるか",
+          "cumulative_length": 605,
+          "infer_duration_ms": 320.34410000778735,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 241.5,
+          "text": "はい今度の",
+          "cumulative_length": 610,
+          "infer_duration_ms": 160.82620003726333,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 244.5,
+          "text": "連休さ",
+          "cumulative_length": 613,
+          "infer_duration_ms": 234.0270000277087,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 247.5,
+          "text": "ざきとまたバベキュしに",
+          "cumulative_length": 624,
+          "infer_duration_ms": 297.8486000210978,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 250.5,
+          "text": "行かないえ行きたいです新しいグリル買っちゃったんだよね",
+          "cumulative_length": 651,
+          "infer_duration_ms": 336.47400001063943,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 253.5,
+          "text": "本当好きですよね",
+          "cumulative_length": 659,
+          "infer_duration_ms": 268.9486999879591,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 259.5,
+          "text": "ちなみに誰か",
+          "cumulative_length": 665,
+          "infer_duration_ms": 190.3740999987349,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 262.5,
+          "text": "連れてきてもいいんだぞいないのか",
+          "cumulative_length": 681,
+          "infer_duration_ms": 205.31990000745282,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 265.5,
+          "text": "付き合ってる人とか",
+          "cumulative_length": 690,
+          "infer_duration_ms": 197.25970004219562,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 268.5,
+          "text": "いた",
+          "cumulative_length": 692,
+          "infer_duration_ms": 255.66209998214617,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 271.5,
+          "text": "らちゃんと言いますよちゃんと",
+          "cumulative_length": 706,
+          "infer_duration_ms": 233.10090001905337,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 274.5,
+          "text": "言って入社してから一回も言われたことないし",
+          "cumulative_length": 727,
+          "infer_duration_ms": 228.12729998258874,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 279.0,
+          "text": "ねまあそれは",
+          "cumulative_length": 733,
+          "infer_duration_ms": 233.151699998416,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 286.5,
+          "text": "ん実は好きな人とか",
+          "cumulative_length": 742,
+          "infer_duration_ms": 133.41650000074878,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 295.5,
+          "text": "まあまあ何",
+          "cumulative_length": 747,
+          "infer_duration_ms": 96.42699995310977,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 298.5,
+          "text": "ますよ気になって",
+          "cumulative_length": 755,
+          "infer_duration_ms": 145.6643000128679,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 301.5,
+          "text": "る人は",
+          "cumulative_length": 758,
+          "infer_duration_ms": 210.78539994778112,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 304.5,
+          "text": "いるんじゃ",
+          "cumulative_length": 763,
+          "infer_duration_ms": 198.1482999981381,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 307.5,
+          "text": "その人とはどうなのどうなのって言われても",
+          "cumulative_length": 783,
+          "infer_duration_ms": 241.91830004565418,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 310.5,
+          "text": "うまく",
+          "cumulative_length": 786,
+          "infer_duration_ms": 203.85219994932413,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 315.0,
+          "text": "行きそうな",
+          "cumulative_length": 791,
+          "infer_duration_ms": 160.09909997228533,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 318.0,
+          "text": "のうまくは行かないですかねそう",
+          "cumulative_length": 806,
+          "infer_duration_ms": 174.70430000685155,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 325.5,
+          "text": "なの",
+          "cumulative_length": 808,
+          "infer_duration_ms": 182.93680000351742,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 328.5,
+          "text": "おなんで結婚してるんですその人ああ",
+          "cumulative_length": 825,
+          "infer_duration_ms": 189.53010003315285,
+          "is_flush": false
+        }
+      ]
+    },
+    {
+      "name": "Win8s_Step1.5s_Agr2_Min2",
+      "window_sec": 8.0,
+      "step_sec": 1.5,
+      "agreement_steps": 2,
+      "min_agreement_chars": 2,
+      "audio_duration_sec": 332.032,
+      "total_inferences": 219,
+      "total_infer_time_sec": 59.55733499932103,
+      "rtf": 0.17937227435705302,
+      "num_commits": 77,
+      "avg_commit_chars": 10.285714285714286,
+      "est_emission_latency_sec": 3.2719513013667627,
+      "cer": 0.13447432762836187,
+      "cer_itn": 0.13080684596577016,
+      "hyp_text": "得意先への営業回りを終え夕食を済ませその日私たちは出張先の宿に向かっていたこのホテル初めてですよねうんトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてくださいえ花田さんの絶対知らなそうなホテル取りますからえなんか信用できないな5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうしたあすまん他は満室だって襖があるから二部屋ってことらしい部屋選び失敗したなあ本当申し訳ないまあ私はま私は悪いなもちろんそっちの広い方川北が使っていいからあいいですよ羽田さんあっち使ってくださいいから使あじゃあ遠慮なくはい羽田さんが私下心を向けることはなかった彼はそういう人だったあの日あの場所でそっか部屋が空いてないながらしょうがないよね手違いがあってさ川北と同じ部屋になったんだあそう二つ部屋があってうん羽田さんそういうことをちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんってみさきさんとは三崎さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員にも戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さざきとまたバベキュしにいかないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねちなみに誰かれてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入賞してから一回も言われたことないしまあそれはうん実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまく行きそうなうまくは行かないですかねそうなのなんで結婚してるんですその人ああ",
+      "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+      "commits": [
+        {
+          "stream_time_sec": 12.0,
+          "text": "得意先への営業回りを",
+          "cumulative_length": 10,
+          "infer_duration_ms": 267.5007999641821,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 15.0,
+          "text": "終え夕食を済ま",
+          "cumulative_length": 17,
+          "infer_duration_ms": 328.86280003003776,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 18.0,
+          "text": "せその日私たちは出張先の宿に向か",
+          "cumulative_length": 33,
+          "infer_duration_ms": 343.8156000338495,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 21.0,
+          "text": "っていたこのホテル初めてです",
+          "cumulative_length": 47,
+          "infer_duration_ms": 295.2709000092,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 24.0,
+          "text": "よね",
+          "cumulative_length": 49,
+          "infer_duration_ms": 306.24249996617436,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 27.0,
+          "text": "うんトラベルダウで星39でさ温泉がいいらしいよ温泉",
+          "cumulative_length": 74,
+          "infer_duration_ms": 363.84070001076907,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 30.0,
+          "text": "やった相変わらず何も",
+          "cumulative_length": 84,
+          "infer_duration_ms": 338.7150000198744,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 33.0,
+          "text": "調べてないんだ羽",
+          "cumulative_length": 92,
+          "infer_duration_ms": 327.39330001641065,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 36.0,
+          "text": "田さんのホテル選びのセンス信用してますか",
+          "cumulative_length": 112,
+          "infer_duration_ms": 312.02670000493526,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 40.5,
+          "text": "らだろ",
+          "cumulative_length": 115,
+          "infer_duration_ms": 314.39439998939633,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 43.5,
+          "text": "来月の出張先のホテルは私に決めさせてください",
+          "cumulative_length": 137,
+          "infer_duration_ms": 304.8115999554284,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 46.5,
+          "text": "え花田さんの絶対知らなそうなホテル",
+          "cumulative_length": 154,
+          "infer_duration_ms": 337.498200009577,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 49.5,
+          "text": "取りますからえ",
+          "cumulative_length": 161,
+          "infer_duration_ms": 352.81339997891337,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 52.5,
+          "text": "なんか信用できないな",
+          "cumulative_length": 171,
+          "infer_duration_ms": 345.4537999932654,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 57.0,
+          "text": "5年先輩の羽田さんとは入社してすぐ同じチムになり",
+          "cumulative_length": 195,
+          "infer_duration_ms": 322.39889999618754,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 60.0,
+          "text": "二人で出張に来ることもしょっちゅうだった",
+          "cumulative_length": 215,
+          "infer_duration_ms": 313.7832999927923,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 72.0,
+          "text": "部屋どう",
+          "cumulative_length": 219,
+          "infer_duration_ms": 191.05109997326508,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 75.0,
+          "text": "したあすまん他は",
+          "cumulative_length": 227,
+          "infer_duration_ms": 285.0839999737218,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 78.0,
+          "text": "満室だって",
+          "cumulative_length": 232,
+          "infer_duration_ms": 312.1695999871008,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 81.0,
+          "text": "襖があるから二部屋ってことらしい",
+          "cumulative_length": 248,
+          "infer_duration_ms": 287.2747000074014,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 84.0,
+          "text": "部屋選び失敗",
+          "cumulative_length": 254,
+          "infer_duration_ms": 291.1745000164956,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 90.0,
+          "text": "したなあ本当申し訳ない",
+          "cumulative_length": 265,
+          "infer_duration_ms": 258.0521000199951,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 94.5,
+          "text": "まあ私は",
+          "cumulative_length": 269,
+          "infer_duration_ms": 231.67779995128512,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 97.5,
+          "text": "ま私は",
+          "cumulative_length": 272,
+          "infer_duration_ms": 282.7296999748796,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 105.0,
+          "text": "悪いなもちろんそっちの広い方川北が使っていいからあいいですよ",
+          "cumulative_length": 302,
+          "infer_duration_ms": 339.9090999737382,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 108.0,
+          "text": "羽田さんあっち使ってください",
+          "cumulative_length": 316,
+          "infer_duration_ms": 335.23050002986565,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 114.0,
+          "text": "いから使",
+          "cumulative_length": 320,
+          "infer_duration_ms": 271.919299964793,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 117.0,
+          "text": "あじゃあ遠慮なく",
+          "cumulative_length": 328,
+          "infer_duration_ms": 213.42949999962002,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 124.5,
+          "text": "はい",
+          "cumulative_length": 330,
+          "infer_duration_ms": 173.483100021258,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 138.0,
+          "text": "羽田さんが私",
+          "cumulative_length": 336,
+          "infer_duration_ms": 240.92599999858066,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 141.0,
+          "text": "下心を向けることはなかった",
+          "cumulative_length": 349,
+          "infer_duration_ms": 271.3549999753013,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 145.5,
+          "text": "彼はそういう人だった",
+          "cumulative_length": 359,
+          "infer_duration_ms": 233.24730002786964,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 154.5,
+          "text": "あの日",
+          "cumulative_length": 362,
+          "infer_duration_ms": 215.17869998933747,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 157.5,
+          "text": "あの場所で",
+          "cumulative_length": 367,
+          "infer_duration_ms": 213.78340001683682,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 160.5,
+          "text": "そっか",
+          "cumulative_length": 370,
+          "infer_duration_ms": 257.86280003376305,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 163.5,
+          "text": "部屋が空いてないながらしょうがないよね",
+          "cumulative_length": 389,
+          "infer_duration_ms": 316.21029996313155,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 166.5,
+          "text": "手違いがあってさ川北と同じ部屋に",
+          "cumulative_length": 405,
+          "infer_duration_ms": 322.96019996283576,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 169.5,
+          "text": "なったんだ",
+          "cumulative_length": 410,
+          "infer_duration_ms": 278.0333000118844,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 172.5,
+          "text": "あそう二つ部屋があって",
+          "cumulative_length": 421,
+          "infer_duration_ms": 290.0861999951303,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 175.5,
+          "text": "うん",
+          "cumulative_length": 423,
+          "infer_duration_ms": 299.7163000400178,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 189.0,
+          "text": "羽田さんそういうこと",
+          "cumulative_length": 433,
+          "infer_duration_ms": 218.5384000185877,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 192.0,
+          "text": "をちゃんと話すんですね",
+          "cumulative_length": 444,
+          "infer_duration_ms": 277.3280999972485,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 198.0,
+          "text": "うんまあね彼は",
+          "cumulative_length": 451,
+          "infer_duration_ms": 237.4765999848023,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 201.0,
+          "text": "そういう人だった",
+          "cumulative_length": 459,
+          "infer_duration_ms": 213.70160003425553,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 204.0,
+          "text": "何いじってんの",
+          "cumulative_length": 466,
+          "infer_duration_ms": 236.2929999944754,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 207.0,
+          "text": "いじってないですよ",
+          "cumulative_length": 475,
+          "infer_duration_ms": 275.09890001965687,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 210.0,
+          "text": "あいつが俺のイビキうるさかったら",
+          "cumulative_length": 491,
+          "infer_duration_ms": 321.9493999495171,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 216.0,
+          "text": "ごめんってみさきさんとは",
+          "cumulative_length": 503,
+          "infer_duration_ms": 270.21659997990355,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 219.0,
+          "text": "三崎さんとはうまくいってるみたいですねまあ",
+          "cumulative_length": 524,
+          "infer_duration_ms": 261.6021999856457,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 222.0,
+          "text": "おかげさまで会社辞めて一年",
+          "cumulative_length": 537,
+          "infer_duration_ms": 316.9654000084847,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 225.0,
+          "text": "くらい経つからもう絶対会",
+          "cumulative_length": 549,
+          "infer_duration_ms": 366.674899996724,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 228.0,
+          "text": "社員にも戻れないって言ってるよ",
+          "cumulative_length": 564,
+          "infer_duration_ms": 370.80340000102296,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 231.0,
+          "text": "風呂入って一杯やるか",
+          "cumulative_length": 574,
+          "infer_duration_ms": 332.0644000195898,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 238.5,
+          "text": "はい",
+          "cumulative_length": 576,
+          "infer_duration_ms": 180.64579996280372,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 241.5,
+          "text": "今度の",
+          "cumulative_length": 579,
+          "infer_duration_ms": 235.4501000372693,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 244.5,
+          "text": "連休さ",
+          "cumulative_length": 582,
+          "infer_duration_ms": 336.05709997937083,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 247.5,
+          "text": "ざきとまたバベキュしにいかないえ行きたいです",
+          "cumulative_length": 604,
+          "infer_duration_ms": 392.5652999896556,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 250.5,
+          "text": "新しいグリル買っちゃったんだよね",
+          "cumulative_length": 620,
+          "infer_duration_ms": 286.1794999917038,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 256.5,
+          "text": "本当好きですよね",
+          "cumulative_length": 628,
+          "infer_duration_ms": 184.69039996853098,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 259.5,
+          "text": "ちなみに誰か",
+          "cumulative_length": 634,
+          "infer_duration_ms": 218.9778999891132,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 262.5,
+          "text": "れてきてもいいんだぞいないのか",
+          "cumulative_length": 649,
+          "infer_duration_ms": 284.54019996570423,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 265.5,
+          "text": "付き合ってる人とか",
+          "cumulative_length": 658,
+          "infer_duration_ms": 291.5379000478424,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 268.5,
+          "text": "いたらちゃんと言いますよ",
+          "cumulative_length": 670,
+          "infer_duration_ms": 277.118900034111,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 271.5,
+          "text": "ちゃんと言って入賞",
+          "cumulative_length": 679,
+          "infer_duration_ms": 270.7450999878347,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 274.5,
+          "text": "してから一回も言われたことないし",
+          "cumulative_length": 695,
+          "infer_duration_ms": 279.24399997573346,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 280.5,
+          "text": "まあそれはうん実は好きな",
+          "cumulative_length": 707,
+          "infer_duration_ms": 227.26539999712259,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 286.5,
+          "text": "人とか",
+          "cumulative_length": 710,
+          "infer_duration_ms": 184.16419997811317,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 294.0,
+          "text": "まあまあ",
+          "cumulative_length": 714,
+          "infer_duration_ms": 200.74290002230555,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 298.5,
+          "text": "何いますよ気になって",
+          "cumulative_length": 724,
+          "infer_duration_ms": 233.34790003718808,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 301.5,
+          "text": "る人はいるんじゃ",
+          "cumulative_length": 732,
+          "infer_duration_ms": 265.4933999874629,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 304.5,
+          "text": "その人とはどうなの",
+          "cumulative_length": 741,
+          "infer_duration_ms": 278.57999998377636,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 307.5,
+          "text": "どうなのって言われても",
+          "cumulative_length": 752,
+          "infer_duration_ms": 239.29299996234477,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 310.5,
+          "text": "うまく行きそうな",
+          "cumulative_length": 760,
+          "infer_duration_ms": 227.82000002916902,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 316.5,
+          "text": "うまくは行かないですかね",
+          "cumulative_length": 772,
+          "infer_duration_ms": 250.1607000012882,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 319.5,
+          "text": "そうなの",
+          "cumulative_length": 776,
+          "infer_duration_ms": 238.54249995201826,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 325.5,
+          "text": "なんで結婚してるんです",
+          "cumulative_length": 787,
+          "infer_duration_ms": 225.65790003864095,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 328.5,
+          "text": "その人ああ",
+          "cumulative_length": 792,
+          "infer_duration_ms": 262.30199995916337,
+          "is_flush": false
+        }
+      ]
+    },
+    {
+      "name": "Win10s_Step2.0s_Agr2_Min2",
+      "window_sec": 10.0,
+      "step_sec": 2.0,
+      "agreement_steps": 2,
+      "min_agreement_chars": 2,
+      "audio_duration_sec": 332.032,
+      "total_inferences": 165,
+      "total_infer_time_sec": 31.17110919964034,
+      "rtf": 0.09387983447270246,
+      "num_commits": 56,
+      "avg_commit_chars": 12.678571428571429,
+      "est_emission_latency_sec": 4.188915813331153,
+      "cer": 0.2139364303178484,
+      "cer_itn": 0.21026894865525672,
+      "hyp_text": "得意先への営業回りを終え夕食を済ませしその日私たちは出張先の宿に向かっていたこのホテル初めてですよねあトラベルダウで星39でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますかだろう来月の出張先のホテルは私に決めさせてくださいええ花田さんの絶対知らなそうなホテル取りますからええなんか信用できないな変わっ5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすま他は満室だって襖があるから二部屋ってことらしい部屋選び失敗したなま私はじゃあ遠慮なくはい羽田さんがに下心を向けることはなかった彼はそういう人だったあの日あの場所でそっか部屋が空いてないそう二つ部屋があってうん乾きたと分けて使う感じうん羽田さんそういうことをちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のイビキうるさかったらごめんって三崎さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員にも戻れないって言ってるよ風呂入って一杯やるかはい今度の連休先とまたバベキュしにいかないえ行きたいです新しいグリル買っちゃったんだよね本当好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしねあそれはうん実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまく生きそうなのうまくはかないですかねそうなのおなんで結婚してるんですその人ああそ",
+      "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+      "commits": [
+        {
+          "stream_time_sec": 12.0,
+          "text": "得意先への営業",
+          "cumulative_length": 7,
+          "infer_duration_ms": 163.63200003979728,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 16.0,
+          "text": "回りを終え夕食を済ま",
+          "cumulative_length": 17,
+          "infer_duration_ms": 280.01940000103787,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 20.0,
+          "text": "せしその日私たちは出張先の宿に向かっていた",
+          "cumulative_length": 38,
+          "infer_duration_ms": 286.3014999893494,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 24.0,
+          "text": "このホテル初めてですよね",
+          "cumulative_length": 50,
+          "infer_duration_ms": 286.41120000975206,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 28.0,
+          "text": "あトラベルダウで星39でさ温泉がいいらしいよ温泉",
+          "cumulative_length": 74,
+          "infer_duration_ms": 284.94889999274164,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 32.0,
+          "text": "やった相変わらず何も調べてないんだ",
+          "cumulative_length": 91,
+          "infer_duration_ms": 285.87409999454394,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 36.0,
+          "text": "羽田さんのホテル選びのセンス信用してますか",
+          "cumulative_length": 112,
+          "infer_duration_ms": 252.6071000029333,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 40.0,
+          "text": "だろ",
+          "cumulative_length": 114,
+          "infer_duration_ms": 259.52640001196414,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 44.0,
+          "text": "う来月の出張先のホテルは私に決めさせてください",
+          "cumulative_length": 137,
+          "infer_duration_ms": 228.78609999315813,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 48.0,
+          "text": "ええ花田さんの絶対知らなそうなホテル取りますから",
+          "cumulative_length": 161,
+          "infer_duration_ms": 300.79900001874194,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 52.0,
+          "text": "ええなんか信用できないな",
+          "cumulative_length": 173,
+          "infer_duration_ms": 302.5423999642953,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 56.0,
+          "text": "変わっ",
+          "cumulative_length": 176,
+          "infer_duration_ms": 222.44540002429858,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 60.0,
+          "text": "5年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった",
+          "cumulative_length": 220,
+          "infer_duration_ms": 278.86079996824265,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 74.0,
+          "text": "部屋どうでした",
+          "cumulative_length": 227,
+          "infer_duration_ms": 142.69470004364848,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 78.0,
+          "text": "あすま",
+          "cumulative_length": 230,
+          "infer_duration_ms": 206.84530003927648,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 82.0,
+          "text": "他は満室だって襖があるから二部屋ってことらしい",
+          "cumulative_length": 253,
+          "infer_duration_ms": 228.90049999114126,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 86.0,
+          "text": "部屋選び失敗したな",
+          "cumulative_length": 262,
+          "infer_duration_ms": 242.887900036294,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 98.0,
+          "text": "ま私は",
+          "cumulative_length": 265,
+          "infer_duration_ms": 164.05600000871345,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 122.0,
+          "text": "じゃあ遠慮なく",
+          "cumulative_length": 272,
+          "infer_duration_ms": 92.22569997655228,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 128.0,
+          "text": "はい",
+          "cumulative_length": 274,
+          "infer_duration_ms": 70.49919996643439,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 138.0,
+          "text": "羽田さんが",
+          "cumulative_length": 279,
+          "infer_duration_ms": 137.5345000415109,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 142.0,
+          "text": "に下心を向けることはなかった",
+          "cumulative_length": 293,
+          "infer_duration_ms": 163.8886999571696,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 146.0,
+          "text": "彼はそういう人だった",
+          "cumulative_length": 303,
+          "infer_duration_ms": 164.72610004711896,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 156.0,
+          "text": "あの日あの場所で",
+          "cumulative_length": 311,
+          "infer_duration_ms": 107.20540001057088,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 162.0,
+          "text": "そっか部屋が空いて",
+          "cumulative_length": 320,
+          "infer_duration_ms": 157.2814999963157,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 166.0,
+          "text": "ない",
+          "cumulative_length": 322,
+          "infer_duration_ms": 268.04639998590574,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 178.0,
+          "text": "そう二つ部屋があってうん",
+          "cumulative_length": 334,
+          "infer_duration_ms": 251.073399966117,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 182.0,
+          "text": "乾きたと分けて使う感じうん",
+          "cumulative_length": 347,
+          "infer_duration_ms": 231.08030000003055,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 192.0,
+          "text": "羽田さんそういうことをちゃんと話すんですね",
+          "cumulative_length": 368,
+          "infer_duration_ms": 171.39030003454536,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 200.0,
+          "text": "うんまあね彼はそういう人だった",
+          "cumulative_length": 383,
+          "infer_duration_ms": 135.78380004037172,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 204.0,
+          "text": "何いじってんの",
+          "cumulative_length": 390,
+          "infer_duration_ms": 143.90619995538145,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 208.0,
+          "text": "いじってないですよ",
+          "cumulative_length": 399,
+          "infer_duration_ms": 235.7406999799423,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 212.0,
+          "text": "あいつが俺のイビキうるさかったらごめんって",
+          "cumulative_length": 420,
+          "infer_duration_ms": 222.1375999506563,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 222.0,
+          "text": "三崎さんとはうまくいってるみたいですねまあおかげさまで会社辞めて",
+          "cumulative_length": 452,
+          "infer_duration_ms": 229.8329999903217,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 226.0,
+          "text": "一年くらい経つからもう絶対会社員に",
+          "cumulative_length": 469,
+          "infer_duration_ms": 271.59310004208237,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 230.0,
+          "text": "も戻れないって言ってるよ風呂入って",
+          "cumulative_length": 486,
+          "infer_duration_ms": 301.67879996588454,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 238.0,
+          "text": "一杯やるかはい",
+          "cumulative_length": 493,
+          "infer_duration_ms": 106.97719996096566,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 242.0,
+          "text": "今度の連休",
+          "cumulative_length": 498,
+          "infer_duration_ms": 135.70679997792467,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 246.0,
+          "text": "先とまたバベキュしに",
+          "cumulative_length": 508,
+          "infer_duration_ms": 237.19399998662993,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 250.0,
+          "text": "いかないえ行きたいです新しいグリル買っちゃったんだ",
+          "cumulative_length": 533,
+          "infer_duration_ms": 267.2294999938458,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 254.0,
+          "text": "よね本当好きですよね",
+          "cumulative_length": 543,
+          "infer_duration_ms": 179.19429996982217,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 262.0,
+          "text": "ちなみに誰か連れてきてもいいんだぞ",
+          "cumulative_length": 560,
+          "infer_duration_ms": 164.3894999870099,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 266.0,
+          "text": "いないのか付き合ってる人とか",
+          "cumulative_length": 574,
+          "infer_duration_ms": 209.86909995554015,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 270.0,
+          "text": "いたらちゃんと言いますよちゃん",
+          "cumulative_length": 589,
+          "infer_duration_ms": 196.40570000046864,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 274.0,
+          "text": "と言って入社してから一回も言われた",
+          "cumulative_length": 606,
+          "infer_duration_ms": 215.28440003748983,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 278.0,
+          "text": "ことないしね",
+          "cumulative_length": 612,
+          "infer_duration_ms": 180.18089997349307,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 282.0,
+          "text": "あそれはうん実は好きな人とか",
+          "cumulative_length": 626,
+          "infer_duration_ms": 165.3607999905944,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 292.0,
+          "text": "まあ",
+          "cumulative_length": 628,
+          "infer_duration_ms": 63.3310999837704,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 296.0,
+          "text": "まあ何",
+          "cumulative_length": 631,
+          "infer_duration_ms": 115.17159995855764,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 300.0,
+          "text": "いますよ気になってる人は",
+          "cumulative_length": 643,
+          "infer_duration_ms": 143.26529996469617,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 304.0,
+          "text": "いるんじゃその人とはどうなの",
+          "cumulative_length": 657,
+          "infer_duration_ms": 213.50419998634607,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 308.0,
+          "text": "どうなのって言われても",
+          "cumulative_length": 668,
+          "infer_duration_ms": 167.87280002608895,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 314.0,
+          "text": "うまく生きそうなの",
+          "cumulative_length": 677,
+          "infer_duration_ms": 122.52460001036525,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 318.0,
+          "text": "うまくは",
+          "cumulative_length": 681,
+          "infer_duration_ms": 173.19419997511432,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 322.0,
+          "text": "かないですかねそうなのおなんで",
+          "cumulative_length": 696,
+          "infer_duration_ms": 152.20720000797883,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 330.0,
+          "text": "結婚してるんですその人ああそ",
+          "cumulative_length": 710,
+          "infer_duration_ms": 158.31529995193705,
+          "is_flush": false
+        }
+      ]
+    },
+    {
+      "name": "Win10s_Step1.5s_Agr3_Min2",
+      "window_sec": 10.0,
+      "step_sec": 1.5,
+      "agreement_steps": 3,
+      "min_agreement_chars": 2,
+      "audio_duration_sec": 332.032,
+      "total_inferences": 220,
+      "total_infer_time_sec": 41.675966800015885,
+      "rtf": 0.12551792236897616,
+      "num_commits": 42,
+      "avg_commit_chars": 12.0,
+      "est_emission_latency_sec": 4.689436212727345,
+      "cer": 0.4352078239608802,
+      "cer_itn": 0.4352078239608802,
+      "hyp_text": "得意先への営業回りを終え夕食を済まその日私たちは出張先の宿に向かっていたこのホテル初めてですよね来月の出張先のホテルは私に決めさせてください花田さんの絶対知らなそうなホテル取りますからえなんか信用できないな部屋どうしたあすま他は満室だって襖があるから二部屋ってことらしい部屋選び失敗したなあ本当申し訳ないま私ははい羽田さんが私に下心を向けることはなかった彼はそういう人だったあの日あの場所でそっか部屋が空いてない羽田さんそういうことをちゃんと話すんですねそういう人だった何いじってんのいじってないですよあいつがのイビキうるさかったらごめんって三崎さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員にも戻れないって言ってるよ風呂入ってやるかはい今度の連休さあちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入賞してから一回も言われたことないしねあそれはうん実は好きなまあまあ何何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくは行かないですかねそうなの結婚してるんですその人ああそっか",
+      "ref_text": "得意先への営業回りを終え夕食を済ましその日私たちは出張先の宿に向かっていたこのホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温泉やった相変わらず何も調べてないんだ羽田さんのホテル選びのセンス信用してますからだろ来月の出張先のホテルは私に決めさせてください羽田さんの絶対知らなそうなホテル取りますからなんか信用できないな川北お前五年先輩の羽田さんとは入社してすぐ同じチムになり二人で出張に来ることもしょっちゅうだった部屋どうでしたあすまん他は満室だってふすまがあるから二部屋ってことらしい部屋選び失敗したなほんと申し訳ない私はふすまがあれば別に大丈夫ですよ悪いなもちろんそっちの広い方を川北が使っていいからあいいですよ羽田さんあっち使ってくださいいいから使いなじゃあ遠慮なく羽田さんが私に下心を向けることはなかった彼はそういう人だったそっか部屋が空いてないんだからしょうがないよね手違いがあってさ川北と同じ部屋になったんだそう二つ部屋があってうん川北と分けて使う感じうん言っておくじゃあねはい羽田さんそういうことちゃんと話すんですねうんまあね彼はそういう人だった何いじってんのいじってないですよあいつが俺のいびきうるさかったらごめんって美咲さんとはうまくいってるみたいですねまあおかげさまで会社辞めて一年くらい経つからもう絶対会社員には戻れないって言ってるよ風呂入って一杯やるかはい今度の連休さ美咲とまたバベキュしに行かないえ行きたいです新しいグリル買っちゃったんだよねほんと好きですよねちなみに誰か連れてきてもいいんだぞいないのか付き合ってる人とかいたらちゃんと言いますよちゃんと言って入社してから一回も言われたことないしなそれは実は好きな人とかまあまあ何いますよ気になってる人はいるんじゃその人とはどうなのどうなのって言われてもうまくいきそうなのうまくはいかないですかねそうなのなんで結婚してるんですその人ああそっか",
+      "commits": [
+        {
+          "stream_time_sec": 13.5,
+          "text": "得意先への営業回りを",
+          "cumulative_length": 10,
+          "infer_duration_ms": 216.36949997628108,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 18.0,
+          "text": "終え夕食を済ま",
+          "cumulative_length": 17,
+          "infer_duration_ms": 305.3139999974519,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 22.5,
+          "text": "その日私たちは出張先の宿に向かっていたこのホテル初めてです",
+          "cumulative_length": 46,
+          "infer_duration_ms": 286.2872999976389,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 27.0,
+          "text": "よね",
+          "cumulative_length": 48,
+          "infer_duration_ms": 267.2131000435911,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 46.5,
+          "text": "来月の出張先のホテルは私に決めさせてください",
+          "cumulative_length": 70,
+          "infer_duration_ms": 294.80110004078597,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 51.0,
+          "text": "花田さんの絶対知らなそうなホテル取りますからえ",
+          "cumulative_length": 93,
+          "infer_duration_ms": 271.2617000215687,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 55.5,
+          "text": "なんか信用できないな",
+          "cumulative_length": 103,
+          "infer_duration_ms": 243.8996999990195,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 73.5,
+          "text": "部屋どう",
+          "cumulative_length": 107,
+          "infer_duration_ms": 150.75639996211976,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 78.0,
+          "text": "したあすま",
+          "cumulative_length": 112,
+          "infer_duration_ms": 208.2382999942638,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 82.5,
+          "text": "他は満室だって襖があるから二部屋ってことらしい",
+          "cumulative_length": 135,
+          "infer_duration_ms": 225.23639997234568,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 87.0,
+          "text": "部屋選び失敗したな",
+          "cumulative_length": 144,
+          "infer_duration_ms": 223.95280003547668,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 93.0,
+          "text": "あ本当申し訳ない",
+          "cumulative_length": 152,
+          "infer_duration_ms": 157.78920002048835,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 97.5,
+          "text": "ま私は",
+          "cumulative_length": 155,
+          "infer_duration_ms": 185.39289996260777,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 127.5,
+          "text": "はい",
+          "cumulative_length": 157,
+          "infer_duration_ms": 70.29270002385601,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 138.0,
+          "text": "羽田",
+          "cumulative_length": 159,
+          "infer_duration_ms": 135.98010002169758,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 142.5,
+          "text": "さんが私に下心を向けることはなかった",
+          "cumulative_length": 177,
+          "infer_duration_ms": 164.52220000792295,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 147.0,
+          "text": "彼はそういう人だった",
+          "cumulative_length": 187,
+          "infer_duration_ms": 143.47980002639815,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 157.5,
+          "text": "あの日あの場所で",
+          "cumulative_length": 195,
+          "infer_duration_ms": 107.34380001667887,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 162.0,
+          "text": "そっか",
+          "cumulative_length": 198,
+          "infer_duration_ms": 157.04469999764115,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 166.5,
+          "text": "部屋が空いてない",
+          "cumulative_length": 206,
+          "infer_duration_ms": 258.040200045798,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 193.5,
+          "text": "羽田さんそういうことをちゃんと話すんですね",
+          "cumulative_length": 227,
+          "infer_duration_ms": 171.54360003769398,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 205.5,
+          "text": "そういう人だった何いじってんの",
+          "cumulative_length": 242,
+          "infer_duration_ms": 171.3852999964729,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 210.0,
+          "text": "いじってないですよあいつが",
+          "cumulative_length": 255,
+          "infer_duration_ms": 284.1045999666676,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 214.5,
+          "text": "のイビキうるさかったらごめんって",
+          "cumulative_length": 271,
+          "infer_duration_ms": 226.30799998296425,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 222.0,
+          "text": "三崎さんとはうまくいってるみたいですねまあおかげさまで",
+          "cumulative_length": 298,
+          "infer_duration_ms": 235.66480004228652,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 226.5,
+          "text": "会社辞めて一年くらい経つからもう絶対会",
+          "cumulative_length": 317,
+          "infer_duration_ms": 275.9704000200145,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 231.0,
+          "text": "社員にも戻れないって言ってるよ風呂入って",
+          "cumulative_length": 337,
+          "infer_duration_ms": 253.64189996616915,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 238.5,
+          "text": "やるかはい",
+          "cumulative_length": 342,
+          "infer_duration_ms": 99.32089998619631,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 243.0,
+          "text": "今度の",
+          "cumulative_length": 345,
+          "infer_duration_ms": 188.66390001494437,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 247.5,
+          "text": "連休さ",
+          "cumulative_length": 348,
+          "infer_duration_ms": 297.89329995401204,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 264.0,
+          "text": "あちなみに誰か連れてきてもいいんだぞいないのか",
+          "cumulative_length": 371,
+          "infer_duration_ms": 201.5388000290841,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 268.5,
+          "text": "付き合ってる人とかいた",
+          "cumulative_length": 382,
+          "infer_duration_ms": 216.09090000856668,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 273.0,
+          "text": "らちゃんと言いますよちゃんと言って入",
+          "cumulative_length": 400,
+          "infer_duration_ms": 201.91750000230968,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 277.5,
+          "text": "賞してから一回も言われたことないしね",
+          "cumulative_length": 418,
+          "infer_duration_ms": 193.18639999255538,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 282.0,
+          "text": "あそれはうん実は好きな",
+          "cumulative_length": 429,
+          "infer_duration_ms": 165.98570003407076,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 297.0,
+          "text": "まあまあ何",
+          "cumulative_length": 434,
+          "infer_duration_ms": 135.10069996118546,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 301.5,
+          "text": "何いますよ気になってる人は",
+          "cumulative_length": 447,
+          "infer_duration_ms": 179.4615999679081,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 306.0,
+          "text": "いるんじゃその人とはどうなの",
+          "cumulative_length": 461,
+          "infer_duration_ms": 194.36820002738386,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 310.5,
+          "text": "どうなのって言われても",
+          "cumulative_length": 472,
+          "infer_duration_ms": 172.97519999556243,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 315.0,
+          "text": "うまく",
+          "cumulative_length": 475,
+          "infer_duration_ms": 142.86209997953847,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 322.5,
+          "text": "は行かないですかねそうなの",
+          "cumulative_length": 488,
+          "infer_duration_ms": 131.7413000506349,
+          "is_flush": false
+        },
+        {
+          "stream_time_sec": 331.5,
+          "text": "結婚してるんですその人ああそっか",
+          "cumulative_length": 504,
+          "infer_duration_ms": 157.15440001804382,
+          "is_flush": false
+        }
+      ]
+    }
+  ]
+}

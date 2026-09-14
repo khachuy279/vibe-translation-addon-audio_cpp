@@ -21,7 +21,7 @@ models:
     file: Qwen3-ASR-0.6B-Q8_0.gguf
     sample_rate: 16000
     languages: auto
-    vram_estimate_mb: 2100
+    vram_estimate_mb: 650
     context_window_sec: 30
     description: Alibaba Audio-LLM model ported to transcribe.cpp, 1.61% WER, auto-detect 30 languages
   sensevoice-small:
@@ -43,7 +43,7 @@ models:
   nemotron-3.5-streaming:
     name: Nemotron 3.5 ASR Streaming (GGUF)
     family: nemotron
-    att_context_right: 1 # `--stream-att-right R ∈ {0, 1, 6, 13}` (lookahead 0 / 80 / 480 / 1040 ms respectively). Default = `13` (max accuracy).
+    att_context_right: 3 # `--stream-att-right R ∈ {0, 3, 6, 13}` (lookahead 0 / 240 / 480 / 1040 ms respectively). Default = 3 (240ms lookahead).
     architecture_type: streaming
     hf_repo: handy-computer/nemotron-3.5-asr-streaming-0.6b-gguf
     default_quant: F16

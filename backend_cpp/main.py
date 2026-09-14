@@ -82,6 +82,8 @@ class SwitchModelRequest(BaseModel):
     vad_engine: Optional[str] = None
     vad_threshold: Optional[float] = None
     silence_duration_ms: Optional[int] = None
+    hangover_ms: Optional[int] = None
+    pre_speech_buffer_ms: Optional[int] = None
     source_lang: Optional[str] = None
     target_lang: Optional[str] = None
     translation_model: Optional[str] = None
@@ -97,23 +99,32 @@ async def lifespan(app: FastAPI):
     logger.info("🔥 [STARTUP] Pre-warming transcribe.cpp ASR, VAD & Local Translation models...")
 
     def _warmup():
+        # 1. Prewarm ASR model on GPU
         try:
-            # 1. Prewarm ASR model on GPU
             engine = TranscribeEngine()
             engine.prewarm()
+            logger.info("✅ [STARTUP] ASR model pre-warmed!")
+        except Exception as e:
+            logger.warning(f"Startup ASR pre-warming warning: {e}", exc_info=True)
 
-            # 2. Prewarm Translation model on GPU
+        # 2. Prewarm Translation model on GPU
+        try:
             translator = get_translator()
             translator.load_model()
+            logger.info("✅ [STARTUP] Translation model pre-warmed!")
+        except Exception as e:
+            logger.warning(f"Startup Translation pre-warming warning: {e}", exc_info=True)
 
-            # 3. Prewarm VAD model on CPU
+        # 3. Prewarm VAD model on CPU
+        try:
             from backend_cpp.vad.vad_processor import VADProcessor
             vad = VADProcessor(vad_engine=config.vad.vad_engine)
             vad._ensure_model()
-
-            logger.info("✅ [STARTUP] Models successfully pre-warmed!")
+            logger.info(f"✅ [STARTUP] VAD ({config.vad.vad_engine}) pre-warmed!")
         except Exception as e:
-            logger.warning(f"Startup pre-warming warning: {e}", exc_info=True)
+            logger.warning(f"Startup VAD pre-warming warning: {e}", exc_info=True)
+
+        logger.info("🚀 [STARTUP] Model warmup sequence complete!")
 
     await asyncio.to_thread(_warmup)
     yield
@@ -204,6 +215,9 @@ def _build_config_response(include_catalog: bool = True) -> Dict[str, Any]:
         "vad_silence_duration_ms": config.vad.silence_duration_ms,
         "silence_duration_ms": config.vad.silence_duration_ms,
         "vad_threshold": config.vad.threshold,
+        "vad_hangover_ms": config.vad.hangover_ms,
+        "vad_pre_speech_buffer_ms": config.vad.pre_speech_buffer_ms,
+        "vad_profiles": {k: v.model_dump() for k, v in config.vad.engine_profiles.items()},
         "min_words_to_commit": config.sentence.min_words_to_commit,
         "source_lang": config.asr.language,
         "supported_languages": SUPPORTED_LANGUAGES,
@@ -276,9 +290,24 @@ async def update_backend_config(req: SwitchModelRequest):
 
     if req.vad_engine is not None:
         ve = req.vad_engine.lower().strip()
-        if ve in SUPPORTED_VAD_ENGINES:
-            config.vad.vad_engine = ve
-            logger.info(f"Switched default VAD engine to '{ve}'")
+        if ve in ("none", "off", "disabled"):
+            raise HTTPException(
+                status_code=400,
+                detail=f"VAD is mandatory and cannot be disabled. Supported engines: {list(SUPPORTED_VAD_ENGINES)}",
+            )
+        elif ve in SUPPORTED_VAD_ENGINES:
+            config.vad.enabled = True
+            old_ve = config.vad.vad_engine
+            if ve != old_ve:
+                profile = config.vad.apply_engine_profile(ve)
+                logger.info(f"Switched default VAD engine to '{ve}' with optimal profile: {profile}")
+            else:
+                config.vad.vad_engine = ve
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown VAD engine '{ve}'. Supported engines: {list(SUPPORTED_VAD_ENGINES)}",
+            )
 
     if req.vad_threshold is not None:
         config.vad.threshold = req.vad_threshold
@@ -286,6 +315,12 @@ async def update_backend_config(req: SwitchModelRequest):
     if req.silence_duration_ms is not None:
         config.vad.silence_duration_ms = req.silence_duration_ms
         logger.info(f"Updated default silence_duration_ms to {config.vad.silence_duration_ms}")
+    if req.hangover_ms is not None:
+        config.vad.hangover_ms = req.hangover_ms
+        logger.info(f"Updated default hangover_ms to {config.vad.hangover_ms}")
+    if req.pre_speech_buffer_ms is not None:
+        config.vad.pre_speech_buffer_ms = req.pre_speech_buffer_ms
+        logger.info(f"Updated default pre_speech_buffer_ms to {config.vad.pre_speech_buffer_ms}")
     if req.min_words_to_commit is not None:
         config.sentence.min_words_to_commit = max(0, req.min_words_to_commit)
         logger.info(f"Updated default min_words_to_commit to {config.sentence.min_words_to_commit}")
@@ -414,4 +449,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -75,6 +75,40 @@ class FsmnVADConfig(BaseModel):
         self.speech_noise_thres = val
 
 
+class VADEngineProfile(BaseModel):
+    """Optimal tuning profile for an individual VAD engine."""
+    threshold: float
+    silence_duration_ms: int = 500
+    hangover_ms: int = 300
+    pre_speech_buffer_ms: int = 120
+    notes: Optional[str] = None
+
+
+DEFAULT_ENGINE_PROFILES: Dict[str, VADEngineProfile] = {
+    "fsmn-vad": VADEngineProfile(
+        threshold=0.45,
+        silence_duration_ms=500,
+        hangover_ms=300,
+        pre_speech_buffer_ms=120,
+        notes="Champion profile (2026-09-13 sweep): 0 false intro triggers, CER 8.92%, 83 commits",
+    ),
+    "firered-vad": VADEngineProfile(
+        threshold=0.45,
+        silence_duration_ms=500,
+        hangover_ms=300,
+        pre_speech_buffer_ms=100,
+        notes="Tuned calibrated profile (2026-09-13 sweep): 0 false intro triggers, CER 14.43%, 102 commits",
+    ),
+    "silero-vad": VADEngineProfile(
+        threshold=0.50,
+        silence_duration_ms=500,
+        hangover_ms=288,
+        pre_speech_buffer_ms=96,
+        notes="Tuned operating point (2026-09-13 sweep): Best recall point under tested range",
+    ),
+}
+
+
 class VADConfig(BaseModel):
     enabled: bool = True
     # Default engine.
@@ -92,22 +126,51 @@ class VADConfig(BaseModel):
     # (67.1% vs 79.6% speech ratio), which risks clipping word onsets on quieter or
     # far-field audio, so it stays opt-in.
     #
-    # Re-measure before changing this again: python scratch/compare_vad_quality.py
     vad_engine: str = "fsmn-vad"  # fsmn-vad (default), firered-vad, silero-vad
-    # DECISION (2026-09-11, user approved C06): threshold 0.20 recovers low-SNR speech in noise
-    # without introducing regressions on clean audio.
-    threshold: float = 0.20
-    silence_duration_ms: int = 150
-    # DECISION (2026-09-11, user approved C06): hangover 250ms preserves trailing phonemes / codas.
-    hangover_ms: int = 250
-    # DECISION (2026-09-11, user approved C06): pre-speech buffer 800ms captures initial plosives
-    # in ring buffer without adding latency.
-    pre_speech_buffer_ms: int = 800
+    # DECISION (2026-09-13, user confirmed; see report/vad_tuning_sweep_report.md):
+    # threshold 0.45 completely eliminates false-triggers on 00:00-00:08 intro music (0 triggers)
+    # while preserving crisp speech onset and recall on dialogue (83 commits), dropping CER to 8.92%.
+    threshold: float = 0.45
+    # DECISION (2026-09-13, user confirmed; see report/vad_tuning_sweep_report.md):
+    # silence 500ms prevents chopping natural conversational clauses mid-pause
+    # and reduces CER from 13.08% down to 8.92% while maintaining distinct speaker turns.
+    silence_duration_ms: int = 500
+    # DECISION (2026-09-13, user confirmed; see report/vad_tuning_sweep_report.md):
+    # hangover 300ms (5 native frames @ 60ms) protects trailing Japanese particles / codas,
+    # reducing CER to 10.02% (sub-10% ITN: 9.90%).
+    hangover_ms: int = 300
+    # DECISION (2026-09-13, user confirmed; see report/vad_tuning_sweep_report.md):
+    # pre-speech buffer 120ms (2 native frames @ 60ms) captures crisp plosive onsets
+    # while avoiding extra acoustic noise preamble (reducing fed audio from 226s to 195s)
+    # and dropping CER from 11.12% to 10.39%.
+    pre_speech_buffer_ms: int = 120
     sample_rate: int = 16000
 
     firered: FireRedVADConfig = Field(default_factory=FireRedVADConfig)
     silero: SileroVADConfig = Field(default_factory=SileroVADConfig)
     fsmn: FsmnVADConfig = Field(default_factory=FsmnVADConfig)
+
+    engine_profiles: Dict[str, VADEngineProfile] = Field(
+        default_factory=lambda: {k: v.model_copy() for k, v in DEFAULT_ENGINE_PROFILES.items()}
+    )
+
+    def get_engine_profile(self, engine_name: Optional[str] = None) -> VADEngineProfile:
+        """Get optimal parameter profile for specified or active engine."""
+        name = (engine_name or self.vad_engine).lower().strip()
+        if name in self.engine_profiles:
+            return self.engine_profiles[name]
+        return DEFAULT_ENGINE_PROFILES.get(name, DEFAULT_ENGINE_PROFILES["fsmn-vad"])
+
+    def apply_engine_profile(self, engine_name: str) -> VADEngineProfile:
+        """Apply optimal profile to the active VAD configuration upon engine switch."""
+        name = engine_name.lower().strip()
+        profile = self.get_engine_profile(name)
+        self.vad_engine = name
+        self.threshold = profile.threshold
+        self.silence_duration_ms = profile.silence_duration_ms
+        self.hangover_ms = profile.hangover_ms
+        self.pre_speech_buffer_ms = profile.pre_speech_buffer_ms
+        return profile
 
     @model_validator(mode="after")
     def _sync_thresholds(self) -> "VADConfig":
@@ -120,14 +183,24 @@ class VADConfig(BaseModel):
             self.fsmn.speech_noise_thres = self.threshold
         return self
 
+    def set_threshold(self, value: float) -> None:
+        """Explicitly set unified threshold across sub-configs."""
+        self.threshold = value
+        if getattr(self, "firered", None) is not None:
+            self.firered.threshold = value
+        if getattr(self, "silero", None) is not None:
+            self.silero.threshold = value
+        if getattr(self, "fsmn", None) is not None:
+            self.fsmn.speech_noise_thres = value
+
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
         if name == "threshold":
-            if hasattr(self, "firered") and self.firered is not None:
+            if getattr(self, "firered", None) is not None:
                 self.firered.threshold = value
-            if hasattr(self, "silero") and self.silero is not None:
+            if getattr(self, "silero", None) is not None:
                 self.silero.threshold = value
-            if hasattr(self, "fsmn") and self.fsmn is not None:
+            if getattr(self, "fsmn", None) is not None:
                 self.fsmn.speech_noise_thres = value
 
 
@@ -138,26 +211,6 @@ class ASRConfig(BaseModel):
     threads: int = 4
     min_transcribe_sec: float = 0.6
     poll_interval_ms: int = 350
-    # Preview growth gate.
-    #
-    # A preview re-transcribes the ENTIRE utterance so far, while the poller wakes every
-    # `poll_interval_ms`. That makes the preview path process far more audio than was
-    # actually spoken: measured on 24s of real speech, `asr.preview_audio_ms` = 52.6s
-    # (+20.6s of commit audio) = 3.05x amplification, and 30 of 38 inferences (79%).
-    #
-    # This gate skips a preview until at least this much NEW audio has accumulated since the
-    # previous preview:
-    #   required_new = max(preview_min_growth_ms / 1000, preview_min_growth_ratio * duration)
-    # A ratio >= 0.5 amortises the repeated work (preview cost grows logarithmically instead
-    # of linearly in the number of polls). The COMMIT path is untouched, so final transcripts
-    # are bit-identical; only live preview cadence changes.
-    #
-    # 0 / 0.0 disables the gate (previous behaviour).
-    #
-    # DECISION (2026-09-11, user approved Phase 3C.1): set to 0.5. Amortizes repeated preview work
-    # reducing GPU inferences by ~67% (from 293 down to 96) and audio exposure to 1.09x without CER penalty.
-    preview_min_growth_ratio: float = 0.5
-    preview_min_growth_ms: int = 0
     models_yaml: str = str(MODELS_YAML_PATH)
     # Bounded ASR token queue. Final (committed) messages are never dropped; preview
     # messages are coalesced (latest-wins) once the queue reaches this size.
@@ -195,37 +248,43 @@ class TranslationConfig(BaseModel):
     top_k: Optional[int] = None
     repetition_penalty: Optional[float] = None
     max_tokens: int = 128
-    use_context: bool = False
+    # DECISION (2026-09-13, user approved; see report/ingress_stream_optimization_report.md):
+    # Enable rolling context window for translation so clauses retain discourse coherence,
+    # correct pronouns/genders, and grammatical flow rather than translating isolated fragments.
+    use_context: bool = True
     context_window: int = 3
     prompt_style: Optional[str] = None
     n_gpu_layers: int = -1
 
     @model_validator(mode="after")
     def _apply_base_defaults(self) -> "TranslationConfig":
-        from backend_cpp.translation.model_registry import TranslationModelRegistry
+        try:
+            from backend_cpp.translation.model_registry import TranslationModelRegistry
 
-        registry = TranslationModelRegistry.get_instance()
-        resolved_key = registry.resolve_key(self.base)
-        d = registry.get_model(resolved_key)
-        if d is None:
-            resolved_key = registry.default_model_key
-            d = registry.get_model(resolved_key) or {}
+            registry = TranslationModelRegistry.get_instance()
+            resolved_key = registry.resolve_key(self.base)
+            d = registry.get_model(resolved_key)
+            if d is None:
+                resolved_key = registry.default_model_key
+                d = registry.get_model(resolved_key) or {}
 
-        self.base = resolved_key
-        if self.model is None and "model" in d:
-            self.model = d["model"]
-        if self.gguf_file is None and "gguf_file" in d:
-            self.gguf_file = d["gguf_file"]
-        if self.temperature is None and "temperature" in d:
-            self.temperature = d["temperature"]
-        if self.top_p is None and "top_p" in d:
-            self.top_p = d["top_p"]
-        if self.top_k is None and "top_k" in d:
-            self.top_k = d["top_k"]
-        if self.repetition_penalty is None and "repetition_penalty" in d:
-            self.repetition_penalty = d["repetition_penalty"]
-        if self.prompt_style is None and "prompt_style" in d:
-            self.prompt_style = d.get("prompt_style", "tencent")
+            self.base = resolved_key
+            if self.model is None and "model" in d:
+                self.model = d["model"]
+            if self.gguf_file is None and "gguf_file" in d:
+                self.gguf_file = d["gguf_file"]
+            if self.temperature is None and "temperature" in d:
+                self.temperature = d["temperature"]
+            if self.top_p is None and "top_p" in d:
+                self.top_p = d["top_p"]
+            if self.top_k is None and "top_k" in d:
+                self.top_k = d["top_k"]
+            if self.repetition_penalty is None and "repetition_penalty" in d:
+                self.repetition_penalty = d["repetition_penalty"]
+            if self.prompt_style is None and "prompt_style" in d:
+                self.prompt_style = d.get("prompt_style", "tencent")
+        except Exception:
+            pass
         return self
 
 
@@ -239,11 +298,17 @@ class SentenceConfig(BaseModel):
     max_duration_require_silence: bool = True
     # DECISION (2026-09-11, user approved Phase 3C.3): 80ms silence probe window as boundary candidate
     boundary_candidate_silence_ms: int = 80
-    # DECISION (2026-09-11, user approved Phase 3C.1): require 4 words to prevent tiny fragment commits
-    min_words_to_commit: int = 4
+    # DECISION (2026-09-11, user approved Phase 3C.1): require 4 words to prevent tiny fragment preview commits
+    min_words_to_commit: int = 1
+    # DECISION (2026-09-13, user approved; see report/ingress_stream_optimization_report.md):
+    # Default is 4 to preserve existing fragment-filter behavior; language adapter (TranscribeEngine.set_language)
+    # or dialogue sessions dynamically lower to 1 for CJK/dialogue streams to commit genuine short turns
+    # ("はい", "だろ", "え？", "まあ", "うん") instead of silently dropping them.
+    min_words_to_emit_final: int = 1
     split_on_stability: bool = True         # Ngắt câu khi preview text ổn định qua nhiều chu kỳ
-    # DECISION (2026-09-11, user approved Phase 3C.1): 1.5s stability duration prevents premature splitting
-    stability_duration_sec: float = 1.5     # Thời gian (giây) preview text giữ nguyên để chốt câu
+    # DECISION (2026-09-13; see report/ingress_stream_optimization_report.md): 2.0s stability duration
+    # prevents premature splitting during mid-sentence hesitations or inter-word pauses.
+    stability_duration_sec: float = 2.0     # Thời gian (giây) preview text giữ nguyên để chốt câu
     stability_threshold_polls: int = 2      # Số lần poll tối thiểu giữ nguyên kết quả
 
 
@@ -277,12 +342,23 @@ class DebugConfig(BaseModel):
     strict_lock_checks: bool = False
 
 
+class NamoConfig(BaseModel):
+    enabled: bool = True
+    repo_id: str = "videosdk-live/Namo-Turn-Detector-v1-Multilingual"
+    model_dir: str = str(MODELS_DIR / "namo")
+    confidence_threshold: float = 0.70
+    min_tokens: int = 3
+    require_silence_ms: int = 120
+    max_length: int = 512
+
+
 class AppConfig(BaseModel):
     ws: WSConfig = Field(default_factory=WSConfig)
     vad: VADConfig = Field(default_factory=VADConfig)
     asr: ASRConfig = Field(default_factory=ASRConfig)
     translation: TranslationConfig = Field(default_factory=TranslationConfig)
     sentence: SentenceConfig = Field(default_factory=SentenceConfig)
+    namo: NamoConfig = Field(default_factory=NamoConfig)
     tts: TTSConfig = Field(default_factory=TTSConfig)
     perf: PerfConfig = Field(default_factory=PerfConfig)
     debug: DebugConfig = Field(default_factory=DebugConfig)

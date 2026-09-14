@@ -491,13 +491,13 @@ def benchmark_vad_engine_tradeoff(
     speech coverage are in the same ballpark, i.e. whether one engine is obviously missing
     or inventing speech.
     """
-    path = Path(audio_path) if audio_path else Path("wav_test/OSR_us_000_0010_16k.wav")
+    # Imported here: perf_real_audio imports this module, so a top-level import would cycle.
+    from backend_cpp.tests.perf_real_audio import DEFAULT_REFERENCE_AUDIO, load_wav_pcm16
+    from backend_cpp.vad.vad_processor import VADProcessor
+
+    path = Path(audio_path) if audio_path else Path(DEFAULT_REFERENCE_AUDIO)
     if not path.is_absolute():
         path = Path.cwd() / path
-
-    # Imported here: perf_real_audio imports this module, so a top-level import would cycle.
-    from backend_cpp.tests.perf_real_audio import load_wav_pcm16
-    from backend_cpp.vad.vad_processor import VADProcessor
 
     pcm = load_wav_pcm16(path, max_sec=max_sec)
     duration = len(pcm) / (DEFAULT_SAMPLE_RATE * 2)

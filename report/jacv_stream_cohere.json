@@ -1,0 +1,3772 @@
+{
+  "mode": "stream",
+  "speed": 1.0,
+  "lang_mode": "ja",
+  "config": {
+    "vad_engine": "fsmn-vad",
+    "vad_threshold": 0.2,
+    "silence_duration_ms": 150,
+    "hangover_ms": 250,
+    "pre_speech_buffer_ms": 800,
+    "asr_language": "auto",
+    "normalize_speech": true,
+    "normalize_target_rms": 0.1,
+    "preview_min_growth_ratio": 0.5,
+    "poll_interval_ms": 350,
+    "min_transcribe_sec": 0.6,
+    "split_on_stability": true,
+    "min_words_to_commit": 4,
+    "stability_duration_sec": 1.5,
+    "max_duration_sec": 15.0,
+    "max_duration_require_silence": true,
+    "boundary_candidate_silence_ms": 80,
+    "override.asr.active_model": "cohere-transcribe"
+  },
+  "corpus_cer_pct": 12.109,
+  "corpus_cer_itn_pct": 12.109,
+  "corpus_wer_pct": null,
+  "total_ref_chars": 1759,
+  "total_edits": 213,
+  "per_file_cer_pct": {
+    "stream00": 7.95,
+    "stream01": 11.73,
+    "stream02": 8.11,
+    "stream03": 8.76,
+    "stream04": 14.18,
+    "stream05": 7.83,
+    "stream06": 10.0,
+    "stream07": 26.87
+  },
+  "results": [
+    {
+      "pair_id": "stream00",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 62.85,
+      "wall_sec": 80.55,
+      "wer": null,
+      "cer": 0.07954545454545454,
+      "cer_itn": 0.07954545454545454,
+      "substitutions": 0,
+      "deletions": 14,
+      "insertions": 0,
+      "ref_length": 176,
+      "hyp_length": 192,
+      "raw_reference": "車を買えば、どこでも行けます。.木曜日の午後、銀行へお金を振り込みに行きます。.今晩は長い時間勉強しようと思っています。.おなかが痛いので、病院へ行きます。.時間が分からなかったので、教室の時計を見ました。.田中さんは大きな家に住んでいます。.携帯電話は小さくて、とても便利です。.その仕事はわたしがしましょう。.おふろで体を洗います。.木村さんは時々晩ごはんを作ります。.あの人はこの学校の留学生です。.",
+      "raw_hypothesis": "車を買えば。 どこでも行けます。 お金を振り込みに行きます。 長い時間勉強しようと思っています。 おなかが痛いので、病院へ行きます。 時間が分からなかったので。 教室の時計を、 見ました。 田中さんは大きな家に住んでいます。 携帯電話は小さくて とても便利です その仕事はわたしがしましょう。 おふろで体を洗います。 木村さんは。 晩ごはんを作ります。 あの人はこの学校の留学生です。",
+      "normalized_reference": "車を買えばどこでも行けます木曜日の午後銀行へお金を振り込みに行きます今晩は長い時間勉強しようと思っていますおなかが痛いので病院へ行きます時間が分からなかったので教室の時計を見ました田中さんは大きな家に住んでいます携帯電話は小さくてとても便利ですその仕事はわたしがしましょうおふろで体を洗います木村さんは時々晩ごはんを作りますあの人はこの学校の留学生です",
+      "normalized_hypothesis": "車を買えばどこでも行けますお金を振り込みに行きます長い時間勉強しようと思っていますおなかが痛いので病院へ行きます時間が分からなかったので教室の時計を見ました田中さんは大きな家に住んでいます携帯電話は小さくてとても便利ですその仕事はわたしがしましょうおふろで体を洗います木村さんは晩ごはんを作りますあの人はこの学校の留学生です",
+      "commit_count": 16,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 52.32,
+      "preview_audio_sec": 39.6,
+      "inference_count": 45,
+      "audio_exposure_ratio": 1.46,
+      "commits": [
+        {
+          "utterance_id": "b149b211-f6e9-4dbd-8f27-a0a43def4492",
+          "reason": "VAD_SILENCE",
+          "text": "車を買えば。",
+          "t_wall": 1789185786.5114026,
+          "buffer_duration_sec": 0.36
+        },
+        {
+          "utterance_id": "bb617750-b6e6-42df-b8cf-957330f557bf",
+          "reason": "VAD_SILENCE",
+          "text": "どこでも行けます。",
+          "t_wall": 1789185789.3806345,
+          "buffer_duration_sec": 2.64
+        },
+        {
+          "utterance_id": "4d8621e4-6190-4f86-afca-892d84a3d5f8",
+          "reason": "VAD_SILENCE",
+          "text": "お金を振り込みに行きます。",
+          "t_wall": 1789185796.2556431,
+          "buffer_duration_sec": 2.88
+        },
+        {
+          "utterance_id": "77246d7d-60ab-469c-acbd-1983a75c34ff",
+          "reason": "VAD_SILENCE",
+          "text": "長い時間勉強しようと思っています。",
+          "t_wall": 1789185797.9894164,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "840b86b0-c311-476c-84cb-235896a8a8f8",
+          "reason": "VAD_SILENCE",
+          "text": "おなかが痛いので、病院へ行きます。",
+          "t_wall": 1789185804.8890004,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7c81a3b3-82e2-486d-acec-af6bc7c18a49",
+          "reason": "VAD_SILENCE",
+          "text": "時間が分からなかったので。",
+          "t_wall": 1789185812.8906827,
+          "buffer_duration_sec": 2.28
+        },
+        {
+          "utterance_id": "795d568d-654b-470c-aa9d-dfc5fc2d8c47",
+          "reason": "VAD_SILENCE",
+          "text": "教室の時計を、",
+          "t_wall": 1789185813.3265853,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "13684d32-b660-4a96-9a50-5fd57be417b1",
+          "reason": "VAD_SILENCE",
+          "text": "見ました。",
+          "t_wall": 1789185814.6049044,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "03083e23-a136-43d7-bf41-ac769a9cdbbe",
+          "reason": "VAD_SILENCE",
+          "text": "田中さんは大きな家に住んでいます。",
+          "t_wall": 1789185819.8609092,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "cda6710c-53fb-4781-a150-d86870b1e206",
+          "reason": "VAD_SILENCE",
+          "text": "携帯電話は小さくて",
+          "t_wall": 1789185824.0527506,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "df923615-5a2e-4e81-be53-ef5912ba1ef7",
+          "reason": "VAD_SILENCE",
+          "text": "とても便利です",
+          "t_wall": 1789185825.7969344,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "610b5f1e-a19f-426f-835f-fbccf3e37596",
+          "reason": "VAD_SILENCE",
+          "text": "その仕事はわたしがしましょう。",
+          "t_wall": 1789185831.2378979,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ba9dcdf3-619d-427c-8a36-b3a647eef501",
+          "reason": "VAD_SILENCE",
+          "text": "おふろで体を洗います。",
+          "t_wall": 1789185835.9287562,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7b605ff1-2f13-4e23-b6b5-129876a1bda1",
+          "reason": "VAD_SILENCE",
+          "text": "木村さんは。",
+          "t_wall": 1789185839.6438239,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "ff7b1d1b-69ac-455d-9cfd-bcfca7beacc9",
+          "reason": "VAD_SILENCE",
+          "text": "晩ごはんを作ります。",
+          "t_wall": 1789185843.067808,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f9c548d9-579f-4af2-ae50-aac65a0dd77a",
+          "reason": "VAD_SILENCE",
+          "text": "あの人はこの学校の留学生です。",
+          "t_wall": 1789185851.3629577,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 10057.2,
+          "text": "君。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.34,
+          "wall_ms": 8301.5,
+          "text": "車を買えば。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 9026.5,
+          "text": "どこでも行けます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.96,
+          "wall_ms": 7844.1,
+          "text": "あっ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 5565.3,
+          "text": "Kiyobi no Gokō"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.56,
+          "wall_ms": 3598.2,
+          "text": "英語。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.7,
+          "wall_ms": 6788.3,
+          "text": "お金を振り込みに行きます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.68,
+          "wall_ms": 3716.8,
+          "text": "今日は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.06,
+          "wall_ms": 117.7,
+          "text": "長い時間勉強しようと思う。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.14,
+          "wall_ms": 123.6,
+          "text": "長い時間勉強しようと思っています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 90.0,
+          "text": "お!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 102.5,
+          "text": "おなかが痛い"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 246.3,
+          "text": "おなかが痛いので、病院へ行きます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.56,
+          "wall_ms": 127.4,
+          "text": "おなかが痛いので、病院へ行きます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 95.6,
+          "text": "えっ?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 5729.1,
+          "text": "チーター"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 2898.0,
+          "text": "時間が分からなかったので。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.46,
+          "wall_ms": 101.3,
+          "text": "教室の時計を"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.46,
+          "wall_ms": 162.5,
+          "text": "教室の時計を、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 84.4,
+          "text": "見ました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 93.9,
+          "text": "見ました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 62.2,
+          "text": "田中。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.16,
+          "wall_ms": 106.5,
+          "text": "田中さんは大きいな。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 189.4,
+          "text": "田中さんは大きな家に住んでいます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 96.7,
+          "text": "きれい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 102.0,
+          "text": "携帯電話は"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 183.9,
+          "text": "携帯電話は小さくて"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 97.2,
+          "text": "トテモペリ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.44,
+          "wall_ms": 102.6,
+          "text": "とても便利です"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 254.8,
+          "text": "どうしよう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.16,
+          "wall_ms": 104.9,
+          "text": "その仕事はわたしが。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.3,
+          "wall_ms": 298.0,
+          "text": "その仕事はわたしがしましょう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 96.7,
+          "text": "お風呂。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 112.3,
+          "text": "おふろで体を洗います。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 123.7,
+          "text": "おふろで体を洗います。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 192.9,
+          "text": "肝。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 96.3,
+          "text": "木村さんは、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.98,
+          "wall_ms": 104.5,
+          "text": "木村さんは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 89.3,
+          "text": "あ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.44,
+          "wall_ms": 108.6,
+          "text": "晩ごはんを作って。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.52,
+          "wall_ms": 356.2,
+          "text": "晩ごはんを作ります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 289.6,
+          "text": "あの日"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.16,
+          "wall_ms": 99.3,
+          "text": "あの人はこの学校"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.62,
+          "wall_ms": 135.7,
+          "text": "あの人はこの学校の留学生です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.62,
+          "wall_ms": 170.1,
+          "text": "あの人はこの学校の留学生です。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream01",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 61.92,
+      "wall_sec": 79.07,
+      "wer": null,
+      "cer": 0.11728395061728394,
+      "cer_itn": 0.11728395061728394,
+      "substitutions": 9,
+      "deletions": 6,
+      "insertions": 4,
+      "ref_length": 162,
+      "hyp_length": 187,
+      "raw_reference": "このコンピューターは高いですが、とてもいいです。.わたしは砂糖を入れて、コーヒーを飲みます。.毎年家族で旅行に行きます。.田中さんはいつも忙しそうです。.ぐずぐず考えていたら、三十分も、フトンから出られなかった。.さあ、よく分かりません。.皆さんの教室は三階です。.では、授業を始めます。.この雑誌はおもしろいです。.わたしは歩くのがとても遅いです。.あの人は日本語の先生だと思います。.",
+      "raw_hypothesis": "このコンピュータは高いですが、 いいです。 私は砂糖を入れてコーヒーを飲みます。 毎年家族で医療機関に行きます。 田中さんはいつも忙しそうです。 ぐずぐず考えていたら三十分も布団から出られなかった さあ、よくわかりません。 みなさんの教室は三階です。 では、授業を始めます。 この雑誌はおもしろいです。 わたしはあるものがとても遅いです。 あの人は日本語の先生だと思います。",
+      "normalized_reference": "このコンピュタは高いですがとてもいいですわたしは砂糖を入れてコヒを飲みます毎年家族で旅行に行きます田中さんはいつも忙しそうですぐずぐず考えていたら三十分もフトンから出られなかったさあよく分かりません皆さんの教室は三階ですでは授業を始めますこの雑誌はおもしろいですわたしは歩くのがとても遅いですあの人は日本語の先生だと思います",
+      "normalized_hypothesis": "このコンピュタは高いですがいいです私は砂糖を入れてコヒを飲みます毎年家族で医療機関に行きます田中さんはいつも忙しそうですぐずぐず考えていたら三十分も布団から出られなかったさあよくわかりませんみなさんの教室は三階ですでは授業を始めますこの雑誌はおもしろいですわたしはあるものがとても遅いですあの人は日本語の先生だと思います",
+      "commit_count": 12,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 48.96,
+      "preview_audio_sec": 52.56,
+      "inference_count": 43,
+      "audio_exposure_ratio": 1.64,
+      "commits": [
+        {
+          "utterance_id": "76dc8f47-318f-4284-ac92-e4b1c3a2db98",
+          "reason": "VAD_SILENCE",
+          "text": "このコンピュータは高いですが、",
+          "t_wall": 1789185861.2188733,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "f7d258c2-bacc-4fdb-9019-76ef2c7e84eb",
+          "reason": "VAD_SILENCE",
+          "text": "いいです。",
+          "t_wall": 1789185863.042759,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ba1ee3c2-aacf-4da4-bdc7-c82cf20a83e3",
+          "reason": "VAD_SILENCE",
+          "text": "私は砂糖を入れてコーヒーを飲みます。",
+          "t_wall": 1789185871.9477427,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "32549524-1c8e-4048-86ae-857d1a8f172a",
+          "reason": "VAD_SILENCE",
+          "text": "毎年家族で医療機関に行きます。",
+          "t_wall": 1789185879.5491886,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "67f7973f-7d08-465f-9fec-e5dfe1fc81ad",
+          "reason": "VAD_SILENCE",
+          "text": "田中さんはいつも忙しそうです。",
+          "t_wall": 1789185886.2150881,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "dc8259d5-1638-4047-93d0-8583b024d30f",
+          "reason": "VAD_SILENCE",
+          "text": "ぐずぐず考えていたら三十分も布団から出られなかった",
+          "t_wall": 1789185901.6866913,
+          "buffer_duration_sec": 1.98
+        },
+        {
+          "utterance_id": "22b71e1d-f8e9-4395-9904-7c1a5b4dc47a",
+          "reason": "VAD_SILENCE",
+          "text": "さあ、よくわかりません。",
+          "t_wall": 1789185903.6925485,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7bd8de92-0e8a-4215-a36e-665fef5eaf23",
+          "reason": "VAD_SILENCE",
+          "text": "みなさんの教室は三階です。",
+          "t_wall": 1789185909.59242,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "9e4cb499-4027-4f0d-aade-33d66763060f",
+          "reason": "VAD_SILENCE",
+          "text": "では、授業を始めます。",
+          "t_wall": 1789185913.9501436,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "8a006479-96b2-45ca-a70a-4206a031bdc0",
+          "reason": "VAD_SILENCE",
+          "text": "この雑誌はおもしろいです。",
+          "t_wall": 1789185918.2488368,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "75e0bbc0-9a24-4889-b221-05fb23b6247b",
+          "reason": "VAD_SILENCE",
+          "text": "わたしはあるものがとても遅いです。",
+          "t_wall": 1789185924.233012,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "920bd399-f4f5-4fe7-b34b-b61506b92bbc",
+          "reason": "VAD_SILENCE",
+          "text": "あの人は日本語の先生だと思います。",
+          "t_wall": 1789185930.2463672,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 284.4,
+          "text": "これ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 102.3,
+          "text": "このコンピュータは。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.9,
+          "wall_ms": 258.3,
+          "text": "このコンピュータは高いですが、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 82.9,
+          "text": "ね"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 86.3,
+          "text": "いいです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.5,
+          "wall_ms": 97.3,
+          "text": "いいです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 188.9,
+          "text": "うわ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 96.2,
+          "text": "私は砂糖。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.96,
+          "wall_ms": 135.3,
+          "text": "私は砂糖を入れてコーヒーを飲みます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.68,
+          "wall_ms": 143.8,
+          "text": "私は砂糖を入れてコーヒーを飲みます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 144.2,
+          "text": "まい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 178.0,
+          "text": "毎年家族で。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.32,
+          "wall_ms": 131.7,
+          "text": "毎年家族で医療機関に行きます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 259.6,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 83.9,
+          "text": "ただ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 107.4,
+          "text": "田中さんは「いつも」。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.78,
+          "wall_ms": 127.8,
+          "text": "田中さんはいつも忙しそうです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 221.7,
+          "text": "どうぞ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 96.1,
+          "text": "ぐずぐず考えて。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.08,
+          "wall_ms": 128.7,
+          "text": "ぐずぐず考えていたら30分も。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.32,
+          "wall_ms": 4311.8,
+          "text": "ぐずぐず考えていたら三十分も布団から出られなかった"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 104.9,
+          "text": "さあ、よくわからない。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 127.6,
+          "text": "さあ、よくわかりません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 92.5,
+          "text": "みんな。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 225.2,
+          "text": "皆さんのお気を"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.72,
+          "wall_ms": 131.2,
+          "text": "みなさんの教室は三階です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.08,
+          "wall_ms": 129.0,
+          "text": "みなさんの教室は三階です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 88.0,
+          "text": "でも。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 113.2,
+          "text": "では、ギュギュをはじめ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 119.8,
+          "text": "では、授業を始めます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.14,
+          "wall_ms": 231.9,
+          "text": "この図。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.46,
+          "wall_ms": 110.2,
+          "text": "この雑誌はおもしろいです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.0,
+          "wall_ms": 120.9,
+          "text": "この雑誌はおもしろいです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 83.0,
+          "text": "私"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 103.9,
+          "text": "私はある程度、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 210.7,
+          "text": "わたしはあるものがとてもおそいです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.08,
+          "wall_ms": 137.5,
+          "text": "わたしはあるものがとても遅いです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 89.0,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.84,
+          "wall_ms": 84.7,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 90.5,
+          "text": "あの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 99.8,
+          "text": "あの人は日本。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 299.7,
+          "text": "あの人は日本語の先生だと思います。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.9,
+          "wall_ms": 121.1,
+          "text": "あの人は日本語の先生だと思います。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream02",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 60.93,
+      "wall_sec": 77.76,
+      "wer": null,
+      "cer": 0.08108108108108109,
+      "cer_itn": 0.08108108108108109,
+      "substitutions": 9,
+      "deletions": 6,
+      "insertions": 3,
+      "ref_length": 222,
+      "hyp_length": 258,
+      "raw_reference": "今晩は早く会社を出て、うちへ帰ります。.テロがあるからやめろと、さんざん、いわれた。.秀麗な富士山も、一歩足を踏み入れれば、岩石の露出した、あらあらしい姿を現す。.わたしはいつもこのスーパーで買い物をします。.あそこの角を右に曲がると、スーパーがあります。.きのう初めてピアノを習いました。.それで窓をあけると、火傷をしそうな熱風が吹きこんでくる。.あの人の名前を忘れてしまいました。.自己を顧みる、人間らしい態度である。.これは小林さんの大好きな食べ物です。.生みの親は、サンフランシスコに住む日系人たちだった。.",
+      "raw_hypothesis": "今晩は、早く会社を出て。 うちへ帰ります。 テロがあるからやめろとさんざん言われた。 シューレーな富士山も、 一歩足を踏み入れれば。 露出した荒々しい姿を現す。 わたしはいつもこのスーパーで買い物をします。 あそこの角を右に曲がると、スーパーがあります。 きのう初めてピアノを習いました。 それで、窓を開けると、火傷しそうな熱風が吹き込んでくる。 あの人の名前を忘れてしまいました。 自己をかかり見る人間らしい態度である。 これは小林さんの大好きな食べ物です。 生みの親は、サンフランシスコに住む、日系人たちだった。",
+      "normalized_reference": "今晩は早く会社を出てうちへ帰りますテロがあるからやめろとさんざんいわれた秀麗な富士山も一歩足を踏み入れれば岩石の露出したあらあらしい姿を現すわたしはいつもこのスパで買い物をしますあそこの角を右に曲がるとスパがありますきのう初めてピアノを習いましたそれで窓をあけると火傷をしそうな熱風が吹きこんでくるあの人の名前を忘れてしまいました自己を顧みる人間らしい態度であるこれは小林さんの大好きな食べ物です生みの親はサンフランシスコに住む日系人たちだった",
+      "normalized_hypothesis": "今晩は早く会社を出てうちへ帰りますテロがあるからやめろとさんざん言われたシュレな富士山も一歩足を踏み入れれば露出した荒々しい姿を現すわたしはいつもこのスパで買い物をしますあそこの角を右に曲がるとスパがありますきのう初めてピアノを習いましたそれで窓を開けると火傷しそうな熱風が吹き込んでくるあの人の名前を忘れてしまいました自己をかかり見る人間らしい態度であるこれは小林さんの大好きな食べ物です生みの親はサンフランシスコに住む日系人たちだった",
+      "commit_count": 14,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 51.3,
+      "preview_audio_sec": 54.72,
+      "inference_count": 56,
+      "audio_exposure_ratio": 1.74,
+      "commits": [
+        {
+          "utterance_id": "3df9e2e2-4085-48df-8870-c2063ca23d7b",
+          "reason": "VAD_SILENCE",
+          "text": "今晩は、早く会社を出て。",
+          "t_wall": 1789185938.246897,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "4d0498d7-3a3a-44ac-a44b-bc868c018414",
+          "reason": "VAD_SILENCE",
+          "text": "うちへ帰ります。",
+          "t_wall": 1789185940.057434,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "fcd81f30-6a25-49fd-af42-2852f2dee810",
+          "reason": "VAD_SILENCE",
+          "text": "テロがあるからやめろとさんざん言われた。",
+          "t_wall": 1789185947.1552432,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7202a5e0-f5cf-4a28-a187-dd7caccf7c10",
+          "reason": "VAD_SILENCE",
+          "text": "シューレーな富士山も、",
+          "t_wall": 1789185950.946065,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "bc69785f-fe86-4780-9095-b7acb2639ebb",
+          "reason": "VAD_SILENCE",
+          "text": "一歩足を踏み入れれば。",
+          "t_wall": 1789185953.3273594,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "86bcfdd0-9b64-436d-847b-24a0ffdb7d20",
+          "reason": "VAD_SILENCE",
+          "text": "露出した荒々しい姿を現す。",
+          "t_wall": 1789185958.1942806,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "98895189-c85c-4e9d-88fd-ac45e6e4ffba",
+          "reason": "VAD_SILENCE",
+          "text": "わたしはいつもこのスーパーで買い物をします。",
+          "t_wall": 1789185964.2425108,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "24a63b13-06c2-42b5-9cba-680bdf1d4135",
+          "reason": "VAD_SILENCE",
+          "text": "あそこの角を右に曲がると、スーパーがあります。",
+          "t_wall": 1789185971.146845,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "dde78028-1c59-4895-9c0d-c5553b6ae8ad",
+          "reason": "VAD_SILENCE",
+          "text": "きのう初めてピアノを習いました。",
+          "t_wall": 1789185976.6092193,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "662ad6c6-ee09-4263-86fe-3f5ce70f7482",
+          "reason": "VAD_SILENCE",
+          "text": "それで、窓を開けると、火傷しそうな熱風が吹き込んでくる。",
+          "t_wall": 1789185983.4460642,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "31a2079b-53b4-42ee-be5b-b6556450ec23",
+          "reason": "VAD_SILENCE",
+          "text": "あの人の名前を忘れてしまいました。",
+          "t_wall": 1789185988.7858365,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "15e4ce53-3a64-4efe-94ba-329ecf332b7b",
+          "reason": "VAD_SILENCE",
+          "text": "自己をかかり見る人間らしい態度である。",
+          "t_wall": 1789185995.462066,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "9482ac6b-b643-497c-8157-49f37a43bf12",
+          "reason": "VAD_SILENCE",
+          "text": "これは小林さんの大好きな食べ物です。",
+          "t_wall": 1789186001.806086,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "41a159ca-e81f-4c84-92ea-920fbb9b462d",
+          "reason": "VAD_SILENCE",
+          "text": "生みの親は、サンフランシスコに住む、日系人たちだった。",
+          "t_wall": 1789186008.9072292,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 208.1,
+          "text": "え?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.72,
+          "wall_ms": 78.0,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 91.3,
+          "text": "こんばんは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 113.6,
+          "text": "今晩は、早く会社を出た。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.46,
+          "wall_ms": 116.9,
+          "text": "今晩は、早く会社を出て。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 91.4,
+          "text": "入ります。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 101.2,
+          "text": "うちへ帰ります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 177.3,
+          "text": "トゥルー。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 100.1,
+          "text": "テロがあるからやめろ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.02,
+          "wall_ms": 276.6,
+          "text": "テロがあるからやめろとさんざん言われた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.2,
+          "wall_ms": 129.3,
+          "text": "テロがあるからやめろとさんざん言われた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 83.9,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.84,
+          "wall_ms": 58.0,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 89.1,
+          "text": "へえ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 97.6,
+          "text": "終霊な富士"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.16,
+          "wall_ms": 114.0,
+          "text": "シューレーな富士山も、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 89.3,
+          "text": "踏み"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 106.8,
+          "text": "一歩足を踏み入れれば。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.86,
+          "wall_ms": 111.9,
+          "text": "一歩足を踏み入れれば。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.9,
+          "text": "露出。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 104.7,
+          "text": "露出した洗う"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 308.6,
+          "text": "露出した荒々しい姿を現す。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 92.9,
+          "text": "私"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 104.7,
+          "text": "私はいつもこの"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.96,
+          "wall_ms": 268.0,
+          "text": "わたしはいつもこのスーパーで買い物をします。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 87.4,
+          "text": "あそこ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 100.0,
+          "text": "あそこの角を。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 302.7,
+          "text": "あそこのかどをみぎにまがるとスーパーがあります。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.5,
+          "wall_ms": 132.0,
+          "text": "あそこの角を右に曲がると、スーパーがあります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 92.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 226.1,
+          "text": "きのう初めてピアノ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.36,
+          "wall_ms": 120.5,
+          "text": "きのう初めてピアノを習いました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 89.3,
+          "text": "うん。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 93.7,
+          "text": "よし!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 93.0,
+          "text": "それで、窓。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 228.8,
+          "text": "それで、窓を開けると、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.78,
+          "wall_ms": 145.6,
+          "text": "それで、窓を開けると、火傷しそうな熱風が吹き込んでくる。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.14,
+          "wall_ms": 156.2,
+          "text": "それで、窓を開けると、火傷しそうな熱風が吹き込んでくる。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 94.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 89.4,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 92.8,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 263.0,
+          "text": "あの人の名前を忘れてしまいました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.34,
+          "wall_ms": 106.4,
+          "text": "あの人の名前を忘れてしまいました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 95.4,
+          "text": "すいません。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.5,
+          "wall_ms": 92.6,
+          "text": "え?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 98.0,
+          "text": "仮に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 218.4,
+          "text": "自己をかかり見る人間"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 120.5,
+          "text": "自己をかかり見る人間らしい態度である。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 93.9,
+          "text": "これは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 112.6,
+          "text": "これは小林さんの大好きなものです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.48,
+          "wall_ms": 279.2,
+          "text": "これは小林さんの大好きな食べ物です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 83.8,
+          "text": "え?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 103.5,
+          "text": "アメリカは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 112.7,
+          "text": "生みの親はサンフランシスコ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 200.8,
+          "text": "生みの親はサンフランシスコに住む日系人たちだ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.26,
+          "wall_ms": 143.0,
+          "text": "生みの親は、サンフランシスコに住む、日系人たちだった。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream03",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 65.53,
+      "wall_sec": 83.59,
+      "wer": null,
+      "cer": 0.08755760368663594,
+      "cer_itn": 0.10222222222222223,
+      "substitutions": 7,
+      "deletions": 11,
+      "insertions": 1,
+      "ref_length": 217,
+      "hyp_length": 247,
+      "raw_reference": "新しい道ができたので、村は便利になりました。.学生は、レポートを置くと、ちょっと頭を下げて出て行った。.なぜですか。.不思議なくらい、美しく彩られた道を行く。.箱の中に小さい犬がいます。.真っ昼間なのに、キャンプの外れの電柱に、電球がともっていた。.このボールペンはいくらですか。.その荷物はわたしが持ちましょう。.喜びばかりが続くとは限らないのだ。.田中さんにもらったお菓子を食べました。.暖房器具の時期に、冷房器具を並べるようなデパートは、たちまちつぶれる。.つぎの瞬間、万歳、万歳の声が聞こえていた。.",
+      "raw_hypothesis": "新しい道ができたので、村は便利になりました。 学生はレポートを置くと、ちょっと頭を下げて出ていった。 なぜですか? 不思議なくらい、 彩られた道を行く。 箱の中に小さい犬がいます。 真っ昼間なのに、キャンプのハズレの、電柱に。 電球が止まっていた。 このボールペンはいくらですか。 その荷物はわたしが持ちましょう。 喜びばかりが続くとは ないのだ。 田中さんにもらったお菓子を食べました。 暖房器具の時期に、 冷房器具を並べるようなデパートはたちまち潰れる。 次の瞬間、万歳! 声が聞こえてた。",
+      "normalized_reference": "新しい道ができたので村は便利になりました学生はレポトを置くとちょっと頭を下げて出て行ったなぜですか不思議なくらい美しく彩られた道を行く箱の中に小さい犬がいます真っ昼間なのにキャンプの外れの電柱に電球がともっていたこのボルペンはいくらですかその荷物はわたしが持ちましょう喜びばかりが続くとは限らないのだ田中さんにもらったお菓子を食べました暖房器具の時期に冷房器具を並べるようなデパトはたちまちつぶれるつぎの瞬間万歳万歳の声が聞こえていた",
+      "normalized_hypothesis": "新しい道ができたので村は便利になりました学生はレポトを置くとちょっと頭を下げて出ていったなぜですか不思議なくらい彩られた道を行く箱の中に小さい犬がいます真っ昼間なのにキャンプのハズレの電柱に電球が止まっていたこのボルペンはいくらですかその荷物はわたしが持ちましょう喜びばかりが続くとはないのだ田中さんにもらったお菓子を食べました暖房器具の時期に冷房器具を並べるようなデパトはたちまち潰れる次の瞬間万歳声が聞こえてた",
+      "commit_count": 17,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 53.34,
+      "preview_audio_sec": 57.96,
+      "inference_count": 53,
+      "audio_exposure_ratio": 1.7,
+      "commits": [
+        {
+          "utterance_id": "38ee4f0b-2f8e-4e73-b04c-ba29dd39ec22",
+          "reason": "VAD_SILENCE",
+          "text": "新しい道ができたので、村は便利になりました。",
+          "t_wall": 1789186016.647637,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "4cac61cd-a9a0-4d35-bc9b-3cf480f649a1",
+          "reason": "VAD_SILENCE",
+          "text": "学生はレポートを置くと、ちょっと頭を下げて出ていった。",
+          "t_wall": 1789186023.5103986,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1f4b488d-e2b0-42a9-abff-537dc8e1fc09",
+          "reason": "VAD_SILENCE",
+          "text": "なぜですか?",
+          "t_wall": 1789186027.4789586,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7b2448e5-cfc4-40a0-b251-64e9fbd6b9a9",
+          "reason": "VAD_SILENCE",
+          "text": "不思議なくらい、",
+          "t_wall": 1789186030.6201322,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "69c801e5-e6d1-4dfe-9df6-b09b8ec5406d",
+          "reason": "VAD_SILENCE",
+          "text": "彩られた道を行く。",
+          "t_wall": 1789186033.2950737,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1b9210c3-8f97-41ee-9a3a-e923b0ac67e4",
+          "reason": "VAD_SILENCE",
+          "text": "箱の中に小さい犬がいます。",
+          "t_wall": 1789186039.4298797,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "38f264c8-6214-4237-bff3-7790c6974510",
+          "reason": "VAD_SILENCE",
+          "text": "真っ昼間なのに、キャンプのハズレの、電柱に。",
+          "t_wall": 1789186047.2146373,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "26d200a6-8014-4f54-826d-77ea06bc8279",
+          "reason": "VAD_SILENCE",
+          "text": "電球が止まっていた。",
+          "t_wall": 1789186050.5026627,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "9c3afab6-0dc7-44a6-88d1-48656784cae7",
+          "reason": "VAD_SILENCE",
+          "text": "このボールペンはいくらですか。",
+          "t_wall": 1789186055.2801976,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ae944c17-3069-4bf8-8722-6e42d649f27f",
+          "reason": "VAD_SILENCE",
+          "text": "その荷物はわたしが持ちましょう。",
+          "t_wall": 1789186060.5450287,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "19fe1e77-43b1-4f39-800b-f80dd90df43a",
+          "reason": "VAD_SILENCE",
+          "text": "喜びばかりが続くとは",
+          "t_wall": 1789186065.2066245,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "52fe4ffd-2590-492e-ad52-bf408407b721",
+          "reason": "VAD_SILENCE",
+          "text": "ないのだ。",
+          "t_wall": 1789186066.846362,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "b9df6003-b686-49c7-afc4-1c70323e1bbb",
+          "reason": "VAD_SILENCE",
+          "text": "田中さんにもらったお菓子を食べました。",
+          "t_wall": 1789186072.6407528,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "73930732-1c82-439a-b085-3f831d953ad9",
+          "reason": "VAD_SILENCE",
+          "text": "暖房器具の時期に、",
+          "t_wall": 1789186078.7799742,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c84b9f93-197f-4e24-bb30-b526c241c20f",
+          "reason": "VAD_SILENCE",
+          "text": "冷房器具を並べるようなデパートはたちまち潰れる。",
+          "t_wall": 1789186085.62216,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "18bb3194-28c3-4e2d-bbad-8d5b6f0a33d9",
+          "reason": "VAD_SILENCE",
+          "text": "次の瞬間、万歳!",
+          "t_wall": 1789186089.9187267,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "11347db8-c450-4314-85ec-f2a82636ca48",
+          "reason": "VAD_SILENCE",
+          "text": "声が聞こえてた。",
+          "t_wall": 1789186092.8523684,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 156.6,
+          "text": "新しい"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 435.5,
+          "text": "新しい道ができたので、村は一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ一つ"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.66,
+          "wall_ms": 119.2,
+          "text": "新しい道ができたので、村は便利になりました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 85.1,
+          "text": "学生"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 109.8,
+          "text": "学生はレポートを送っています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.08,
+          "wall_ms": 204.3,
+          "text": "学生はレポートを置くと、ちょっと頭を下げて出ていった"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.56,
+          "wall_ms": 144.2,
+          "text": "学生はレポートを置くと、ちょっと頭を下げて出ていった。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 175.5,
+          "text": "なぜだ?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.74,
+          "wall_ms": 87.7,
+          "text": "なぜですか?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 91.4,
+          "text": "不思議な"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.74,
+          "wall_ms": 216.0,
+          "text": "不思議なくらい、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 81.8,
+          "text": "色"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 98.9,
+          "text": "彩られた道を"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.22,
+          "wall_ms": 110.3,
+          "text": "彩られた道を行く。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 173.3,
+          "text": "はか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 104.1,
+          "text": "箱の中に小さな灯油が入っています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.48,
+          "wall_ms": 126.8,
+          "text": "箱の中に小さい犬がいます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 228.8,
+          "text": "まっ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 98.8,
+          "text": "まっ昼間なのに"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.08,
+          "wall_ms": 138.3,
+          "text": "真っ昼間なのに、キャンプのハズレへの愛。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.28,
+          "wall_ms": 163.1,
+          "text": "真っ昼間なのに、キャンプのハズレの、電柱に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 84.5,
+          "text": "ん?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 99.5,
+          "text": "吩きゅうがっ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.46,
+          "wall_ms": 298.5,
+          "text": "電球が止まっていた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.52,
+          "wall_ms": 269.2,
+          "text": "電球が止まっていた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.8,
+          "text": "この"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 102.4,
+          "text": "このボールペンはい"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 120.6,
+          "text": "このボールペンはいくらですか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 153.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 106.3,
+          "text": "その帝を。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 269.2,
+          "text": "その荷物はわたしが持ちましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.78,
+          "wall_ms": 148.7,
+          "text": "その荷物はわたしが持ちましょう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 88.7,
+          "text": "よろしくお願いします。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 102.4,
+          "text": "喜びばっかりだ"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 122.5,
+          "text": "喜びばかりが続くとは"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 85.3,
+          "text": "はい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.32,
+          "wall_ms": 95.8,
+          "text": "ないのだ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 228.2,
+          "text": "ただ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 103.0,
+          "text": "田中さんにもらった。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 193.1,
+          "text": "田中さんにもらったお菓子を食べました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 239.9,
+          "text": "だ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 99.1,
+          "text": "暖房器具の十字"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 110.6,
+          "text": "暖房器具の時期に、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.1,
+          "text": "ギグ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 173.5,
+          "text": "冷房器具を並べてください。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 251.3,
+          "text": "冷房器具を並べるようなデパートは、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.34,
+          "wall_ms": 164.1,
+          "text": "冷房器具を並べるようなデパートはたちまち潰れる。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 192.5,
+          "text": "次。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 105.2,
+          "text": "次の瞬間、万全。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.58,
+          "wall_ms": 116.9,
+          "text": "次の瞬間、万歳!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 80.7,
+          "text": "ここ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 94.5,
+          "text": "光栄が。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 115.3,
+          "text": "声が聞こえてた。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream04",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 65.9,
+      "wall_sec": 83.96,
+      "wer": null,
+      "cer": 0.14181818181818182,
+      "cer_itn": 0.14181818181818182,
+      "substitutions": 21,
+      "deletions": 14,
+      "insertions": 4,
+      "ref_length": 275,
+      "hyp_length": 306,
+      "raw_reference": "球宴のファン投票でも人気が偶像化していた長嶋茂雄に肉薄する.妹はきょうも高い熱が続いているので、心配です。.けさテレビでニュースを見ました。.けさは時間があるので、新聞を読んでから、家を出ます。.わたしはあの人のことを覚えていませんでした。.シャツが一枚あります。.不満や、いらだちは、もっぱら、受験や、身のまわりに向けられている。.山田さんは来月東京へ行くそうです。.おしゃれとは縁がなく、ジーパンにティーシャツ、ジャンパーといった格好で、駅まで自転車を走らせる。.自然の知恵でよく知っている。.図書館は午前九時から午後八時までです。.わたしは絵を書くのが下手です。.海山の、往復割引きっぷの大半は、夏休みに向けて、売り出される。.",
+      "raw_hypothesis": "キュンのファン 東京でも。 人気が急増していった長崎市議をに、 妹はきょうも都会熱視が続いているので、心配です。 けさテレビでニュースを見ました。 けさは時間があるので、新聞を読んでから、家を出ます。 私はあの人のことを覚えていませんでした。 シャツが一枚あります。 不満や苛立ちは、専ら、受験や身の回りに向けられている。 山田さんは来月東京に行くそうです。 おしゃれとは縁がなく、ジーパーにTシャツ、ジャンパーといった格好で、駅まで自転車を走らせる。 自然の知恵でよく知っている 図書館は午前九時から午後八時までです。 わたしは絵を描くのが下手です。 海山の往復割引切符の大半は、 夏休みに向けて売り出される。",
+      "normalized_reference": "球宴のファン投票でも人気が偶像化していた長嶋茂雄に肉薄する妹はきょうも高い熱が続いているので心配ですけさテレビでニュスを見ましたけさは時間があるので新聞を読んでから家を出ますわたしはあの人のことを覚えていませんでしたシャツが一枚あります不満やいらだちはもっぱら受験や身のまわりに向けられている山田さんは来月東京へ行くそうですおしゃれとは縁がなくジパンにティシャツジャンパといった格好で駅まで自転車を走らせる自然の知恵でよく知っている図書館は午前九時から午後八時までですわたしは絵を書くのが下手です海山の往復割引きっぷの大半は夏休みに向けて売り出される",
+      "normalized_hypothesis": "キュンのファン東京でも人気が急増していった長崎市議をに妹はきょうも都会熱視が続いているので心配ですけさテレビでニュスを見ましたけさは時間があるので新聞を読んでから家を出ます私はあの人のことを覚えていませんでしたシャツが一枚あります不満や苛立ちは専ら受験や身の回りに向けられている山田さんは来月東京に行くそうですおしゃれとは縁がなくジパにTシャツジャンパといった格好で駅まで自転車を走らせる自然の知恵でよく知っている図書館は午前九時から午後八時までですわたしは絵を描くのが下手です海山の往復割引切符の大半は夏休みに向けて売り出される",
+      "commit_count": 16,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 58.44,
+      "preview_audio_sec": 69.78,
+      "inference_count": 56,
+      "audio_exposure_ratio": 1.95,
+      "commits": [
+        {
+          "utterance_id": "037326f9-5dcb-4e3e-8331-7b3cc0b57afd",
+          "reason": "VAD_SILENCE",
+          "text": "キュンのファン",
+          "t_wall": 1789186097.620116,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "60ece37e-e0d4-46c0-ade3-1a8aa9fd2cb9",
+          "reason": "VAD_SILENCE",
+          "text": "東京でも。",
+          "t_wall": 1789186099.6883256,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "3919df63-4a9e-44e2-a707-e8081fbfad15",
+          "reason": "VAD_SILENCE",
+          "text": "人気が急増していった長崎市議をに、",
+          "t_wall": 1789186104.8879526,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "5596d76a-d731-4614-9cd2-ea7e8104fbbe",
+          "reason": "VAD_SILENCE",
+          "text": "妹はきょうも都会熱視が続いているので、心配です。",
+          "t_wall": 1789186114.4488356,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e4e2e62c-0160-42ea-9af4-703e91741b4f",
+          "reason": "VAD_SILENCE",
+          "text": "けさテレビでニュースを見ました。",
+          "t_wall": 1789186118.67955,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "471f7aae-6132-47bd-89c9-1dcbeb331bf5",
+          "reason": "VAD_SILENCE",
+          "text": "けさは時間があるので、新聞を読んでから、家を出ます。",
+          "t_wall": 1789186125.8425746,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c4f1645e-d5c7-4e79-b806-f759388ed40b",
+          "reason": "VAD_SILENCE",
+          "text": "私はあの人のことを覚えていませんでした。",
+          "t_wall": 1789186130.5744667,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "84f87638-7947-439f-bba8-7ab4b5606579",
+          "reason": "VAD_SILENCE",
+          "text": "シャツが一枚あります。",
+          "t_wall": 1789186134.447104,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "5bdbb6e3-16e2-4dcb-81ce-8d5607f512dd",
+          "reason": "VAD_SILENCE",
+          "text": "不満や苛立ちは、専ら、受験や身の回りに向けられている。",
+          "t_wall": 1789186141.8007746,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c5d759ed-3f01-4e78-8fa8-a9137aed9369",
+          "reason": "VAD_SILENCE",
+          "text": "山田さんは来月東京に行くそうです。",
+          "t_wall": 1789186146.6023512,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c4da3c86-71b0-43a8-a0d5-b2512d86f279",
+          "reason": "VAD_SILENCE",
+          "text": "おしゃれとは縁がなく、ジーパーにTシャツ、ジャンパーといった格好で、駅まで自転車を走らせる。",
+          "t_wall": 1789186156.4782848,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f0bd0052-bb9c-4f70-94e5-9115bef60206",
+          "reason": "VAD_SILENCE",
+          "text": "自然の知恵でよく知っている",
+          "t_wall": 1789186159.9264233,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "14bdc2a8-f87b-4626-96bb-38d3e5d7167b",
+          "reason": "VAD_SILENCE",
+          "text": "図書館は午前九時から午後八時までです。",
+          "t_wall": 1789186165.126179,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "b9e3e936-d6ba-49fb-88dc-3826594e3faf",
+          "reason": "VAD_SILENCE",
+          "text": "わたしは絵を描くのが下手です。",
+          "t_wall": 1789186168.8704236,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "22ee8f6c-c2a7-4884-8017-8a1653b1de79",
+          "reason": "VAD_SILENCE",
+          "text": "海山の往復割引切符の大半は、",
+          "t_wall": 1789186174.0269701,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "8d569dac-9b1f-46c3-89e9-3fe0d12bc7eb",
+          "reason": "VAD_SILENCE",
+          "text": "夏休みに向けて売り出される。",
+          "t_wall": 1789186176.82385,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 293.5,
+          "text": "九"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 93.9,
+          "text": "キュンのファン"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 80.2,
+          "text": "お。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 92.9,
+          "text": "東洋でも。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 96.3,
+          "text": "東京でも。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 90.7,
+          "text": "いいよ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 252.7,
+          "text": "人気が急速化します。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 125.7,
+          "text": "人気が急増していた長崎市"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.08,
+          "wall_ms": 138.2,
+          "text": "人気が急増していった長崎市議をに、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 93.3,
+          "text": "する。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 92.7,
+          "text": "する。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 87.2,
+          "text": "え?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 252.8,
+          "text": "妹はきょうも"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.72,
+          "wall_ms": 133.0,
+          "text": "妹はきょうも都会熱視が続いています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.82,
+          "wall_ms": 256.7,
+          "text": "妹はきょうも都会熱視が続いているので、心配です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 92.7,
+          "text": "けさ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 125.3,
+          "text": "けさテレビでニュースを見ました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 123.5,
+          "text": "けさテレビでニュースを見ました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 163.9,
+          "text": "け"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 97.6,
+          "text": "けさは時間があるの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 132.4,
+          "text": "けさは時間があるので、新聞を読んでから。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.68,
+          "wall_ms": 144.5,
+          "text": "けさは時間があるので、新聞を読んでから、家を出ます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 85.9,
+          "text": "私"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 168.7,
+          "text": "私はあの人のことを覚えています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.12,
+          "wall_ms": 129.2,
+          "text": "私はあの人のことを覚えていませんでした。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 216.9,
+          "text": "シャツ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 105.3,
+          "text": "シャツが一枚あります。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.4,
+          "wall_ms": 107.1,
+          "text": "シャツが一枚あります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 92.6,
+          "text": "フォロー。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 104.4,
+          "text": "不満やいらだち"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 256.6,
+          "text": "不満や苛立ちは、専ら、受験や、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.52,
+          "wall_ms": 166.2,
+          "text": "不満や苛立ちは、専ら、受験や身の回りに向けられている。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 239.5,
+          "text": "山田さん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.1,
+          "wall_ms": 101.9,
+          "text": "山田さんは来月東京に移住。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 127.7,
+          "text": "山田さんは来月東京に行くそうです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 210.0,
+          "text": "おしゃれ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 113.1,
+          "text": "おしゃれとは縁がなく、ジーパン"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.8,
+          "wall_ms": 166.1,
+          "text": "おしゃれとは縁がなく、ジーパンにTシャツ、ジャンパーといった格好で、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.32,
+          "wall_ms": 329.1,
+          "text": "おしゃれとは縁がなく、ジーパーにTシャツ、ジャンパーといった格好で、駅まで自転車を走らせる。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 85.1,
+          "text": "き"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 107.6,
+          "text": "自然の知恵でよく"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.64,
+          "wall_ms": 126.1,
+          "text": "自然の知恵でよく知っている"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 96.7,
+          "text": "図書館"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 102.6,
+          "text": "図書館は午前九時"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 282.6,
+          "text": "図書館は午前九時から午後八時までです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.78,
+          "wall_ms": 169.2,
+          "text": "図書館は午前九時から午後八時までです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 84.9,
+          "text": "私。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 115.8,
+          "text": "わたしは絵を描くのが下手。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 123.0,
+          "text": "わたしは絵を描くのが下手です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 89.0,
+          "text": "うん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 218.4,
+          "text": "海山の大福間"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.72,
+          "wall_ms": 136.5,
+          "text": "海山の往復割引切符の大半は、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 176.6,
+          "text": "海山の往復割引切符の大半は、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 89.1,
+          "text": "すみません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 98.6,
+          "text": "夏休みに向けて。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 116.4,
+          "text": "夏休みに向けて売り出される。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream05",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 60.1,
+      "wall_sec": 76.76,
+      "wer": null,
+      "cer": 0.0782608695652174,
+      "cer_itn": 0.0782608695652174,
+      "substitutions": 13,
+      "deletions": 1,
+      "insertions": 4,
+      "ref_length": 230,
+      "hyp_length": 269,
+      "raw_reference": "このノートは縦より横のほうが長いです。.わたしは学生です。.この箱はとても重いです。.強風と、冷え込みの強い、神宮のグラウンドである。.危ないので、ナイフを使ってはいけません。.この辺で少し休みましょう。.電車に乗るとき、切符を買います。.卵は一個五十グラムぐらいです。.ギレスピーはマッギーを通じてイネスと知り合った.農業をやめざるをえない人があり、関連企業も、この不況にひきずられているという。.両手の指は変形し、関節の辺りが、こぶ状に盛り上がっていた。.去年より今年のほうが暑いです。.あしたの夜は友達と会うので、出かけます。.",
+      "raw_hypothesis": "このノートは縦より横の方が長いです。 わたしは学生です。 この箱はとても重たいです。 強風と、冷え込みの強い、神宮のグラウンドである。 危ないので。 ナイフを使ってはいけません。 この辺で少し休みましょう。 電車に乗るとき、切符を買います。 玉子は一個五十グラムぐらいです。 ゲイスピーはマッキーを通じてイネスと知り合った。 農業を辞めざるを得ない人があり、 関連企業もこの不規定用に引きずられていると思う 両手の指は変形し、関節の辺りが黒塗りに盛り上がっていた。 去年より今年のほうが暑いです。 あしたの夜は友達と会うので、出かけます。",
+      "normalized_reference": "このノトは縦より横のほうが長いですわたしは学生ですこの箱はとても重いです強風と冷え込みの強い神宮のグラウンドである危ないのでナイフを使ってはいけませんこの辺で少し休みましょう電車に乗るとき切符を買います卵は一個五十グラムぐらいですギレスピはマッギを通じてイネスと知り合った農業をやめざるをえない人があり関連企業もこの不況にひきずられているという両手の指は変形し関節の辺りがこぶ状に盛り上がっていた去年より今年のほうが暑いですあしたの夜は友達と会うので出かけます",
+      "normalized_hypothesis": "このノトは縦より横の方が長いですわたしは学生ですこの箱はとても重たいです強風と冷え込みの強い神宮のグラウンドである危ないのでナイフを使ってはいけませんこの辺で少し休みましょう電車に乗るとき切符を買います玉子は一個五十グラムぐらいですゲイスピはマッキを通じてイネスと知り合った農業を辞めざるを得ない人があり関連企業もこの不規定用に引きずられていると思う両手の指は変形し関節の辺りが黒塗りに盛り上がっていた去年より今年のほうが暑いですあしたの夜は友達と会うので出かけます",
+      "commit_count": 15,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 52.14,
+      "preview_audio_sec": 55.26,
+      "inference_count": 54,
+      "audio_exposure_ratio": 1.79,
+      "commits": [
+        {
+          "utterance_id": "f721a466-cc36-431b-a59e-46eed298f3d8",
+          "reason": "VAD_SILENCE",
+          "text": "このノートは縦より横の方が長いです。",
+          "t_wall": 1789186183.574257,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "fd4e51f9-e783-4e72-8d9d-909051d2c325",
+          "reason": "VAD_SILENCE",
+          "text": "わたしは学生です。",
+          "t_wall": 1789186186.6576304,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ce9420e5-fcc2-4599-8331-3b875041b7d1",
+          "reason": "VAD_SILENCE",
+          "text": "この箱はとても重たいです。",
+          "t_wall": 1789186190.5605195,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f63c62b4-c4e9-4073-9856-50375ff873ef",
+          "reason": "VAD_SILENCE",
+          "text": "強風と、冷え込みの強い、神宮のグラウンドである。",
+          "t_wall": 1789186196.7213554,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "032c2487-1ea1-45bd-946a-ad557018a824",
+          "reason": "VAD_SILENCE",
+          "text": "危ないので。",
+          "t_wall": 1789186199.3583798,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "592028bc-4f01-4259-9c82-57306316a02e",
+          "reason": "VAD_SILENCE",
+          "text": "ナイフを使ってはいけません。",
+          "t_wall": 1789186201.667767,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "21c2348c-0a00-40de-a518-908e83e96eb7",
+          "reason": "VAD_SILENCE",
+          "text": "この辺で少し休みましょう。",
+          "t_wall": 1789186205.8756692,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "abbe82be-0752-48f1-81ed-c6c0fcb70087",
+          "reason": "VAD_SILENCE",
+          "text": "電車に乗るとき、切符を買います。",
+          "t_wall": 1789186211.0354183,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e088b3ca-bfe9-437b-8ae0-42f91ce01482",
+          "reason": "VAD_SILENCE",
+          "text": "玉子は一個五十グラムぐらいです。",
+          "t_wall": 1789186217.6143804,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "880faba1-8fc6-47c2-aa93-810511a2ab7e",
+          "reason": "VAD_SILENCE",
+          "text": "ゲイスピーはマッキーを通じてイネスと知り合った。",
+          "t_wall": 1789186225.2070992,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "acc47ad3-bed7-4f5e-8a40-c51f63baa176",
+          "reason": "VAD_SILENCE",
+          "text": "農業を辞めざるを得ない人があり、",
+          "t_wall": 1789186230.076107,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "d999c36d-a952-4d73-b5e9-369fddcc2edc",
+          "reason": "VAD_SILENCE",
+          "text": "関連企業もこの不規定用に引きずられていると思う",
+          "t_wall": 1789186235.3372045,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "27aaae1d-207e-4a32-a81d-e01a022e50be",
+          "reason": "VAD_SILENCE",
+          "text": "両手の指は変形し、関節の辺りが黒塗りに盛り上がっていた。",
+          "t_wall": 1789186243.0782764,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "da262a1c-2afe-4e6f-a2ff-3ba3a7c1339d",
+          "reason": "VAD_SILENCE",
+          "text": "去年より今年のほうが暑いです。",
+          "t_wall": 1789186248.3747838,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "83f2f03d-f96f-48be-90a5-f65373149de2",
+          "reason": "VAD_SILENCE",
+          "text": "あしたの夜は友達と会うので、出かけます。",
+          "t_wall": 1789186253.8663082,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 287.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.6,
+          "wall_ms": 250.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 81.7,
+          "text": "た"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 117.2,
+          "text": "たてよりよこのほうがなかよい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.58,
+          "wall_ms": 122.0,
+          "text": "このノートは縦より横の方が長いです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 87.8,
+          "text": "私"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 108.9,
+          "text": "わたしは学生です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 176.3,
+          "text": "わたしは学生です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 90.3,
+          "text": "この箱"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 166.8,
+          "text": "この箱はとても重たいです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 108.2,
+          "text": "この箱はとても重たいです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 85.8,
+          "text": "きょう"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 103.6,
+          "text": "強風と冷え込み"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 184.2,
+          "text": "強風と冷え込みの強い神宮の裏"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.62,
+          "wall_ms": 149.1,
+          "text": "強風と、冷え込みの強い、神宮のグラウンドである。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 90.3,
+          "text": "危ない"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.74,
+          "wall_ms": 102.2,
+          "text": "危ないので。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 86.8,
+          "text": "か。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 235.7,
+          "text": "ナイフを使ってはいけません。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.74,
+          "wall_ms": 183.4,
+          "text": "ナイフを使ってはいけません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 91.7,
+          "text": "この辺"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 115.4,
+          "text": "このへんで少し休みましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.64,
+          "wall_ms": 116.7,
+          "text": "この辺で少し休みましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.24,
+          "wall_ms": 1061.7,
+          "text": "あ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 100.5,
+          "text": "電車。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 173.3,
+          "text": "電車に乗るとき、キッ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 124.7,
+          "text": "電車に乗るとき、切符を買います。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 156.3,
+          "text": "たた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 91.8,
+          "text": "たた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 206.0,
+          "text": "卵は?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.4,
+          "wall_ms": 106.9,
+          "text": "玉子は一個五十グラムぐらいです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.94,
+          "wall_ms": 113.5,
+          "text": "玉子は一個五十グラムぐらいです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 252.3,
+          "text": "ぎゅっ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.46,
+          "wall_ms": 114.6,
+          "text": "ゲイスピーは、マッキーを。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.68,
+          "wall_ms": 154.8,
+          "text": "ゲイスピーはマッキーを通じてイネスと知り合った。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 86.9,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.84,
+          "wall_ms": 88.9,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 93.3,
+          "text": "どう?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 190.6,
+          "text": "農業を辞めざるをえない"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.0,
+          "wall_ms": 115.2,
+          "text": "農業を辞めざるを得ない人があり、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 88.2,
+          "text": "関連企業"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 112.4,
+          "text": "関連企業もこの不規則"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 278.6,
+          "text": "関連企業もこの不規定用に引きずられていると思う。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.14,
+          "wall_ms": 130.6,
+          "text": "関連企業もこの不規定用に引きずられていると思う"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 90.6,
+          "text": "じゃあ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 111.4,
+          "text": "両手の揚げは減った。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 286.9,
+          "text": "両手の指は変形し、関節の辺りが黒くなる"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.46,
+          "wall_ms": 167.7,
+          "text": "両手の指は変形し、関節の辺りが黒塗りに盛り上がっていた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.14,
+          "wall_ms": 92.6,
+          "text": "去年より"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 153.1,
+          "text": "去年より今年のほうが"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.54,
+          "wall_ms": 131.9,
+          "text": "去年より今年のほうが暑いです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 100.8,
+          "text": "明日の朝。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 195.5,
+          "text": "あしたの夜は友達と会う"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.2,
+          "wall_ms": 140.7,
+          "text": "あしたの夜は友達と会うので、出かけます。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream06",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 66.36,
+      "wall_sec": 84.56,
+      "wer": null,
+      "cer": 0.1,
+      "cer_itn": 0.1,
+      "substitutions": 13,
+      "deletions": 3,
+      "insertions": 9,
+      "ref_length": 250,
+      "hyp_length": 288,
+      "raw_reference": "学校を休みます。.あさって野球の試合があります。.牛肉は肉の中で一番高いです。.中年以上は、おふくろの味を求め、若い人は、袋の味を求める。.来月から新しい生徒が来るそうです。.わたしは小さくて、かわいい動物が好きです。.わたしはスポーツがすきではありません。.どろぼうでも入ったかと、一瞬僕は思った。.三日前、髪を切りました。.制度が動かぬとなれば、やはり、不都合が出てくる。.御存知の通り、不良クラッチに関する補償は、製造側に原因がある場合のみに限られています。.危ないので、あそこの窓を開けてはいけません。.半年、一年とつづくと、自分から願い出て、病院を移ることがあるという。.",
+      "raw_hypothesis": "学校を休みます。 あさって野球の試合があります。 牛肉は肉の中でいちばん高いです。 中年以上はおふくろの味を求め、若い人はふくろの味を求める 来月から新しい生徒が来るそうです。 わたしは小さくてかわいい動物が好きです。 わたしはスポーツが好きではありません。 泥棒でも入ったかと一瞬僕は思った 三日前髪を切りました。 制度がうかんとなれば、やはり不都合が出てくる ご存知のとおり 不良クラッチに関する補償は、製造側に原因がある場合のみに限られています。 危ないので、あそこの窓を開けてはいけません。 半年二年と続くと、自分から願い出て、病院を探して、 うつることがあるという。",
+      "normalized_reference": "学校を休みますあさって野球の試合があります牛肉は肉の中で一番高いです中年以上はおふくろの味を求め若い人は袋の味を求める来月から新しい生徒が来るそうですわたしは小さくてかわいい動物が好きですわたしはスポツがすきではありませんどろぼうでも入ったかと一瞬僕は思った三日前髪を切りました制度が動かぬとなればやはり不都合が出てくる御存知の通り不良クラッチに関する補償は製造側に原因がある場合のみに限られています危ないのであそこの窓を開けてはいけません半年一年とつづくと自分から願い出て病院を移ることがあるという",
+      "normalized_hypothesis": "学校を休みますあさって野球の試合があります牛肉は肉の中でいちばん高いです中年以上はおふくろの味を求め若い人はふくろの味を求める来月から新しい生徒が来るそうですわたしは小さくてかわいい動物が好きですわたしはスポツが好きではありません泥棒でも入ったかと一瞬僕は思った三日前髪を切りました制度がうかんとなればやはり不都合が出てくるご存知のとおり不良クラッチに関する補償は製造側に原因がある場合のみに限られています危ないのであそこの窓を開けてはいけません半年二年と続くと自分から願い出て病院を探してうつることがあるという",
+      "commit_count": 15,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 59.7,
+      "preview_audio_sec": 71.46,
+      "inference_count": 61,
+      "audio_exposure_ratio": 1.98,
+      "commits": [
+        {
+          "utterance_id": "79d10c75-f671-4258-9449-015048c43684",
+          "reason": "VAD_SILENCE",
+          "text": "学校を休みます。",
+          "t_wall": 1789186258.9126232,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "5c5c2863-a926-4170-a470-0b2b9bcf0933",
+          "reason": "VAD_SILENCE",
+          "text": "あさって野球の試合があります。",
+          "t_wall": 1789186263.1429155,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "a55c09ce-58f3-40ba-b210-8fb91c8a3344",
+          "reason": "VAD_SILENCE",
+          "text": "牛肉は肉の中でいちばん高いです。",
+          "t_wall": 1789186269.345211,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e593d258-b7cf-41c6-898c-3b6a858d23db",
+          "reason": "VAD_SILENCE",
+          "text": "中年以上はおふくろの味を求め、若い人はふくろの味を求める",
+          "t_wall": 1789186277.7586653,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e037c82b-7baf-4c8d-a39c-1283f674a19c",
+          "reason": "VAD_SILENCE",
+          "text": "来月から新しい生徒が来るそうです。",
+          "t_wall": 1789186283.1079435,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ad9f320d-549c-47bd-936b-18199c898d29",
+          "reason": "VAD_SILENCE",
+          "text": "わたしは小さくてかわいい動物が好きです。",
+          "t_wall": 1789186287.7875752,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "85446246-d333-4faa-b96d-5b6d056092bd",
+          "reason": "VAD_SILENCE",
+          "text": "わたしはスポーツが好きではありません。",
+          "t_wall": 1789186292.8609881,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "239ab754-4986-47ce-81d6-11078187ee44",
+          "reason": "VAD_SILENCE",
+          "text": "泥棒でも入ったかと一瞬僕は思った",
+          "t_wall": 1789186298.3341148,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "93a84a99-532f-4f01-8bf8-70394d56cc74",
+          "reason": "VAD_SILENCE",
+          "text": "三日前髪を切りました。",
+          "t_wall": 1789186302.3583722,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1c000572-8fe8-4ba6-afcb-ea951e6f7460",
+          "reason": "VAD_SILENCE",
+          "text": "制度がうかんとなれば、やはり不都合が出てくる",
+          "t_wall": 1789186308.2413354,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "24ee98b0-d92b-4c9c-a853-94cdd23b30c2",
+          "reason": "VAD_SILENCE",
+          "text": "ご存知のとおり",
+          "t_wall": 1789186312.1793318,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ec351b20-913b-4de1-a3df-f708ff9c3e6a",
+          "reason": "VAD_SILENCE",
+          "text": "不良クラッチに関する補償は、製造側に原因がある場合のみに限られています。",
+          "t_wall": 1789186319.567116,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "0bb456d4-1b27-4224-aab6-c4c6daebd71a",
+          "reason": "VAD_SILENCE",
+          "text": "危ないので、あそこの窓を開けてはいけません。",
+          "t_wall": 1789186328.5330791,
+          "buffer_duration_sec": 1.32
+        },
+        {
+          "utterance_id": "20d03be6-668a-4fb3-99c5-414fbd9feeec",
+          "reason": "VAD_SILENCE",
+          "text": "半年二年と続くと、自分から願い出て、病院を探して、",
+          "t_wall": 1789186334.888012,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "e1adbb21-6fa5-479a-98c3-e6e1e03a0c2d",
+          "reason": "VAD_SILENCE",
+          "text": "うつることがあるという。",
+          "t_wall": 1789186338.720086,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 277.8,
+          "text": "かっこいい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.38,
+          "wall_ms": 99.4,
+          "text": "加工を休めます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.1,
+          "wall_ms": 102.9,
+          "text": "学校を休みます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 93.4,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 113.3,
+          "text": "あさって焼き芋炒め"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.12,
+          "wall_ms": 122.9,
+          "text": "あさって野球の試合があります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 87.3,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.72,
+          "wall_ms": 100.5,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 93.7,
+          "text": "きれい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 183.2,
+          "text": "牛肉は豚"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.78,
+          "wall_ms": 128.2,
+          "text": "牛肉は肉の中でいちばん高いです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.96,
+          "wall_ms": 138.3,
+          "text": "牛肉は肉の中でいちばん高いです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 92.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 113.6,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 94.7,
+          "text": "ちなみに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 114.5,
+          "text": "十年以上は、おふくろの"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.96,
+          "wall_ms": 322.7,
+          "text": "中年以上はおふくろの味を求め、若い人は福を求め、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.58,
+          "wall_ms": 170.7,
+          "text": "中年以上はおふくろの味を求め、若い人はふくろの味を求める"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 87.8,
+          "text": "来月"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 120.3,
+          "text": "来月から新しい生徒が来るそうです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 131.9,
+          "text": "来月から新しい生徒が来るそうです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 145.7,
+          "text": "私は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 125.8,
+          "text": "私は小さくてかわいい動物が好きです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.94,
+          "wall_ms": 133.0,
+          "text": "わたしは小さくてかわいい動物が好きです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 86.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 89.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 84.9,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 112.7,
+          "text": "私はスポーツが好き。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 130.6,
+          "text": "わたしはスポーツが好きではありません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 209.4,
+          "text": "誰?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 108.1,
+          "text": "泥棒でも入ったかと一緒に。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.24,
+          "wall_ms": 132.4,
+          "text": "泥棒でも入ったかと一瞬僕は思った"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 89.0,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.96,
+          "wall_ms": 89.1,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 88.1,
+          "text": "みかん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 186.4,
+          "text": "3日前髪を切りました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.16,
+          "wall_ms": 117.4,
+          "text": "三日前髪を切りました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 90.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 99.0,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 92.0,
+          "text": "せいとがおう"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 111.2,
+          "text": "せいとかを簡単ならばや"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.48,
+          "wall_ms": 215.3,
+          "text": "制度がうかんとなれば、やはり不都合が出てくる"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 86.9,
+          "text": "か"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 109.8,
+          "text": "ご存知のとおり、"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 107.2,
+          "text": "ご存知のとおり"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 83.5,
+          "text": ""
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 99.5,
+          "text": "クラッチに関する"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 253.0,
+          "text": "不良クラッチに関する保障は製造側に"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 5.64,
+          "wall_ms": 364.2,
+          "text": "不良クラッチに関する補償は、製造側に原因がある場合のみに限られています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.64,
+          "wall_ms": 419.1,
+          "text": "不良クラッチに関する補償は、製造側に原因がある場合のみに限られています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 85.8,
+          "text": "あ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 110.1,
+          "text": "危ないので遊びに来い"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.96,
+          "wall_ms": 140.3,
+          "text": "危ないので、あそこの窓を開けてはならない"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.04,
+          "wall_ms": 2470.3,
+          "text": "危ないので、あそこの窓を開けてはいけません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.44,
+          "wall_ms": 93.4,
+          "text": "ハントシー"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.0,
+          "wall_ms": 115.0,
+          "text": "半年以上続くと、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 6.0,
+          "wall_ms": 309.5,
+          "text": "半年二年と続くと、自分から願い出て、病院を探していた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 6.24,
+          "wall_ms": 164.3,
+          "text": "半年二年と続くと、自分から願い出て、病院を探して、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 89.0,
+          "text": "映る。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 102.4,
+          "text": "映ることがある。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.12,
+          "wall_ms": 116.0,
+          "text": "うつることがあるという。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream07",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 62.66,
+      "wall_sec": 80.0,
+      "wer": null,
+      "cer": 0.2687224669603524,
+      "cer_itn": 0.2687224669603524,
+      "substitutions": 31,
+      "deletions": 29,
+      "insertions": 1,
+      "ref_length": 227,
+      "hyp_length": 230,
+      "raw_reference": "この部屋に入ってはだめです。.これほど、躍動感がなくて、静かで、沈痛な胴上げというのも珍しい。.山田さんはいつも元気ですけれども、きょうは静かです。.着用中に、ダウンやフェザーが飛び出す原因ともなります。.木村さんに英語を教えます。.たくさん写真を撮ったので、もうフィルムがありません。.田中さんの左に木村さんがいます。.こちらの準備もございますので、早急の御返事を、お待ちいたしております。.冬が長くて辛ければ、それだけ、歓びも大きいのだ。.妹がまだ帰らないので、母は心配しています。.部屋の電気が消えてしまいました。.",
+      "raw_hypothesis": "この部屋に入ってはだめです。 これほど躍動感がなくて、静かで、鎮痛の間をあげというのも珍しい。 山田さんはいつも元気ですけれども。 今日は静かです。 着用中にダウンやフェザーが飛び出す原因ともなります。 木村さんに英語を教えます。 写真を撮ったのでもうフィルムがありません。 私は思ってた。 こちらの準備もございますので。 そういうのもね。 私たちでおります。 いい感じなんですね。 妹がまだ帰らないので、母は心配しています。 部屋の電気が消えてしまいました。",
+      "normalized_reference": "この部屋に入ってはだめですこれほど躍動感がなくて静かで沈痛な胴上げというのも珍しい山田さんはいつも元気ですけれどもきょうは静かです着用中にダウンやフェザが飛び出す原因ともなります木村さんに英語を教えますたくさん写真を撮ったのでもうフィルムがありません田中さんの左に木村さんがいますこちらの準備もございますので早急の御返事をお待ちいたしております冬が長くて辛ければそれだけ歓びも大きいのだ妹がまだ帰らないので母は心配しています部屋の電気が消えてしまいました",
+      "normalized_hypothesis": "この部屋に入ってはだめですこれほど躍動感がなくて静かで鎮痛の間をあげというのも珍しい山田さんはいつも元気ですけれども今日は静かです着用中にダウンやフェザが飛び出す原因ともなります木村さんに英語を教えます写真を撮ったのでもうフィルムがありません私は思ってたこちらの準備もございますのでそういうのもね私たちでおりますいい感じなんですね妹がまだ帰らないので母は心配しています部屋の電気が消えてしまいました",
+      "commit_count": 14,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 48.6,
+      "preview_audio_sec": 48.42,
+      "inference_count": 55,
+      "audio_exposure_ratio": 1.55,
+      "commits": [
+        {
+          "utterance_id": "3865e0ce-de10-4a45-a053-c8229e72c2fa",
+          "reason": "VAD_SILENCE",
+          "text": "この部屋に入ってはだめです。",
+          "t_wall": 1789186344.3451607,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "0e3152e2-481e-4999-83df-14653a93780c",
+          "reason": "VAD_SILENCE",
+          "text": "これほど躍動感がなくて、静かで、鎮痛の間をあげというのも珍しい。",
+          "t_wall": 1789186352.2531235,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "8d0de9d0-1304-456a-956f-c390503970d5",
+          "reason": "VAD_SILENCE",
+          "text": "山田さんはいつも元気ですけれども。",
+          "t_wall": 1789186358.4213333,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "856b2b44-b682-455c-b8e2-f7289abc240e",
+          "reason": "VAD_SILENCE",
+          "text": "今日は静かです。",
+          "t_wall": 1789186360.8165238,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7d1c8d9e-5c7d-46ff-b785-5c09652bf904",
+          "reason": "VAD_SILENCE",
+          "text": "着用中にダウンやフェザーが飛び出す原因ともなります。",
+          "t_wall": 1789186370.3332505,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7cb6688d-21f3-41c6-b6a7-f3f37895d6f3",
+          "reason": "VAD_SILENCE",
+          "text": "木村さんに英語を教えます。",
+          "t_wall": 1789186376.6317239,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "01246e9e-9bd7-4f70-9ca2-a79f377e8fd2",
+          "reason": "VAD_SILENCE",
+          "text": "写真を撮ったのでもうフィルムがありません。",
+          "t_wall": 1789186383.379303,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "a675db3a-5645-43a9-a3c0-382e53b68120",
+          "reason": "VAD_SILENCE",
+          "text": "私は思ってた。",
+          "t_wall": 1789186386.8338017,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1521b45d-b413-4c3b-8c44-02f23967ec94",
+          "reason": "VAD_SILENCE",
+          "text": "こちらの準備もございますので。",
+          "t_wall": 1789186393.6628861,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "49320daf-abb6-4027-8e64-bff925f2d365",
+          "reason": "VAD_SILENCE",
+          "text": "そういうのもね。",
+          "t_wall": 1789186395.2465034,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "bac8e8e2-b3c4-48a4-87f8-08761d495a58",
+          "reason": "VAD_SILENCE",
+          "text": "私たちでおります。",
+          "t_wall": 1789186396.9037085,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "fc253e02-00da-4af3-a7a9-c31e5aaeae98",
+          "reason": "VAD_SILENCE",
+          "text": "いい感じなんですね。",
+          "t_wall": 1789186400.6474779,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "85796769-fdb7-4926-b800-31559590055f",
+          "reason": "VAD_SILENCE",
+          "text": "妹がまだ帰らないので、母は心配しています。",
+          "t_wall": 1789186412.0143082,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "2cdeb366-d123-43e8-b3a3-9b0c3b3ef9c8",
+          "reason": "VAD_SILENCE",
+          "text": "部屋の電気が消えてしまいました。",
+          "t_wall": 1789186417.783433,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 230.2,
+          "text": "この辺。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 105.0,
+          "text": "この部屋に入ってはダメです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.52,
+          "wall_ms": 116.5,
+          "text": "この部屋に入ってはだめです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 94.8,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 91.5,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 85.3,
+          "text": "この辺?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 100.5,
+          "text": "これほど躍動感がない。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.88,
+          "wall_ms": 128.1,
+          "text": "これほど躍動感がなくて静かで沈痛な"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.04,
+          "wall_ms": 249.0,
+          "text": "これほど躍動感がなくて、静かで、鎮痛の間をあげというのも珍しい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 98.1,
+          "text": "ヤマダさん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 109.7,
+          "text": "山田さんはいつも"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.38,
+          "wall_ms": 225.2,
+          "text": "山田さんはいつも元気ですけれども。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 85.6,
+          "text": "きょうは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 102.8,
+          "text": "今日は静かです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.98,
+          "wall_ms": 101.4,
+          "text": "今日は静かです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 171.6,
+          "text": "チャキー。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.34,
+          "wall_ms": 110.9,
+          "text": "着用中にダウンや"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.68,
+          "wall_ms": 237.3,
+          "text": "着用中にダウンやフェザーが飛び出す原因とも思えない"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.88,
+          "wall_ms": 166.0,
+          "text": "着用中にダウンやフェザーが飛び出す原因ともなります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 90.4,
+          "text": "あっ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 90.2,
+          "text": "あっ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 91.9,
+          "text": "君らさん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 118.0,
+          "text": "木村さんに英語を教えてくれた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.7,
+          "wall_ms": 118.0,
+          "text": "木村さんに英語を教えます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 167.7,
+          "text": "あ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 86.1,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 85.3,
+          "text": "チーム。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 105.4,
+          "text": "写真を撮ったので。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.94,
+          "wall_ms": 128.7,
+          "text": "写真を撮ったのでもうフィルムがありません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 177.8,
+          "text": "ありがとう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.56,
+          "wall_ms": 94.3,
+          "text": "私は思ってた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 91.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 101.1,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 158.7,
+          "text": "ちなみに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 93.3,
+          "text": "こちらの準備もございます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.22,
+          "wall_ms": 99.7,
+          "text": "こちらの準備もございますので。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 86.4,
+          "text": "そうか。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.2,
+          "wall_ms": 94.1,
+          "text": "そういうのもね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 83.5,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 93.4,
+          "text": "私たちでおります。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.32,
+          "wall_ms": 82.9,
+          "text": "私たちでおります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.5,
+          "text": "えっ?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.5,
+          "wall_ms": 96.1,
+          "text": "いい感じなんですね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 260.1,
+          "text": "きれい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 91.2,
+          "text": "きれい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 616.2,
+          "text": "《"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 97.6,
+          "text": "英語で言うと、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 94.5,
+          "text": "妹が舞。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 240.3,
+          "text": "妹がまだ帰らないので、母。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.34,
+          "wall_ms": 147.9,
+          "text": "妹がまだ帰らないので、母は心配しています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 90.0,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 90.9,
+          "text": "えっ?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 85.6,
+          "text": "へ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 112.9,
+          "text": "部屋の電気が消えて"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.12,
+          "wall_ms": 294.4,
+          "text": "部屋の電気が消えてしまいました。"
+        }
+      ]
+    }
+  ]
+}

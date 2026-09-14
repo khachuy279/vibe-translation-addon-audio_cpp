@@ -1,0 +1,330 @@
+{
+  "mode": "stream",
+  "speed": 6.0,
+  "lang_mode": "ja",
+  "config": {
+    "vad_engine": "fsmn-vad",
+    "vad_threshold": 0.2,
+    "silence_duration_ms": 150,
+    "hangover_ms": 250,
+    "pre_speech_buffer_ms": 800,
+    "asr_language": "auto",
+    "normalize_speech": true,
+    "normalize_target_rms": 0.1,
+    "preview_min_growth_ratio": 0.5,
+    "poll_interval_ms": 350,
+    "min_transcribe_sec": 0.6,
+    "split_on_stability": true,
+    "min_words_to_commit": 4,
+    "stability_duration_sec": 1.5,
+    "max_duration_sec": 15.0,
+    "max_duration_require_silence": true,
+    "boundary_candidate_silence_ms": 80
+  },
+  "corpus_cer_pct": 49.18,
+  "corpus_cer_itn_pct": 49.18,
+  "corpus_wer_pct": null,
+  "total_ref_chars": 183,
+  "total_edits": 90,
+  "per_file_cer_pct": {
+    "stream00": 49.18
+  },
+  "results": [
+    {
+      "pair_id": "stream00",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 65.47,
+      "wall_sec": 19.65,
+      "wer": null,
+      "cer": 0.4918032786885246,
+      "cer_itn": 0.48633879781420764,
+      "substitutions": 10,
+      "deletions": 20,
+      "insertions": 60,
+      "ref_length": 183,
+      "hyp_length": 254,
+      "raw_reference": "でも実際のとこちょっと。だから彼も本調子じゃないんですよ突然向き合うのは大変なこと。大体８００年ぐらい前。裏読み過ぎちゃったんじゃないかなと思うんだこれ。「コロコロ転がってる」って言われたらどんなものが転がってるイメージ？いやマジすごいわ。目的は３年生を送るだけでなく。こちら東京・渋谷駅前のスクランブル交差点ではなく原寸大で再現されたオープンセット。兵庫の１品目人間は誰もが持ってるんですよ。",
+      "raw_hypothesis": "でもまあ実際のとこちょっとまあ。 突然向き合うのは大変なこと。 だいたい800年ぐらい。 黄色以外考えないでしょ。これちょっとうら裏読みすぎちゃったんじゃないかなと思うんだこれ。 お願いします。 コロコロ転がってるって言われたらどんなものが転がってるイメージ？おにぎり。うんとか。 ああれかそうやそれ自主的にやってんでしょそうだよいやマジすごいわ。 三年生を送るだけでなく。 こちら、東京渋谷駅前のスクランブル交差点。 ではなく。 厳寸大で再現されたオープンセット。 兵庫の人質め。 誰もが持ってるんですよ。",
+      "normalized_reference": "でも実際のとこちょっとだから彼も本調子じゃないんですよ突然向き合うのは大変なこと大体800年ぐらい前裏読み過ぎちゃったんじゃないかなと思うんだこれコロコロ転がってるって言われたらどんなものが転がってるイメジいやマジすごいわ目的は3年生を送るだけでなくこちら東京渋谷駅前のスクランブル交差点ではなく原寸大で再現されたオプンセット兵庫の1品目人間は誰もが持ってるんですよ",
+      "normalized_hypothesis": "でもまあ実際のとこちょっとまあ突然向き合うのは大変なことだいたい800年ぐらい黄色以外考えないでしょこれちょっとうら裏読みすぎちゃったんじゃないかなと思うんだこれお願いしますコロコロ転がってるって言われたらどんなものが転がってるイメジおにぎりうんとかああれかそうやそれ自主的にやってんでしょそうだよいやマジすごいわ三年生を送るだけでなくこちら東京渋谷駅前のスクランブル交差点ではなく厳寸大で再現されたオプンセット兵庫の人質め誰もが持ってるんですよ",
+      "commit_count": 13,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 60.66,
+      "preview_audio_sec": 7.62,
+      "inference_count": 27,
+      "audio_exposure_ratio": 1.04,
+      "commits": [
+        {
+          "utterance_id": "175165da-2c87-4bdc-8947-20ebc9bcde70",
+          "reason": "VAD_SILENCE",
+          "text": "でもまあ実際のとこちょっとまあ。",
+          "t_wall": 1789182834.2704346,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e2db334d-2e2f-45df-892b-92cac219fd7e",
+          "reason": "VAD_SILENCE",
+          "text": "突然向き合うのは大変なこと。",
+          "t_wall": 1789182834.4121916,
+          "buffer_duration_sec": 0.96
+        },
+        {
+          "utterance_id": "4b78e163-d1fc-48fc-8f23-ad550e5f0da4",
+          "reason": "VAD_SILENCE",
+          "text": "だいたい800年ぐらい。",
+          "t_wall": 1789182834.5286124,
+          "buffer_duration_sec": 1.32
+        },
+        {
+          "utterance_id": "ac657a0b-f178-4990-8ddf-637a3feda18e",
+          "reason": "VAD_SILENCE",
+          "text": "黄色以外考えないでしょ。これちょっとうら裏読みすぎちゃったんじゃないかなと思うんだこれ。",
+          "t_wall": 1789182835.3519819,
+          "buffer_duration_sec": 3.96
+        },
+        {
+          "utterance_id": "99e718f5-041d-4bb9-9b67-75328d8447c1",
+          "reason": "VAD_SILENCE",
+          "text": "お願いします。",
+          "t_wall": 1789182835.4292815,
+          "buffer_duration_sec": 4.2
+        },
+        {
+          "utterance_id": "12990731-39b4-43d5-be8f-4efcb53a8a9f",
+          "reason": "VAD_SILENCE",
+          "text": "コロコロ転がってるって言われたらどんなものが転がってるイメージ？おにぎり。うんとか。",
+          "t_wall": 1789182835.8515246,
+          "buffer_duration_sec": 5.28
+        },
+        {
+          "utterance_id": "2c38af7a-33fc-4dfa-b280-2d679e2c832a",
+          "reason": "VAD_SILENCE",
+          "text": "ああれかそうやそれ自主的にやってんでしょそうだよいやマジすごいわ。",
+          "t_wall": 1789182836.1136405,
+          "buffer_duration_sec": 0.3
+        },
+        {
+          "utterance_id": "07b190f7-3338-4767-9ba4-f5a0c9701971",
+          "reason": "VAD_SILENCE",
+          "text": "三年生を送るだけでなく。",
+          "t_wall": 1789182836.3003716,
+          "buffer_duration_sec": 0.84
+        },
+        {
+          "utterance_id": "87d199b1-5927-4cd8-87e8-cf009c089d8e",
+          "reason": "VAD_SILENCE",
+          "text": "こちら、東京渋谷駅前のスクランブル交差点。",
+          "t_wall": 1789182837.9054582,
+          "buffer_duration_sec": 1.08
+        },
+        {
+          "utterance_id": "418b4537-8986-46d3-8602-f8ed7dc34aa6",
+          "reason": "VAD_SILENCE",
+          "text": "ではなく。",
+          "t_wall": 1789182837.9789367,
+          "buffer_duration_sec": 1.32
+        },
+        {
+          "utterance_id": "173b74b0-0d17-41ec-a0b1-51531897ec29",
+          "reason": "VAD_SILENCE",
+          "text": "厳寸大で再現されたオープンセット。",
+          "t_wall": 1789182838.1386642,
+          "buffer_duration_sec": 1.74
+        },
+        {
+          "utterance_id": "7afe46fc-e333-414a-8e64-fa40a7623e24",
+          "reason": "VAD_SILENCE",
+          "text": "兵庫の人質め。",
+          "t_wall": 1789182839.8042805,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "010e0fde-3fd7-4cc3-93ee-d20aaa4315d1",
+          "reason": "VAD_SILENCE",
+          "text": "誰もが持ってるんですよ。",
+          "t_wall": 1789182841.2364657,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 9037.9,
+          "text": "でも。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 10009.2,
+          "text": ""
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 10961.5,
+          "text": "でもまあ実際のとこちょっとまあ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 9488.9,
+          "text": "突然向き合うのは大変なこと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 9083.5,
+          "text": "だいたい800年ぐらい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.7,
+          "wall_ms": 8376.0,
+          "text": "黄色以外考えないでしょ。これちょっとうら裏読みすぎちゃったんじゃないかなと思うんだこれ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.68,
+          "wall_ms": 7979.2,
+          "text": "お願いします。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 7675.6,
+          "text": "はい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.2,
+          "wall_ms": 5874.9,
+          "text": "コロコロ転がってるって言われたらどんなものが転がってるイメージ？おにぎり。うんとか。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.4,
+          "wall_ms": 4617.6,
+          "text": "ああれかそうやそれ自主的にやってんでしょそうだよいやマジすごいわ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.5,
+          "wall_ms": 4240.3,
+          "text": "目的は。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 3823.7,
+          "text": "三年生を送るだけでなく。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.2,
+          "wall_ms": 3079.5,
+          "text": "お。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.36,
+          "wall_ms": 3782.0,
+          "text": "あ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.3,
+          "wall_ms": 4107.3,
+          "text": "ははは。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 3733.5,
+          "text": "ね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.52,
+          "wall_ms": 1968.6,
+          "text": "こちら、東京渋谷駅前のスクランブル交差点。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 1492.6,
+          "text": "ではなく。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.6,
+          "wall_ms": 635.3,
+          "text": "厳寸大で再現されたオープンセット。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.04,
+          "wall_ms": 102.1,
+          "text": "うん。え。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 125.5,
+          "text": "競合のひとしらめ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.9,
+          "wall_ms": 131.4,
+          "text": "兵庫の人質め。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 64.1,
+          "text": "はん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.4,
+          "wall_ms": 97.1,
+          "text": "人間は。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 99.9,
+          "text": "人間は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 84.6,
+          "text": "誰もが。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.1,
+          "wall_ms": 118.9,
+          "text": "誰もが持ってるんですよ。"
+        }
+      ]
+    }
+  ]
+}

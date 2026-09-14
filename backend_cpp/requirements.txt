@@ -1,12 +1,15 @@
-# Minimal requirements for backend_cpp (No PyTorch required for ASR!)
+# Core requirements for backend_cpp
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 pydantic>=2.5.0
-pydantic-settings>=2.1.0
 numpy>=1.24.0
 pyyaml>=6.0
 onnxruntime-gpu>=1.17.0
-llama-cpp-python>=0.3.0
-transcribe-cpp>=0.2.3
+llama-cpp-python>=0.3.0,<0.4.0
+transcribe-cpp>=0.2.3,<0.3.0
 huggingface_hub>=0.20.0
-gguf>=0.10.0
+transformers>=4.40.0  # Required for NamoTurnDetector AutoTokenizer
+
+# Optional / Tooling dependencies:
+gguf>=0.10.0          # Required for GGUF model conversion scripts
+# torch>=2.0.0        # Optional: Required if using silero-vad or firered-vad engines

@@ -115,7 +115,7 @@ class LocalGGUFTranslator:
         self._loaded_file: Optional[str] = None
         self._load_lock = threading.RLock()
         self._infer_lock = threading.RLock()
-        self._async_load_lock = asyncio.Lock()
+        self._async_load_lock: Optional[asyncio.Lock] = None
 
     def _resolve_gguf_path(self) -> Optional[str]:
         """Strictly locate or auto-download GGUF translation model in models directory."""
@@ -244,6 +244,8 @@ class LocalGGUFTranslator:
 
         # Non-blocking model loading guarded by async lock to avoid redundant thread submissions
         if self._llm is None:
+            if self._async_load_lock is None:
+                self._async_load_lock = asyncio.Lock()
             async with self._async_load_lock:
                 if self._llm is None:
                     await asyncio.to_thread(self.load_model)

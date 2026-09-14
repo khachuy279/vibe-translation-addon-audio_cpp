@@ -98,7 +98,7 @@ class AudioBufferManager:
         n_total_frames = (n_samples + self.frame_samples - 1) // self.frame_samples
         if n_total_frames > len(states):
             states.extend(bytes([pending_state]) * (n_total_frames - len(states)))
-        frame_state = np.frombuffer(states, dtype=np.uint8, count=n_total_frames)
+        frame_state = np.frombuffer(states, dtype=np.uint8, count=n_total_frames).copy()
 
         return AudioSnapshot(
             pcm=samples_f32,
@@ -202,3 +202,17 @@ class AudioBufferManager:
     def version(self) -> int:
         with self._buffer_lock:
             return self._version
+
+    def get_trailing_silence_ms(self) -> float:
+        """Calculate trailing silence duration (in milliseconds) at the tail of the buffer."""
+        with self._buffer_lock:
+            if not self._frame_states:
+                return 0.0
+            silence_frames = 0
+            for s in reversed(self._frame_states):
+                if s != VAD_STATE_SPEECH:
+                    silence_frames += 1
+                else:
+                    break
+            frame_ms = (self.frame_samples / float(self.sample_rate)) * 1000.0
+            return silence_frames * frame_ms

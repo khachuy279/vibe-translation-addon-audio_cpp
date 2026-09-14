@@ -1,0 +1,3818 @@
+{
+  "mode": "stream",
+  "speed": 1.0,
+  "lang_mode": "ja",
+  "config": {
+    "vad_engine": "fsmn-vad",
+    "vad_threshold": 0.2,
+    "silence_duration_ms": 150,
+    "hangover_ms": 250,
+    "pre_speech_buffer_ms": 800,
+    "asr_language": "auto",
+    "normalize_speech": true,
+    "normalize_target_rms": 0.1,
+    "preview_min_growth_ratio": 0.5,
+    "poll_interval_ms": 350,
+    "min_transcribe_sec": 0.6,
+    "split_on_stability": true,
+    "min_words_to_commit": 4,
+    "stability_duration_sec": 1.5,
+    "max_duration_sec": 15.0,
+    "max_duration_require_silence": true,
+    "boundary_candidate_silence_ms": 80,
+    "override.asr.active_model": "cohere-transcribe"
+  },
+  "corpus_cer_pct": 17.002,
+  "corpus_cer_itn_pct": 17.002,
+  "corpus_wer_pct": null,
+  "total_ref_chars": 1988,
+  "total_edits": 338,
+  "per_file_cer_pct": {
+    "stream00": 32.79,
+    "stream01": 10.61,
+    "stream02": 19.44,
+    "stream03": 15.82,
+    "stream04": 13.62,
+    "stream05": 11.62,
+    "stream06": 15.64,
+    "stream07": 22.18
+  },
+  "results": [
+    {
+      "pair_id": "stream00",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 65.47,
+      "wall_sec": 83.66,
+      "wer": null,
+      "cer": 0.32786885245901637,
+      "cer_itn": 0.32786885245901637,
+      "substitutions": 9,
+      "deletions": 46,
+      "insertions": 5,
+      "ref_length": 183,
+      "hyp_length": 165,
+      "raw_reference": "でも実際のとこちょっと。だから彼も本調子じゃないんですよ突然向き合うのは大変なこと。大体８００年ぐらい前。裏読み過ぎちゃったんじゃないかなと思うんだこれ。「コロコロ転がってる」って言われたらどんなものが転がってるイメージ？いやマジすごいわ。目的は３年生を送るだけでなく。こちら東京・渋谷駅前のスクランブル交差点ではなく原寸大で再現されたオープンセット。兵庫の１品目人間は誰もが持ってるんですよ。",
+      "raw_hypothesis": "でも実際のとこちょっと。 これちょっと裏読みすぎちゃったんじゃないかなと思うんだこれ。 ハハハハ! コロコロがってるっていわれたらどんなものがころがってるイメージ? いやマジすごいわ。 3年生を送るだけでなく。 こちら、東京・渋谷駅前のスクランブル交差点。 台で再現されたオープンセット。 兵庫の1品目。 誰もが持ってるんですよ。",
+      "normalized_reference": "でも実際のとこちょっとだから彼も本調子じゃないんですよ突然向き合うのは大変なこと大体800年ぐらい前裏読み過ぎちゃったんじゃないかなと思うんだこれコロコロ転がってるって言われたらどんなものが転がってるイメジいやマジすごいわ目的は3年生を送るだけでなくこちら東京渋谷駅前のスクランブル交差点ではなく原寸大で再現されたオプンセット兵庫の1品目人間は誰もが持ってるんですよ",
+      "normalized_hypothesis": "でも実際のとこちょっとこれちょっと裏読みすぎちゃったんじゃないかなと思うんだこれハハハハコロコロがってるっていわれたらどんなものがころがってるイメジいやマジすごいわ3年生を送るだけでなくこちら東京渋谷駅前のスクランブル交差点台で再現されたオプンセット兵庫の1品目誰もが持ってるんですよ",
+      "commit_count": 10,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 60.66,
+      "preview_audio_sec": 41.58,
+      "inference_count": 49,
+      "audio_exposure_ratio": 1.56,
+      "commits": [
+        {
+          "utterance_id": "c5d58b45-9227-4630-9c21-50c0d890054d",
+          "reason": "VAD_SILENCE",
+          "text": "でも実際のとこちょっと。",
+          "t_wall": 1789183786.9369125,
+          "buffer_duration_sec": 0.42
+        },
+        {
+          "utterance_id": "a4eda575-0ab2-4555-9c84-1f15cba2ad7b",
+          "reason": "VAD_SILENCE",
+          "text": "これちょっと裏読みすぎちゃったんじゃないかなと思うんだこれ。",
+          "t_wall": 1789183791.509857,
+          "buffer_duration_sec": 3.96
+        },
+        {
+          "utterance_id": "10064e5a-8c02-4918-bc7d-0b1f1a3d1f4c",
+          "reason": "VAD_SILENCE",
+          "text": "ハハハハ!",
+          "t_wall": 1789183791.608481,
+          "buffer_duration_sec": 4.02
+        },
+        {
+          "utterance_id": "82498ac6-cbe0-4985-92a7-30e3070ff347",
+          "reason": "VAD_SILENCE",
+          "text": "コロコロがってるっていわれたらどんなものがころがってるイメージ?",
+          "t_wall": 1789183795.7364125,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "2b798e78-28f0-4d8a-b2b6-58536b49485d",
+          "reason": "VAD_SILENCE",
+          "text": "いやマジすごいわ。",
+          "t_wall": 1789183802.5015082,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f85a0293-2468-4026-9c7c-99e0b4906e1c",
+          "reason": "VAD_SILENCE",
+          "text": "3年生を送るだけでなく。",
+          "t_wall": 1789183806.9121609,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "eee328b5-7fbc-4226-b42c-e7a3f1d03429",
+          "reason": "VAD_SILENCE",
+          "text": "こちら、東京・渋谷駅前のスクランブル交差点。",
+          "t_wall": 1789183821.1978157,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ca1763cc-c681-400e-b34b-376b69e1ebdb",
+          "reason": "VAD_SILENCE",
+          "text": "台で再現されたオープンセット。",
+          "t_wall": 1789183827.5186894,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "2001d2e6-ab63-4f02-a64b-2b5f34750d07",
+          "reason": "VAD_SILENCE",
+          "text": "兵庫の1品目。",
+          "t_wall": 1789183836.4206464,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "5ec8670b-e5a5-4b0b-acca-04490201d834",
+          "reason": "VAD_SILENCE",
+          "text": "誰もが持ってるんですよ。",
+          "t_wall": 1789183842.5902398,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 9300.3,
+          "text": "あ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 10004.7,
+          "text": ""
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 10001.5,
+          "text": ""
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 10012.2,
+          "text": ""
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.72,
+          "wall_ms": 21506.7,
+          "text": "でも実際のとこちょっと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.7,
+          "wall_ms": 9102.2,
+          "text": "これちょっと裏読みすぎちゃったんじゃないかなと思うんだこれ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.68,
+          "wall_ms": 7056.7,
+          "text": "ハハハハ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 5323.2,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.26,
+          "wall_ms": 129.7,
+          "text": "転がってるって言われたらどんなものが転がってる?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.2,
+          "wall_ms": 187.0,
+          "text": "コロコロがってるっていわれたらどんなものがころがってるイメージ?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 91.7,
+          "text": "うわ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 103.1,
+          "text": "ああそう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 202.4,
+          "text": "自主的にやってるんでしょ?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.4,
+          "wall_ms": 137.2,
+          "text": "いやマジすごいわ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 91.2,
+          "text": "目的。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.5,
+          "wall_ms": 102.8,
+          "text": "目的は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 97.5,
+          "text": "3年生を送る。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 114.1,
+          "text": "3年生を送るだけでなく。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 111.5,
+          "text": "3年生を送るだけでなく。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 219.4,
+          "text": "本当に。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.2,
+          "wall_ms": 90.3,
+          "text": "本当に。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.36,
+          "wall_ms": 554.4,
+          "text": "はい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.3,
+          "wall_ms": 1151.2,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 97.5,
+          "text": "ねっ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 95.0,
+          "text": "ねっ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 92.1,
+          "text": "こちら"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 96.3,
+          "text": "こちら。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 271.9,
+          "text": "こちら東京・渋谷駅前のスク"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.52,
+          "wall_ms": 165.2,
+          "text": "こちら、東京・渋谷駅前のスクランブル交差点。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 82.7,
+          "text": "な"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 87.9,
+          "text": "なく。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 88.7,
+          "text": "なく。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 89.9,
+          "text": "ん?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 95.5,
+          "text": "台で再現"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.88,
+          "wall_ms": 125.7,
+          "text": "台で再現されたオープンセット。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.6,
+          "wall_ms": 130.1,
+          "text": "台で再現されたオープンセット。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 89.6,
+          "text": "うん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 95.0,
+          "text": "えっ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.04,
+          "wall_ms": 101.2,
+          "text": "えっ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 221.8,
+          "text": "今日"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 103.0,
+          "text": "兵庫の1品目は。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.9,
+          "wall_ms": 128.7,
+          "text": "兵庫の1品目。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 89.4,
+          "text": "あ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 93.8,
+          "text": "ああ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 308.6,
+          "text": "人間は?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 112.8,
+          "text": "人間は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 90.3,
+          "text": "誰も。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 104.1,
+          "text": "誰もが持ってるんですよ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.1,
+          "wall_ms": 110.0,
+          "text": "誰もが持ってるんですよ。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream01",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 60.7,
+      "wall_sec": 77.45,
+      "wer": null,
+      "cer": 0.10606060606060606,
+      "cer_itn": 0.1044776119402985,
+      "substitutions": 12,
+      "deletions": 2,
+      "insertions": 14,
+      "ref_length": 264,
+      "hyp_length": 306,
+      "raw_reference": "殺人の疑いで逮捕されたのは自称・看護助手の上田綾乃容疑者４２歳。今、左手をとった右側に大きさの違う２つのホールドがありましたが堀さん、あそこ使うのがセッターの。タイヤは、なぜ爆発したのでしょうか。ここからは気象予報士の水越さんとお伝えします。どっちも使うようになって。今となってはあのころがなつかしい。近くで働く人の話によりますと、火事があった現場には、ことしになって、プレハブ小屋のようなものが建てられていたということです。最大２万円分のマイナポイントの申し込み期限が今月末に迫る中自治体の窓口には相談に訪れる人が相次いでいます。いよいよトップ発表の日あっへえ。",
+      "raw_hypothesis": "殺人の疑いで逮捕されたのは自称・看護助手の上田綾乃容疑者42歳。 あの今左手を取った右側に。 大きさの違う2つのホールドがありましたけれども堀さん、あそこを使うのがセッターの。 そうですね。 タイヤはなぜ爆発したのでしょうか。 ここからは気象予報士の水越さんとお伝えします。 どっちも使うようになって。 今となってはあのころが懐かしい。 近くで働く人の話によりますと。 火事があった現場には今年になってプレハブ小屋のようなものが建てられていたということです。 最大2万円分のマイナポイントの申し込み期限が今月末に迫る中 自治体の窓口には相談に訪れる人が相次いでいます。 いよいよトップはっぴょうのひ。 カップは。",
+      "normalized_reference": "殺人の疑いで逮捕されたのは自称看護助手の上田綾乃容疑者42歳今左手をとった右側に大きさの違う2つのホルドがありましたが堀さんあそこ使うのがセッタのタイヤはなぜ爆発したのでしょうかここからは気象予報士の水越さんとお伝えしますどっちも使うようになって今となってはあのころがなつかしい近くで働く人の話によりますと火事があった現場にはことしになってプレハブ小屋のようなものが建てられていたということです最大2万円分のマイナポイントの申し込み期限が今月末に迫る中自治体の窓口には相談に訪れる人が相次いでいますいよいよトップ発表の日あっへえ",
+      "normalized_hypothesis": "殺人の疑いで逮捕されたのは自称看護助手の上田綾乃容疑者42歳あの今左手を取った右側に大きさの違う2つのホルドがありましたけれども堀さんあそこを使うのがセッタのそうですねタイヤはなぜ爆発したのでしょうかここからは気象予報士の水越さんとお伝えしますどっちも使うようになって今となってはあのころが懐かしい近くで働く人の話によりますと火事があった現場には今年になってプレハブ小屋のようなものが建てられていたということです最大2万円分のマイナポイントの申し込み期限が今月末に迫る中自治体の窓口には相談に訪れる人が相次いでいますいよいよトップはっぴょうのひカップは",
+      "commit_count": 14,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 54.12,
+      "preview_audio_sec": 54.48,
+      "inference_count": 46,
+      "audio_exposure_ratio": 1.79,
+      "commits": [
+        {
+          "utterance_id": "e43d766d-fe1a-4400-b29e-b1fa51bddd83",
+          "reason": "VAD_SILENCE",
+          "text": "殺人の疑いで逮捕されたのは自称・看護助手の上田綾乃容疑者42歳。",
+          "t_wall": 1789183853.7375731,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7c2a1a45-57af-448c-92dc-1219e5c0bec3",
+          "reason": "VAD_SILENCE",
+          "text": "あの今左手を取った右側に。",
+          "t_wall": 1789183858.7905796,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "603f8bbd-c490-488e-8332-7423ef5e69c8",
+          "reason": "VAD_SILENCE",
+          "text": "大きさの違う2つのホールドがありましたけれども堀さん、あそこを使うのがセッターの。",
+          "t_wall": 1789183867.529312,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "a7923383-7f1a-4289-a297-cc26ebaf0f02",
+          "reason": "VAD_SILENCE",
+          "text": "そうですね。",
+          "t_wall": 1789183868.6460361,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1660ba40-1e4c-41b7-8e1a-f226815a1377",
+          "reason": "VAD_SILENCE",
+          "text": "タイヤはなぜ爆発したのでしょうか。",
+          "t_wall": 1789183872.8925605,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "267eda5a-ca22-4add-95e9-9b6cdd83daff",
+          "reason": "VAD_SILENCE",
+          "text": "ここからは気象予報士の水越さんとお伝えします。",
+          "t_wall": 1789183877.3374977,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "63e13304-92c7-46ff-b01d-a9a6ffa52cb3",
+          "reason": "VAD_SILENCE",
+          "text": "どっちも使うようになって。",
+          "t_wall": 1789183880.4911046,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "8af46022-428e-42d5-9f39-2c02a2b4c79e",
+          "reason": "VAD_SILENCE",
+          "text": "今となってはあのころが懐かしい。",
+          "t_wall": 1789183884.8981998,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "692f2b47-882f-4eb9-a9e3-f3e1e298b69b",
+          "reason": "VAD_SILENCE",
+          "text": "近くで働く人の話によりますと。",
+          "t_wall": 1789183889.1959794,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c1e4e8ca-78d0-4962-9798-363fbefbb854",
+          "reason": "VAD_SILENCE",
+          "text": "火事があった現場には今年になってプレハブ小屋のようなものが建てられていたということです。",
+          "t_wall": 1789183895.4137912,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "4047c64c-6342-462b-aa8d-0e25b1a64c1d",
+          "reason": "VAD_SILENCE",
+          "text": "最大2万円分のマイナポイントの申し込み期限が今月末に迫る中",
+          "t_wall": 1789183903.1857977,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c04c0461-962f-40ad-8dd7-3f8f25eb74bd",
+          "reason": "VAD_SILENCE",
+          "text": "自治体の窓口には相談に訪れる人が相次いでいます。",
+          "t_wall": 1789183908.643116,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ec6b2603-5c88-4c8c-8a9e-54c335b40e57",
+          "reason": "VAD_SILENCE",
+          "text": "いよいよトップはっぴょうのひ。",
+          "t_wall": 1789183913.2533772,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1138580e-38f5-4cd0-a34a-7db33f84d3d2",
+          "reason": "VAD_SILENCE",
+          "text": "カップは。",
+          "t_wall": 1789183919.4012878,
+          "buffer_duration_sec": 0.06
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 158.7,
+          "text": "殺人。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 110.5,
+          "text": "殺人の疑いで逮捕"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.02,
+          "wall_ms": 285.8,
+          "text": "殺人の疑いで逮捕されたのは自称看護助手"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.08,
+          "wall_ms": 308.5,
+          "text": "殺人の疑いで逮捕されたのは自称・看護助手の上田綾乃容疑者42歳。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 89.5,
+          "text": "あの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 101.6,
+          "text": "あの。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.02,
+          "wall_ms": 137.2,
+          "text": "あの今左手を取った右側に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 250.0,
+          "text": "大木さん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 104.2,
+          "text": "大きさの違う2つのホールド"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.14,
+          "wall_ms": 147.6,
+          "text": "大きさの違う2つのホールドがありましたけれども堀さん"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 6.12,
+          "wall_ms": 302.8,
+          "text": "大きさの違う2つのホールドがありましたけれども堀さん、あそこを使うのがセッターの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 100.7,
+          "text": "そうですね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 87.1,
+          "text": "そうですね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 92.2,
+          "text": "タイヤ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 105.6,
+          "text": "タイヤはなぜ爆発?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.3,
+          "wall_ms": 130.1,
+          "text": "タイヤはなぜ爆発したのでしょうか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 94.1,
+          "text": "ここから。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 106.1,
+          "text": "ここからは気象予報士"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.48,
+          "wall_ms": 216.1,
+          "text": "ここからは気象予報士の水越さんとお伝えします。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 89.7,
+          "text": "どう?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 102.6,
+          "text": "どっちも使う。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.58,
+          "wall_ms": 121.3,
+          "text": "どっちも使うようになって。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 95.7,
+          "text": "《だ》"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 104.0,
+          "text": "今となっては。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 256.8,
+          "text": "今となってはあのころが懐かしい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 93.6,
+          "text": "近くで"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.16,
+          "wall_ms": 117.8,
+          "text": "近くで働く人の話によります"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 123.6,
+          "text": "近くで働く人の話によりますと。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 99.2,
+          "text": "火事があった?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 115.2,
+          "text": "火事があった現場には今年になって。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 224.8,
+          "text": "火事があった現場には今年になってプレハブ小屋のようなものが建てられています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.92,
+          "wall_ms": 172.0,
+          "text": "火事があった現場には今年になってプレハブ小屋のようなものが建てられていたということです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 89.3,
+          "text": "寝る。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 109.6,
+          "text": "最大2万円分"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.62,
+          "wall_ms": 329.1,
+          "text": "最大2万円分のマイナポイントの申し込み期限が今月"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 6.12,
+          "wall_ms": 166.0,
+          "text": "最大2万円分のマイナポイントの申し込み期限が今月末に迫る中"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 87.3,
+          "text": "自治体の"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 113.4,
+          "text": "自治体の窓口には"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 141.7,
+          "text": "自治体の窓口には相談に訪れる人が相次い"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.38,
+          "wall_ms": 158.7,
+          "text": "自治体の窓口には相談に訪れる人が相次いでいます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 142.6,
+          "text": "いや。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 107.5,
+          "text": "いよいよトップ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.7,
+          "wall_ms": 131.2,
+          "text": "いよいよトップはっぴょうのひ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 204.3,
+          "text": "トップ"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 98.7,
+          "text": "カップは。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.48,
+          "wall_ms": 77.7,
+          "text": "あ!"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream02",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 60.28,
+      "wall_sec": 76.83,
+      "wer": null,
+      "cer": 0.19444444444444445,
+      "cer_itn": 0.19444444444444445,
+      "substitutions": 8,
+      "deletions": 20,
+      "insertions": 14,
+      "ref_length": 216,
+      "hyp_length": 244,
+      "raw_reference": "スプーンにうつった顔がおもしろくて見てたんです。大丈夫ですか？島に入りこんだ凶悪犯を殺してしまい、それを隠そうとする島の住民たちの周囲でさらなる事件が起こっていくというサスペンスでございます。描いているのはルーマニアで見たという変わったおうちの絵。オレゴン州の弁護士資格、持ってないんじゃないんですか？鉄道警察が注意するとなぜか女性は。温かいご飯にレモン鶏そぼろを混ぜるのがポイント。こんなぜいたく。続いてにまいりましょう。本当にきれいですね。もうそれしかない。",
+      "raw_hypothesis": "スプーンに映った顔が面白くて。 大丈夫ですか? 島に入り込んだ凶悪犯を殺してしまい、それを隠そうとする島の住民たちの周囲で、さらなる事件が起こっていくというサスペンスなんです。 描いているのはルーマニアで見たという変わったおうちの絵。 うん窓よこれ。 オレゴン州の弁護士資格持ってないんじゃない? 鉄道警察が注意すると、なぜか女性は。 ごめんね。 温かいご飯に。 鶏そぼろを混ぜるのがポイント。 こんなぜいたく。 本当です。 続いて参りましょう。 本当にきれいですね。 もうそれしかない。",
+      "normalized_reference": "スプンにうつった顔がおもしろくて見てたんです大丈夫ですか島に入りこんだ凶悪犯を殺してしまいそれを隠そうとする島の住民たちの周囲でさらなる事件が起こっていくというサスペンスでございます描いているのはルマニアで見たという変わったおうちの絵オレゴン州の弁護士資格持ってないんじゃないんですか鉄道警察が注意するとなぜか女性は温かいご飯にレモン鶏そぼろを混ぜるのがポイントこんなぜいたく続いてにまいりましょう本当にきれいですねもうそれしかない",
+      "normalized_hypothesis": "スプンに映った顔が面白くて大丈夫ですか島に入り込んだ凶悪犯を殺してしまいそれを隠そうとする島の住民たちの周囲でさらなる事件が起こっていくというサスペンスなんです描いているのはルマニアで見たという変わったおうちの絵うん窓よこれオレゴン州の弁護士資格持ってないんじゃない鉄道警察が注意するとなぜか女性はごめんね温かいご飯に鶏そぼろを混ぜるのがポイントこんなぜいたく本当です続いて参りましょう本当にきれいですねもうそれしかない",
+      "commit_count": 15,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 57.36,
+      "preview_audio_sec": 62.34,
+      "inference_count": 61,
+      "audio_exposure_ratio": 1.99,
+      "commits": [
+        {
+          "utterance_id": "989a9674-e0eb-477c-b7b4-78d9c2e2d96b",
+          "reason": "VAD_SILENCE",
+          "text": "スプーンに映った顔が面白くて。",
+          "t_wall": 1789183927.0925581,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "6bfafabf-3aad-4a1a-b87e-776eb7a955ad",
+          "reason": "VAD_SILENCE",
+          "text": "大丈夫ですか?",
+          "t_wall": 1789183934.3810263,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "596dcac2-0299-4a29-bf72-68b8b99b3f3c",
+          "reason": "VAD_SILENCE",
+          "text": "島に入り込んだ凶悪犯を殺してしまい、それを隠そうとする島の住民たちの周囲で、さらなる事件が起こっていくというサスペンスなんです。",
+          "t_wall": 1789183946.6307716,
+          "buffer_duration_sec": 0.24
+        },
+        {
+          "utterance_id": "d9eec47a-b79d-4773-8f04-61a34e236a72",
+          "reason": "VAD_SILENCE",
+          "text": "描いているのはルーマニアで見たという変わったおうちの絵。",
+          "t_wall": 1789183952.7100172,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "13325c00-4f2d-4f0d-8d1e-bc1ff816ff04",
+          "reason": "VAD_SILENCE",
+          "text": "うん窓よこれ。",
+          "t_wall": 1789183955.5099266,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "77526c90-c35b-4088-a7a3-78ab548eaecb",
+          "reason": "VAD_SILENCE",
+          "text": "オレゴン州の弁護士資格持ってないんじゃない?",
+          "t_wall": 1789183961.3314877,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "142f23f0-2ffa-40c9-9fda-524ef54b791b",
+          "reason": "VAD_SILENCE",
+          "text": "鉄道警察が注意すると、なぜか女性は。",
+          "t_wall": 1789183967.5662625,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "57dfbca5-c9d7-4fff-a543-2519b1fd83a5",
+          "reason": "VAD_SILENCE",
+          "text": "ごめんね。",
+          "t_wall": 1789183969.190262,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "1cc24b9e-1d85-4e8f-b13b-cb93591470b9",
+          "reason": "VAD_SILENCE",
+          "text": "温かいご飯に。",
+          "t_wall": 1789183975.9499714,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "075b6972-c13f-4832-b329-7beb47e150cf",
+          "reason": "VAD_SILENCE",
+          "text": "鶏そぼろを混ぜるのがポイント。",
+          "t_wall": 1789183979.8644357,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "71f1a723-8ee8-46da-9e29-d9453594cac4",
+          "reason": "VAD_SILENCE",
+          "text": "こんなぜいたく。",
+          "t_wall": 1789183983.5855963,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f7d256b7-93fc-4e7e-bfb6-68792c4b3823",
+          "reason": "VAD_SILENCE",
+          "text": "本当です。",
+          "t_wall": 1789183985.4522662,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "3e66d8e1-ff46-4c15-8b7c-6940281842ef",
+          "reason": "VAD_SILENCE",
+          "text": "続いて参りましょう。",
+          "t_wall": 1789183989.524742,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e3fd2d0e-f168-408b-943c-884569ec3755",
+          "reason": "VAD_SILENCE",
+          "text": "本当にきれいですね。",
+          "t_wall": 1789183994.5876617,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "87bad1a3-51e3-4dee-bb37-85d65754ce1e",
+          "reason": "VAD_SILENCE",
+          "text": "もうそれしかない。",
+          "t_wall": 1789183996.869001,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 82.9,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 93.8,
+          "text": "そりゃ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 88.8,
+          "text": "スプーン。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 104.2,
+          "text": "スプーンに打つと。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 123.3,
+          "text": "スプーンに映った顔が面白くて。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.0,
+          "wall_ms": 126.8,
+          "text": "スプーンに映った顔が面白くて。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 93.1,
+          "text": "です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.2,
+          "wall_ms": 92.2,
+          "text": "です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 237.1,
+          "text": "あら。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 101.4,
+          "text": "帰る。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.66,
+          "wall_ms": 115.7,
+          "text": "大丈夫ですか?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 93.1,
+          "text": "芝"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 110.8,
+          "text": "芝に入るか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.48,
+          "wall_ms": 184.4,
+          "text": "芝に入り込んだ凶悪犯を殺してしまい、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 7.02,
+          "wall_ms": 314.3,
+          "text": "島に入り込んだ凶悪犯を殺してしまい、それを隠そうとする島の住民たちの周囲で、さらなる事件。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 9.72,
+          "wall_ms": 252.5,
+          "text": "島に入り込んだ凶悪犯を殺してしまい、それを隠そうとする島の住民たちの周囲で、さらなる事件が起こっていくというサスペンスなんです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 87.4,
+          "text": "《"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 104.1,
+          "text": "描いているのはルーム"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 141.6,
+          "text": "描いているのはルーマニアで見たという変わった絵。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.98,
+          "wall_ms": 160.0,
+          "text": "描いているのはルーマニアで見たという変わったおうちの絵。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 87.1,
+          "text": "うん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 117.0,
+          "text": "うん窓よ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.22,
+          "wall_ms": 106.8,
+          "text": "うん窓よこれ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 96.1,
+          "text": "解説"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 101.5,
+          "text": "解説していただきました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 205.8,
+          "text": "オレゴン州の弁護士資格持ってないんじゃないですか。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.62,
+          "wall_ms": 148.0,
+          "text": "オレゴン州の弁護士資格持ってないんじゃない?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 99.8,
+          "text": "心虚激怒。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 107.1,
+          "text": "鉄道警察"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 219.9,
+          "text": "鉄道警察が注意するとなぜか銃。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.98,
+          "wall_ms": 135.6,
+          "text": "鉄道警察が注意すると、なぜか女性は。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 96.2,
+          "text": "何?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.26,
+          "wall_ms": 97.0,
+          "text": "ごめんね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 92.2,
+          "text": "ねえ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.9,
+          "wall_ms": 91.2,
+          "text": "ねえ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 86.6,
+          "text": "え?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.9,
+          "wall_ms": 94.8,
+          "text": "ピッ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.24,
+          "wall_ms": 81.8,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 95.5,
+          "text": "当たった!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 102.5,
+          "text": "温かいご飯"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.64,
+          "wall_ms": 116.4,
+          "text": "温かいご飯に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 91.8,
+          "text": "トリュフ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 112.7,
+          "text": "鶏そぼろを混ぜるね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 131.8,
+          "text": "鶏そぼろを混ぜるのがポイント。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 93.7,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 101.4,
+          "text": "こんなぜ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 119.1,
+          "text": "こんなぜいたく。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 682.7,
+          "text": "うん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.7,
+          "text": "うん。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.96,
+          "wall_ms": 91.7,
+          "text": "本当です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 93.4,
+          "text": "画面"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.44,
+          "wall_ms": 100.5,
+          "text": "さあ続いては。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.88,
+          "wall_ms": 274.4,
+          "text": "続いて参りましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 109.4,
+          "text": "続いて参りましょう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 92.8,
+          "text": "すいません。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 59.3,
+          "text": "楽しみ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 95.4,
+          "text": "よし!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 99.5,
+          "text": "よくしてる。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.58,
+          "wall_ms": 110.4,
+          "text": "本当にきれいですね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 89.6,
+          "text": "もうそれ"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.8,
+          "wall_ms": 96.9,
+          "text": "もうそれしかない。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream03",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 62.48,
+      "wall_sec": 79.68,
+      "wer": null,
+      "cer": 0.15822784810126583,
+      "cer_itn": 0.15822784810126583,
+      "substitutions": 9,
+      "deletions": 32,
+      "insertions": 9,
+      "ref_length": 316,
+      "hyp_length": 315,
+      "raw_reference": "きょう日中は半袖姿の方もいらっしゃいましたがあすは少し厚手のものを用意したほうがよさそうです。さあ正解はどうなんでしょうか？ドリカムさんのようにずっとずっと続けていきたいなっていうふうに。スタッフのみんなでおいしく食べてきてください。お母さんの立場になって考えてみる。ですからぜひ、１人だけで除雪等をやらないで、２人、そして安全を確認しながらやっていただきたいと思います。いろんな本に出会えるなと思いました。ツッコミとか早くなれるんだ。日本人もやっぱりこれ食べないでしょ。それでそのウソもたくさんつくんですけども名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた一生だっていうことで。その名を冠した望遠鏡は宇宙での調整を終え",
+      "raw_hypothesis": "きょう日中は半袖姿の方もいらっしゃいましたが、あすは少し厚手のものを用意したほうがよさそうでさあ、正解はどうなんでしょうか。 さんのようにずっとずっと続けていきたいなっていうふうにいきたくなりましたスタッフのみんなでおいしく食べてきてください お母さんの立場になって考えてみる。 ですから、ぜひ1人だけで除雪等をやらないで、2人、そして安全を確認しながらやっていただきたいと思います。 いろんな本に出会えるなというふうに感じました。 日本人もやっぱりこれ食べないでしょ。 それでその。 名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた。 っていうこと。 その名を冠した望遠鏡は宇宙での調整を終え",
+      "normalized_reference": "きょう日中は半袖姿の方もいらっしゃいましたがあすは少し厚手のものを用意したほうがよさそうですさあ正解はどうなんでしょうかドリカムさんのようにずっとずっと続けていきたいなっていうふうにスタッフのみんなでおいしく食べてきてくださいお母さんの立場になって考えてみるですからぜひ1人だけで除雪等をやらないで2人そして安全を確認しながらやっていただきたいと思いますいろんな本に出会えるなと思いましたツッコミとか早くなれるんだ日本人もやっぱりこれ食べないでしょそれでそのウソもたくさんつくんですけども名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた一生だっていうことでその名を冠した望遠鏡は宇宙での調整を終え",
+      "normalized_hypothesis": "きょう日中は半袖姿の方もいらっしゃいましたがあすは少し厚手のものを用意したほうがよさそうでさあ正解はどうなんでしょうかさんのようにずっとずっと続けていきたいなっていうふうにいきたくなりましたスタッフのみんなでおいしく食べてきてくださいお母さんの立場になって考えてみるですからぜひ1人だけで除雪等をやらないで2人そして安全を確認しながらやっていただきたいと思いますいろんな本に出会えるなというふうに感じました日本人もやっぱりこれ食べないでしょそれでその名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けたっていうことその名を冠した望遠鏡は宇宙での調整を終え",
+      "commit_count": 10,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "STABLE_PREFIX",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 59.78,
+      "preview_audio_sec": 80.66,
+      "inference_count": 46,
+      "audio_exposure_ratio": 2.25,
+      "commits": [
+        {
+          "utterance_id": "1004d782-fc09-4eba-9d8d-e172639a625e",
+          "reason": "VAD_SILENCE",
+          "text": "きょう日中は半袖姿の方もいらっしゃいましたが、あすは少し厚手のものを用意したほうがよさそうでさあ、正解はどうなんでしょうか。",
+          "t_wall": 1789184013.99124,
+          "buffer_duration_sec": 0.36
+        },
+        {
+          "utterance_id": "01da862e-beb8-462e-9b8e-bcb805aae881",
+          "reason": "VAD_SILENCE",
+          "text": "さんのようにずっとずっと続けていきたいなっていうふうにいきたくなりましたスタッフのみんなでおいしく食べてきてください",
+          "t_wall": 1789184025.2092233,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1a8adc3e-4ae7-400f-b294-6d14d719d51d",
+          "reason": "VAD_SILENCE",
+          "text": "お母さんの立場になって考えてみる。",
+          "t_wall": 1789184033.5441546,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "1aaa3222-4154-49ed-b462-b63749a82bab",
+          "reason": "VAD_SILENCE",
+          "text": "ですから、ぜひ1人だけで除雪等をやらないで、2人、そして安全を確認しながらやっていただきたいと思います。",
+          "t_wall": 1789184045.3228698,
+          "buffer_duration_sec": 0.3
+        },
+        {
+          "utterance_id": "7aa88abe-17ed-40e9-b451-a90f803f4c3c",
+          "reason": "VAD_SILENCE",
+          "text": "いろんな本に出会えるなというふうに感じました。",
+          "t_wall": 1789184049.41004,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "ef197ce1-9c33-4606-8bd5-891fde7df29d",
+          "reason": "VAD_SILENCE",
+          "text": "日本人もやっぱりこれ食べないでしょ。",
+          "t_wall": 1789184056.9478557,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "d57f2725-9088-41bb-ad77-2d56c3ee9eae",
+          "reason": "STABLE_PREFIX",
+          "text": "それでその。",
+          "t_wall": 1789184060.0031567,
+          "buffer_duration_sec": 2.58
+        },
+        {
+          "utterance_id": "b99d9fd7-e7ab-413a-befd-7e6adcf31564",
+          "reason": "VAD_SILENCE",
+          "text": "名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた。",
+          "t_wall": 1789184069.5844812,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "02a033d5-a78a-4b45-9349-54850ad68ed6",
+          "reason": "VAD_SILENCE",
+          "text": "っていうこと。",
+          "t_wall": 1789184071.3037531,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "2df55fa9-8578-4901-ae90-4af41dbdeb8e",
+          "reason": "VAD_SILENCE",
+          "text": "その名を冠した望遠鏡は宇宙での調整を終え",
+          "t_wall": 1789184076.6939492,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 201.3,
+          "text": "競技"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 101.4,
+          "text": "きょう日中は半袖。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.02,
+          "wall_ms": 316.5,
+          "text": "きょう日中は半袖姿の方もいらっしゃいましたが、"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 8.04,
+          "wall_ms": 206.2,
+          "text": "きょう日中は半袖姿の方もいらっしゃいましたが、あすは少し厚手のものを用意したほうがよさそうです。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 12.06,
+          "wall_ms": 403.5,
+          "text": "きょう日中は半袖姿の方もいらっしゃいましたが、あすは少し厚手のものを用意したほうがよさそうでさあ、正解はどうなんでしょうか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 85.1,
+          "text": "うん。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 88.0,
+          "text": "うん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 93.3,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.38,
+          "wall_ms": 100.6,
+          "text": "ずっとずっと。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 138.7,
+          "text": "のようにずっとずっと続けていきたいなっていうふうに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 5.94,
+          "wall_ms": 323.9,
+          "text": "ずっと続けていきたいなと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.98,
+          "wall_ms": 209.6,
+          "text": "さんのようにずっとずっと続けていきたいなっていうふうにいきたくなりましたスタッフのみんなでおいしく食べてきてください"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 87.8,
+          "text": "み"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 105.9,
+          "text": "考えてみるのさ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.42,
+          "wall_ms": 115.4,
+          "text": "そう!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 6.6,
+          "wall_ms": 295.4,
+          "text": "お母さんの立場になって考えてみる。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 80.2,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 92.6,
+          "text": "ですから、全"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 116.2,
+          "text": "ですから、ぜひ1人だけで。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 5.22,
+          "wall_ms": 314.6,
+          "text": "ですから、ぜひ1人だけで除雪等をやらないで。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 9.36,
+          "wall_ms": 408.3,
+          "text": "ですから、ぜひ1人だけで除雪等をやらないで、2人、そして安全を確認しながらやっていただきたいと思います。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 86.0,
+          "text": "確かに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 96.4,
+          "text": "いろんな本に出る。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.88,
+          "wall_ms": 132.5,
+          "text": "いろんな本に出会えるなというふうに感じました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 140.9,
+          "text": "いろんな本に出会えるなというふうに感じました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 86.3,
+          "text": "あ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.66,
+          "wall_ms": 92.2,
+          "text": "いい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 86.7,
+          "text": "あっ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 101.2,
+          "text": "ツッコミとか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.4,
+          "wall_ms": 158.6,
+          "text": "ツッコミとかは早くなれるんだ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.86,
+          "wall_ms": 274.0,
+          "text": "日本人もやっぱりこれ食べないでしょ?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.28,
+          "wall_ms": 136.4,
+          "text": "日本人もやっぱりこれ食べないでしょ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 84.2,
+          "text": "あっ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 99.9,
+          "text": "それでその。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 108.0,
+          "text": "それでその。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.68,
+          "wall_ms": 86.6,
+          "text": "ん?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.64,
+          "wall_ms": 100.3,
+          "text": "目!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.5,
+          "wall_ms": 272.0,
+          "text": "名誉のためとか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 7.22,
+          "wall_ms": 202.1,
+          "text": "名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 7.64,
+          "wall_ms": 194.9,
+          "text": "名誉のためとかお金のためにウソをつくんじゃなくて自分の笑いのためにずっとウソを続けた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 83.6,
+          "text": "っていう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.44,
+          "wall_ms": 92.6,
+          "text": "っていうこと。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 89.8,
+          "text": "その"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 112.2,
+          "text": "その名を冠した貿易"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 201.9,
+          "text": "その名を冠した望遠鏡は宇宙での調整を終え"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.2,
+          "wall_ms": 154.5,
+          "text": "その名を冠した望遠鏡は宇宙での調整を終え"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream04",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 64.43,
+      "wall_sec": 82.01,
+      "wer": null,
+      "cer": 0.13618677042801555,
+      "cer_itn": 0.13618677042801555,
+      "substitutions": 6,
+      "deletions": 15,
+      "insertions": 14,
+      "ref_length": 257,
+      "hyp_length": 297,
+      "raw_reference": "こちらの自動販売機、コカ・コーラが１８０円ですね。「なあこれを１００円で売んねんで」そしてそんな雪が降るくらいですから明日はまた、がくんと気温が下がります。ツーアウト、ランナーなし。じゃああれかい？お見事！ストレートはそれが大事になってきますね。そこで活路を求めたのがインターネットの動画配信です。先ほどの金子さんはあえてあの小さなボディーにこだわってしかも全部段差を越えて一番高いところまでなんとあの伸びちゃってっていう。その罪状で起訴されれば実刑を免れる可能性は高い。晴れているタイミングでは今日は日中少し暖かいぐらいそんなに着込まなくても大丈夫ですよ。",
+      "raw_hypothesis": "こちらの自動販売機。 コカ・コーラが180円ですね。 すみません。 なあこれを100円で売んねて。 そして、そんな雪が降るくらいですから明日またガクンと気温が下がります。 ツーアウトランナーなし。 じゃああれかい。 ストレートはそれが大事になってきますね。 今度はボールゾーン。 そこで活路を求めたのがインターネットの動画配信です。 先ほどの金子さんはもうあえて小さなボディーにこだわってしかも全部段差を超えて一番高いところまでなんとあの。 伸びちゃったっていう。 その罪状で起訴されれば。 実刑を免れる可能性は高い。 晴れているタイミングでは今日は日中。 そんなに着込まなくても大丈夫ですよ。",
+      "normalized_reference": "こちらの自動販売機コカコラが180円ですねなあこれを100円で売んねんでそしてそんな雪が降るくらいですから明日はまたがくんと気温が下がりますツアウトランナなしじゃああれかいお見事ストレトはそれが大事になってきますねそこで活路を求めたのがインタネットの動画配信です先ほどの金子さんはあえてあの小さなボディにこだわってしかも全部段差を越えて一番高いところまでなんとあの伸びちゃってっていうその罪状で起訴されれば実刑を免れる可能性は高い晴れているタイミングでは今日は日中少し暖かいぐらいそんなに着込まなくても大丈夫ですよ",
+      "normalized_hypothesis": "こちらの自動販売機コカコラが180円ですねすみませんなあこれを100円で売んねてそしてそんな雪が降るくらいですから明日またガクンと気温が下がりますツアウトランナなしじゃああれかいストレトはそれが大事になってきますね今度はボルゾンそこで活路を求めたのがインタネットの動画配信です先ほどの金子さんはもうあえて小さなボディにこだわってしかも全部段差を超えて一番高いところまでなんとあの伸びちゃったっていうその罪状で起訴されれば実刑を免れる可能性は高い晴れているタイミングでは今日は日中そんなに着込まなくても大丈夫ですよ",
+      "commit_count": 16,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 58.62,
+      "preview_audio_sec": 63.72,
+      "inference_count": 59,
+      "audio_exposure_ratio": 1.9,
+      "commits": [
+        {
+          "utterance_id": "9ee11aed-39f8-4a30-9fb3-e9efd9efee95",
+          "reason": "VAD_SILENCE",
+          "text": "こちらの自動販売機。",
+          "t_wall": 1789184081.2541273,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "42f24aba-5714-4fd3-a6bb-282f194a574f",
+          "reason": "VAD_SILENCE",
+          "text": "コカ・コーラが180円ですね。",
+          "t_wall": 1789184084.2828767,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "cefa40d8-6f09-4acf-920a-17725ed5b371",
+          "reason": "VAD_SILENCE",
+          "text": "すみません。",
+          "t_wall": 1789184088.6808362,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "b2e11857-1fef-4096-8eb0-f48a91edba1e",
+          "reason": "VAD_SILENCE",
+          "text": "なあこれを100円で売んねて。",
+          "t_wall": 1789184094.1028101,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "08434ecb-9a3c-4829-84de-de8734de6440",
+          "reason": "VAD_SILENCE",
+          "text": "そして、そんな雪が降るくらいですから明日またガクンと気温が下がります。",
+          "t_wall": 1789184102.7529058,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "d2ae9fff-d0b6-4e9c-b774-dade6863ca55",
+          "reason": "VAD_SILENCE",
+          "text": "ツーアウトランナーなし。",
+          "t_wall": 1789184106.0407486,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "00f53e98-12a8-431b-aed5-a6c16398d94f",
+          "reason": "VAD_SILENCE",
+          "text": "じゃああれかい。",
+          "t_wall": 1789184108.107351,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "8cc47234-5166-4b97-8899-5cf8584b0a77",
+          "reason": "VAD_SILENCE",
+          "text": "ストレートはそれが大事になってきますね。",
+          "t_wall": 1789184115.1514995,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "7299ee09-5104-4f71-9347-eaf64b23b42d",
+          "reason": "VAD_SILENCE",
+          "text": "今度はボールゾーン。",
+          "t_wall": 1789184118.77915,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "b41905f6-3201-4468-a66e-3e6bd81bc2a7",
+          "reason": "VAD_SILENCE",
+          "text": "そこで活路を求めたのがインターネットの動画配信です。",
+          "t_wall": 1789184125.6419015,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "30946078-ba9e-47cc-aefd-eacdcc135457",
+          "reason": "VAD_SILENCE",
+          "text": "先ほどの金子さんはもうあえて小さなボディーにこだわってしかも全部段差を超えて一番高いところまでなんとあの。",
+          "t_wall": 1789184138.5759811,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "327676e8-ee0f-41a3-a3ba-8375e0f57154",
+          "reason": "VAD_SILENCE",
+          "text": "伸びちゃったっていう。",
+          "t_wall": 1789184140.4860594,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "29e0fc85-0db9-41c7-bb19-6eb3856d0484",
+          "reason": "VAD_SILENCE",
+          "text": "その罪状で起訴されれば。",
+          "t_wall": 1789184146.8447213,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e2643bbc-f3d4-426d-a912-627515c11e6a",
+          "reason": "VAD_SILENCE",
+          "text": "実刑を免れる可能性は高い。",
+          "t_wall": 1789184150.2628891,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c210f4c0-8894-4d86-8797-6a1664ce9f0e",
+          "reason": "VAD_SILENCE",
+          "text": "晴れているタイミングでは今日は日中。",
+          "t_wall": 1789184154.6227186,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "077558c7-d959-49a3-912c-02be97a56c60",
+          "reason": "VAD_SILENCE",
+          "text": "そんなに着込まなくても大丈夫ですよ。",
+          "t_wall": 1789184158.6076162,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 141.7,
+          "text": "こちら。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 246.0,
+          "text": "こちらの自動販売機"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 106.6,
+          "text": "こちらの自動販売機。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 81.4,
+          "text": "ひ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 97.1,
+          "text": "180円。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.34,
+          "wall_ms": 123.3,
+          "text": "コカ・コーラが180円ですね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 96.1,
+          "text": "あっそうだ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.04,
+          "wall_ms": 107.3,
+          "text": "180円。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 86.5,
+          "text": "え?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.72,
+          "wall_ms": 90.8,
+          "text": "すみません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 200.3,
+          "text": "なあ?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 107.1,
+          "text": "なあこれを100円。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 128.7,
+          "text": "なあこれを100円で売んねて。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 92.1,
+          "text": "さあ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 220.6,
+          "text": "そして、そんな雪が降る"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.74,
+          "wall_ms": 144.5,
+          "text": "そして、そんな雪が降るくらいですから明日またガクン"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 6.48,
+          "wall_ms": 228.3,
+          "text": "そして、そんな雪が降るくらいですから明日またガクンと気温が下がります。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 88.8,
+          "text": "ツー。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 119.1,
+          "text": "ツーアウト、ランナーが出る。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.34,
+          "wall_ms": 118.6,
+          "text": "ツーアウトランナーなし。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 88.4,
+          "text": "じゃあ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 107.1,
+          "text": "じゃああれかい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 128.0,
+          "text": "じゃああれかい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 96.5,
+          "text": "どう?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 102.6,
+          "text": "お見事!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 114.0,
+          "text": "お見事!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 150.4,
+          "text": "それ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 112.9,
+          "text": "ストレートはそれが大事になってきます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.46,
+          "wall_ms": 121.8,
+          "text": "ストレートはそれが大事になってきますね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 182.6,
+          "text": "今度は。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 103.7,
+          "text": "今度はボールゾーン。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 96.8,
+          "text": "そこで"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 113.1,
+          "text": "そこで活路を求めた"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.02,
+          "wall_ms": 322.4,
+          "text": "そこで活路を求めたのがインターネットの動画配信。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.92,
+          "wall_ms": 142.1,
+          "text": "そこで活路を求めたのがインターネットの動画配信です。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 94.0,
+          "text": "ねっ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 103.3,
+          "text": "先ほどの亀"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 136.2,
+          "text": "先ほどの金子さんはもうあえて。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 7.44,
+          "wall_ms": 294.7,
+          "text": "先ほどの金子さんはもうあえて小さなボディーにこだわってしかも全部段差を超えて。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 10.32,
+          "wall_ms": 251.3,
+          "text": "先ほどの金子さんはもうあえて小さなボディーにこだわってしかも全部段差を超えて一番高いところまでなんとあの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 93.5,
+          "text": "伸びちゃった。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.62,
+          "wall_ms": 98.8,
+          "text": "伸びちゃったっていう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 92.6,
+          "text": "って。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.02,
+          "wall_ms": 93.2,
+          "text": "だって。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 90.0,
+          "text": "その。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 109.6,
+          "text": "その罪状で起訴されました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 275.6,
+          "text": "その罪状で起訴されれば。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 87.0,
+          "text": "実刑を?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 111.5,
+          "text": "実刑を免れる可能性も。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 123.8,
+          "text": "実刑を免れる可能性は高い。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.54,
+          "wall_ms": 81.4,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 85.2,
+          "text": "雨。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 100.4,
+          "text": "タイミングでは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 255.0,
+          "text": "晴れているタイミングでは今日は日中。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 116.6,
+          "text": "晴れているタイミングでは今日は日中。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 82.2,
+          "text": "具"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 96.1,
+          "text": "そんなに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 136.6,
+          "text": "そんなに着込まなくても大丈夫ですよ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.12,
+          "wall_ms": 131.0,
+          "text": "そんなに着込まなくても大丈夫ですよ。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream05",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 60.83,
+      "wall_sec": 77.6,
+      "wer": null,
+      "cer": 0.11619718309859155,
+      "cer_itn": 0.11578947368421053,
+      "substitutions": 7,
+      "deletions": 17,
+      "insertions": 9,
+      "ref_length": 284,
+      "hyp_length": 315,
+      "raw_reference": "力強さが上りになっても変わらないどころか上りに感じさせないということはそれほど腕振りの力が使えてるということですから。君たちにはまだ仕事が残ってるんだ。きょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょう。オリーブオイルに変えて頂いたらちょっと洋風な感じになりますし。この辺にいたんでしょ。かけて白熱のイントロドン！〉さらに５回の裏、慶応の攻撃。本当においしい。民間企業の宇宙ビジネス参入を推進して企業間の競争で輸送コストを下げようとしたんだ。東京都などでは注意を呼びかけています。もう十分でしょう。でも、立つこと。これはちょっとまてよ。事件によるＰＴＳＤだと思われます。私はだまされない。",
+      "raw_hypothesis": "力強さが上りになっても変わらないどころか、上りに感じさせないということは、それだけ腕振りの力が使えてるということですから。 君たちにはまだ仕事が残ってんだ。 ちょうせんしてますか? きょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょう。 オリーブオイルに変えて頂いたらちょっと洋風な感じになりますし。 この辺にいたんでしょ? [白熱のイントロ丼] 5回の裏、慶応の攻撃。 おいしい。 民間企業の宇宙ビジネス参入を推進して。 企業間の競争で輸送コストを下げる。 東京都などでは注意を呼びかけています。 もう十分でしょ。 でも、立つこと。 これはちょっと待てよ。 事件によるPTSDだと思われます。 私はだまされない。",
+      "normalized_reference": "力強さが上りになっても変わらないどころか上りに感じさせないということはそれほど腕振りの力が使えてるということですから君たちにはまだ仕事が残ってるんだきょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょうオリブオイルに変えて頂いたらちょっと洋風な感じになりますしこの辺にいたんでしょかけて白熱のイントロドンさらに5回の裏慶応の攻撃本当においしい民間企業の宇宙ビジネス参入を推進して企業間の競争で輸送コストを下げようとしたんだ東京都などでは注意を呼びかけていますもう十分でしょうでも立つことこれはちょっとまてよ事件によるPTSDだと思われます私はだまされない",
+      "normalized_hypothesis": "力強さが上りになっても変わらないどころか上りに感じさせないということはそれだけ腕振りの力が使えてるということですから君たちにはまだ仕事が残ってんだちょうせんしてますかきょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょうオリブオイルに変えて頂いたらちょっと洋風な感じになりますしこの辺にいたんでしょ白熱のイントロ丼5回の裏慶応の攻撃おいしい民間企業の宇宙ビジネス参入を推進して企業間の競争で輸送コストを下げる東京都などでは注意を呼びかけていますもう十分でしょでも立つことこれはちょっと待てよ事件によるPTSDだと思われます私はだまされない",
+      "commit_count": 17,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 58.38,
+      "preview_audio_sec": 66.6,
+      "inference_count": 64,
+      "audio_exposure_ratio": 2.05,
+      "commits": [
+        {
+          "utterance_id": "48c66289-3141-4d2f-838b-858d4a0cf180",
+          "reason": "VAD_SILENCE",
+          "text": "力強さが上りになっても変わらないどころか、上りに感じさせないということは、それだけ腕振りの力が使えてるということですから。",
+          "t_wall": 1789184171.3411674,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "04fa26c4-e604-4d19-bb4b-2eb08fff88b0",
+          "reason": "VAD_SILENCE",
+          "text": "君たちにはまだ仕事が残ってんだ。",
+          "t_wall": 1789184174.368375,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "5efd58e3-48de-4b9f-851f-7a4d3d1ccdd7",
+          "reason": "VAD_SILENCE",
+          "text": "ちょうせんしてますか?",
+          "t_wall": 1789184177.1437347,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "d15eb59a-1c74-4951-ad16-10a2be0d0c8c",
+          "reason": "VAD_SILENCE",
+          "text": "きょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょう。",
+          "t_wall": 1789184183.9609265,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "4bb079b5-62e2-4ad7-a39b-3758a82de82d",
+          "reason": "VAD_SILENCE",
+          "text": "オリーブオイルに変えて頂いたらちょっと洋風な感じになりますし。",
+          "t_wall": 1789184189.7287247,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "ac2a138f-3c7b-427d-8f53-3d6a72358c23",
+          "reason": "VAD_SILENCE",
+          "text": "この辺にいたんでしょ?",
+          "t_wall": 1789184192.0489728,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "e4a90376-af26-4712-bbef-bbafa97023f2",
+          "reason": "VAD_SILENCE",
+          "text": "[白熱のイントロ丼]",
+          "t_wall": 1789184195.4742548,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "b6a32b4b-dec9-449c-9315-db95d052adb8",
+          "reason": "VAD_SILENCE",
+          "text": "5回の裏、慶応の攻撃。",
+          "t_wall": 1789184199.4933836,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "876b8bf8-e4fe-4e7c-a71f-4b63c809b945",
+          "reason": "VAD_SILENCE",
+          "text": "おいしい。",
+          "t_wall": 1789184202.6478615,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "70503a1d-094f-4d02-8ab5-66c743d3b068",
+          "reason": "VAD_SILENCE",
+          "text": "民間企業の宇宙ビジネス参入を推進して。",
+          "t_wall": 1789184207.6779578,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "a4556f13-b18c-46d8-a4d5-4472f8da53a6",
+          "reason": "VAD_SILENCE",
+          "text": "企業間の競争で輸送コストを下げる。",
+          "t_wall": 1789184211.1619725,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "62f5b02f-cc5a-4670-a762-942f1217f064",
+          "reason": "VAD_SILENCE",
+          "text": "東京都などでは注意を呼びかけています。",
+          "t_wall": 1789184216.101399,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "927fd522-1d75-4766-a9df-aa59f625f992",
+          "reason": "VAD_SILENCE",
+          "text": "もう十分でしょ。",
+          "t_wall": 1789184220.7385867,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "13a8e301-c95b-4f27-929a-1bbb6fe99679",
+          "reason": "VAD_SILENCE",
+          "text": "でも、立つこと。",
+          "t_wall": 1789184224.4582064,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "872fbc87-08d4-43ba-ac6a-cc9246bdd09f",
+          "reason": "VAD_SILENCE",
+          "text": "これはちょっと待てよ。",
+          "t_wall": 1789184228.8878055,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "6e6986a4-bab1-4aad-a244-35a08a30c2ac",
+          "reason": "VAD_SILENCE",
+          "text": "事件によるPTSDだと思われます。",
+          "t_wall": 1789184233.1739922,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "0149066d-b450-44f9-9c1d-d576fa6cfeba",
+          "reason": "VAD_SILENCE",
+          "text": "私はだまされない。",
+          "t_wall": 1789184235.9484015,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 84.8,
+          "text": "力強さ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 235.6,
+          "text": "力強さ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.58,
+          "wall_ms": 109.7,
+          "text": "力強さが上りになっても。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 5.28,
+          "wall_ms": 165.0,
+          "text": "力強さが上りになっても変わらないどころか上りに感じさせない"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 8.64,
+          "wall_ms": 344.4,
+          "text": "力強さが上りになっても変わらないどころか、上りに感じさせないということは、それだけ腕振りの力が使えてるということですから。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 87.6,
+          "text": "君たち"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 119.8,
+          "text": "君たちにはまだ仕事が残ってんだ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.52,
+          "wall_ms": 122.7,
+          "text": "君たちにはまだ仕事が残ってんだ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 87.9,
+          "text": "し"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 104.6,
+          "text": "せんしてますか?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.22,
+          "wall_ms": 115.7,
+          "text": "ちょうせんしてますか?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 95.4,
+          "text": "今日は私。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 121.4,
+          "text": "きょうはわたくしといっしょに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.9,
+          "wall_ms": 245.9,
+          "text": "きょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.34,
+          "wall_ms": 180.3,
+          "text": "きょうはわたくしといっしょにじゃんけん装置をくわしくみていきましょう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 87.1,
+          "text": "売り場?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 97.3,
+          "text": "オリーブオイルに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 131.6,
+          "text": "オリーブオイルに変えて頂いたらちょっと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.56,
+          "wall_ms": 238.6,
+          "text": "オリーブオイルに変えて頂いたらちょっと洋風な感じになりますし。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 84.1,
+          "text": "これ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 104.3,
+          "text": "この辺にいたんでしょ?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.92,
+          "wall_ms": 105.3,
+          "text": "この辺にいたんでしょ?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 87.2,
+          "text": "だ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 97.5,
+          "text": "白湯"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.46,
+          "wall_ms": 124.3,
+          "text": "〈白熱のイントロ丼〉"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.7,
+          "wall_ms": 125.9,
+          "text": "[白熱のイントロ丼]"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 91.5,
+          "text": "ねえ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.96,
+          "wall_ms": 94.9,
+          "text": "すげえ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 88.5,
+          "text": "5回。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 109.1,
+          "text": "さらに5回の裏、慶応"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.16,
+          "wall_ms": 115.6,
+          "text": "5回の裏、慶応の攻撃。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 87.1,
+          "text": "本当?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 96.1,
+          "text": "本当に。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.32,
+          "wall_ms": 98.0,
+          "text": "本当に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 93.7,
+          "text": "おいしい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.14,
+          "wall_ms": 102.4,
+          "text": "おいしい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 90.0,
+          "text": "民間"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 107.3,
+          "text": "民間企業の宇宙"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.6,
+          "wall_ms": 271.2,
+          "text": "民間企業の宇宙ビジネス参入を推進して。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.96,
+          "wall_ms": 138.7,
+          "text": "民間企業の宇宙ビジネス参入を推進して。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 86.6,
+          "text": "企業"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 105.5,
+          "text": "企業間の競争で"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 135.3,
+          "text": "企業間の競争で輸送コストを下げる。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 83.4,
+          "text": "《"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 99.4,
+          "text": "東京都南部"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.52,
+          "wall_ms": 119.0,
+          "text": "東京都などでは注意を呼び"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.84,
+          "wall_ms": 236.7,
+          "text": "東京都などでは注意を呼びかけています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 93.8,
+          "text": "もう白。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 108.3,
+          "text": "もう十分でしょ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.88,
+          "wall_ms": 120.4,
+          "text": "もう十分でしょ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 82.5,
+          "text": "あ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 95.0,
+          "text": "でも。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.86,
+          "wall_ms": 110.7,
+          "text": "でも立つこと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.46,
+          "wall_ms": 113.3,
+          "text": "でも、立つこと。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.9,
+          "wall_ms": 154.7,
+          "text": "これ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 100.1,
+          "text": "これは。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.0,
+          "wall_ms": 117.2,
+          "text": "これはちょっと待てよ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 89.8,
+          "text": "次回。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 102.6,
+          "text": "事件による"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 201.9,
+          "text": "事件によるPTSDだと思われます。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 125.3,
+          "text": "事件によるPTSDだと思われます。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 84.8,
+          "text": "私"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.56,
+          "wall_ms": 106.0,
+          "text": "私はだまされない。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.16,
+          "wall_ms": 109.6,
+          "text": "私はだまされない。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream06",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 61.19,
+      "wall_sec": 78.07,
+      "wer": null,
+      "cer": 0.15639810426540285,
+      "cer_itn": 0.15639810426540285,
+      "substitutions": 5,
+      "deletions": 20,
+      "insertions": 8,
+      "ref_length": 211,
+      "hyp_length": 228,
+      "raw_reference": "三谷治代さんの指紋も採取されています。冷やしたバターを入れてとろっと仕上げていくんですね。アイルランドは前半２２分現役引退を表明しているセクストン。君たちのような個性溢れる面々をまとめていくのは相当にやりがいがあるよ。読みました？じゃないんだよ！いってらっしゃい！パーサーの人手不足などもあり、終了に踏み切ったということです。寝ている間に熱中症が迫っているかもしれません。この回は、早い守りになりました星稜高校。『アメトーーク』でこんなきっちりとね井上君的には。",
+      "raw_hypothesis": "三谷春雄さんの指紋も採取されています。 必ずこうやって。 冷やしたバターを入れてとろっと仕上げていくんですか? アイルランドは前半22分。 引退を表明しているセクストン。 君たちのような個性あふれる面々をまとめていくのは。 相当にやりがいがあるよ。 読みましたじゃないんだよ。 いってらっしゃい! パーサーの人手不足などもあり、終了に踏み切ったということです。 寝ている間に熱中症が迫っているかもしれません。 この回は速い守りになりました。 井上君的には。",
+      "normalized_reference": "三谷治代さんの指紋も採取されています冷やしたバタを入れてとろっと仕上げていくんですねアイルランドは前半22分現役引退を表明しているセクストン君たちのような個性溢れる面々をまとめていくのは相当にやりがいがあるよ読みましたじゃないんだよいってらっしゃいパサの人手不足などもあり終了に踏み切ったということです寝ている間に熱中症が迫っているかもしれませんこの回は早い守りになりました星稜高校アメトクでこんなきっちりとね井上君的には",
+      "normalized_hypothesis": "三谷春雄さんの指紋も採取されています必ずこうやって冷やしたバタを入れてとろっと仕上げていくんですかアイルランドは前半22分引退を表明しているセクストン君たちのような個性あふれる面々をまとめていくのは相当にやりがいがあるよ読みましたじゃないんだよいってらっしゃいパサの人手不足などもあり終了に踏み切ったということです寝ている間に熱中症が迫っているかもしれませんこの回は速い守りになりました井上君的には",
+      "commit_count": 13,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "STABLE_PREFIX",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 49.56,
+      "preview_audio_sec": 61.68,
+      "inference_count": 55,
+      "audio_exposure_ratio": 1.82,
+      "commits": [
+        {
+          "utterance_id": "6ea00d77-8f85-4ee6-adac-3cf398ee01ef",
+          "reason": "VAD_SILENCE",
+          "text": "三谷春雄さんの指紋も採取されています。",
+          "t_wall": 1789184241.5375688,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "e151847e-e09d-4a84-a7e8-b0cb003429ce",
+          "reason": "STABLE_PREFIX",
+          "text": "必ずこうやって。",
+          "t_wall": 1789184245.0077417,
+          "buffer_duration_sec": 2.88
+        },
+        {
+          "utterance_id": "834d6e51-b34c-47a5-8925-d5e986b62e68",
+          "reason": "VAD_SILENCE",
+          "text": "冷やしたバターを入れてとろっと仕上げていくんですか?",
+          "t_wall": 1789184250.2849827,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1e01755f-ee1f-4898-a2f0-00d1f667f1e5",
+          "reason": "VAD_SILENCE",
+          "text": "アイルランドは前半22分。",
+          "t_wall": 1789184255.0032232,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f2580673-b636-43f4-9694-ef15cdb4fc6b",
+          "reason": "VAD_SILENCE",
+          "text": "引退を表明しているセクストン。",
+          "t_wall": 1789184258.484735,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "d42449a3-35fe-4857-a533-7f729dab5e4d",
+          "reason": "VAD_SILENCE",
+          "text": "君たちのような個性あふれる面々をまとめていくのは。",
+          "t_wall": 1789184268.2410748,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "77bcfab0-d0fd-49bc-ab2e-5a87e478ea2c",
+          "reason": "VAD_SILENCE",
+          "text": "相当にやりがいがあるよ。",
+          "t_wall": 1789184272.1168785,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "282dddbd-feec-4c6a-a6af-b3c1ee38c689",
+          "reason": "VAD_SILENCE",
+          "text": "読みましたじゃないんだよ。",
+          "t_wall": 1789184276.6732068,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "8fae54f1-0aae-4114-855d-275924cf1dec",
+          "reason": "VAD_SILENCE",
+          "text": "いってらっしゃい!",
+          "t_wall": 1789184281.9003541,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "65cdc7a3-3b34-4f65-985b-41500f43ae3b",
+          "reason": "VAD_SILENCE",
+          "text": "パーサーの人手不足などもあり、終了に踏み切ったということです。",
+          "t_wall": 1789184288.9450932,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "f6331a1b-83d5-47ba-989f-82c4c9c424a6",
+          "reason": "VAD_SILENCE",
+          "text": "寝ている間に熱中症が迫っているかもしれません。",
+          "t_wall": 1789184295.975645,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "43029f98-ecda-4555-a27d-8e43054d8b61",
+          "reason": "VAD_SILENCE",
+          "text": "この回は速い守りになりました。",
+          "t_wall": 1789184303.2472136,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "05a03b08-7cae-4f40-b79b-f10cedde25cf",
+          "reason": "VAD_SILENCE",
+          "text": "井上君的には。",
+          "t_wall": 1789184314.3660395,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 255.1,
+          "text": "三谷"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.98,
+          "wall_ms": 119.9,
+          "text": "三谷春夫さんの指紋も採取されました。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 134.6,
+          "text": "三谷春雄さんの指紋も採取されています。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 86.1,
+          "text": "ただ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.26,
+          "wall_ms": 96.5,
+          "text": "必ずこうやって。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.7,
+          "wall_ms": 117.6,
+          "text": "必ずこうやって。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 92.7,
+          "text": "はい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.9,
+          "wall_ms": 94.0,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 91.1,
+          "text": "冷やした。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 109.3,
+          "text": "冷やしたバターを入れて。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.24,
+          "wall_ms": 248.4,
+          "text": "冷やしたバターを入れてとろっと仕上げていくんですか?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 87.2,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 116.6,
+          "text": "アイルランドは前半2分。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 128.0,
+          "text": "アイルランドは前半22分。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 94.0,
+          "text": "君。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 103.4,
+          "text": "引退を表明している"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.76,
+          "wall_ms": 124.2,
+          "text": "引退を表明しているセクストン。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 302.4,
+          "text": "君たち。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.1,
+          "wall_ms": 103.0,
+          "text": "君たちのような個性あふれ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.2,
+          "wall_ms": 143.6,
+          "text": "君たちのような個性あふれる面々をまとめていくのは。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.26,
+          "wall_ms": 202.9,
+          "text": "君たちのような個性あふれる面々をまとめていくのは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 103.4,
+          "text": "相当に。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 112.7,
+          "text": "相当にやりがいがあるよ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.4,
+          "wall_ms": 120.9,
+          "text": "相当にやりがいがあるよ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 92.1,
+          "text": "どうした?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.22,
+          "wall_ms": 110.8,
+          "text": "読みましたじゃないんだよ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 237.5,
+          "text": "読みましたじゃないんだよ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 80.0,
+          "text": "キング。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 83.9,
+          "text": "だ!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.72,
+          "wall_ms": 83.9,
+          "text": "え!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 65.8,
+          "text": "ん?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.2,
+          "wall_ms": 93.2,
+          "text": "ん?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 89.1,
+          "text": "え?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 105.5,
+          "text": "いってらっしゃい!"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.8,
+          "wall_ms": 102.6,
+          "text": "いってらっしゃい!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 95.6,
+          "text": "パーサー"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 116.2,
+          "text": "パーサーの人手不足など"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.68,
+          "wall_ms": 254.7,
+          "text": "パーサーの人手不足などもあり、終了に踏み切ったということ。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.52,
+          "wall_ms": 157.8,
+          "text": "パーサーの人手不足などもあり、終了に踏み切ったということです。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 95.0,
+          "text": "寝て。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.28,
+          "wall_ms": 114.2,
+          "text": "寝ている間に寝"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.68,
+          "wall_ms": 299.0,
+          "text": "寝ている間に熱中症が迫っているかもしれません。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.34,
+          "wall_ms": 144.2,
+          "text": "寝ている間に熱中症が迫っているかもしれません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 96.1,
+          "text": "この回"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.16,
+          "wall_ms": 234.6,
+          "text": "この回は速い守り。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.18,
+          "wall_ms": 113.4,
+          "text": "この回は速い守りになりました。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 96.8,
+          "text": "コー。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.38,
+          "wall_ms": 95.7,
+          "text": "コー。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 89.8,
+          "text": "と。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 103.5,
+          "text": "書いてますね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.28,
+          "wall_ms": 103.1,
+          "text": "僕らは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 96.2,
+          "text": "せの。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 248.8,
+          "text": "アメトーークに。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.72,
+          "wall_ms": 142.0,
+          "text": "『アメトーーク』にこんなきっちりと。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.16,
+          "wall_ms": 134.1,
+          "text": "井上君的には。"
+        }
+      ]
+    },
+    {
+      "pair_id": "stream07",
+      "language": "UNKNOWN",
+      "condition": "CLEAN",
+      "audio_duration_sec": 64.58,
+      "wall_sec": 82.2,
+      "wer": null,
+      "cer": 0.22178988326848248,
+      "cer_itn": 0.22178988326848248,
+      "substitutions": 10,
+      "deletions": 23,
+      "insertions": 24,
+      "ref_length": 257,
+      "hyp_length": 297,
+      "raw_reference": "「そなえあればうれいなし」「もしものときにそなえましょう！」はい。心配ですね。我が子の成長ぶりに安心したよう。だって嘘だもん。さあ、それではまいりましょう。ここからはこの春スタートした見やすさの工夫を紹介しましょう。「まだゴールしたわけではありません」禁輸措置がとられていますけど当たり前ですけど浅尾さん、中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね。ＮＥＣは政府の方針を踏まえて当社を含む共同事業体として協議し契約変更に応じた。ただ、気掛かりなのがこの航空機３０年前に製造されたもので少々年季が入っているということ。",
+      "raw_hypothesis": "「あればうれいなし」 「もしものときにそなえましょう」 心配ですね。 我が子の成長ぶりに安心したよう。 だって嘘だもん。 さあそれではまいりましょう。 ここからはこの春スタートした見やすさの工夫を紹介しましょう。 まだゴールしたわけではありません。 そっちはできるんですもん。 これ、金融措置が取られていますけど当たり前ですけど朝さん、中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね。 気をつけていきたい。 と思います。 政府の方針を踏まえて。 同社を含む共同事業体として協議し 変更に応じた。 ただ、気がかりなのがこの航空機。 年季が入っているということ。",
+      "normalized_reference": "そなえあればうれいなしもしものときにそなえましょうはい心配ですね我が子の成長ぶりに安心したようだって嘘だもんさあそれではまいりましょうここからはこの春スタトした見やすさの工夫を紹介しましょうまだゴルしたわけではありません禁輸措置がとられていますけど当たり前ですけど浅尾さん中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよねNECは政府の方針を踏まえて当社を含む共同事業体として協議し契約変更に応じたただ気掛かりなのがこの航空機30年前に製造されたもので少々年季が入っているということ",
+      "normalized_hypothesis": "あればうれいなしもしものときにそなえましょう心配ですね我が子の成長ぶりに安心したようだって嘘だもんさあそれではまいりましょうここからはこの春スタトした見やすさの工夫を紹介しましょうまだゴルしたわけではありませんそっちはできるんですもんこれ金融措置が取られていますけど当たり前ですけど朝さん中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね気をつけていきたいと思います政府の方針を踏まえて同社を含む共同事業体として協議し変更に応じたただ気がかりなのがこの航空機年季が入っているということ",
+      "commit_count": 17,
+      "commit_reasons": [
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "VAD_SILENCE",
+        "STABLE_PREFIX",
+        "VAD_SILENCE"
+      ],
+      "commit_audio_sec": 53.18,
+      "preview_audio_sec": 73.6,
+      "inference_count": 60,
+      "audio_exposure_ratio": 1.96,
+      "commits": [
+        {
+          "utterance_id": "399c598c-14fd-4299-a96e-5424d1ae94fa",
+          "reason": "VAD_SILENCE",
+          "text": "「あればうれいなし」",
+          "t_wall": 1789184321.4154398,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "c6255321-1292-4ef9-863e-10f4a6226e49",
+          "reason": "VAD_SILENCE",
+          "text": "「もしものときにそなえましょう」",
+          "t_wall": 1789184325.4550526,
+          "buffer_duration_sec": 0.24
+        },
+        {
+          "utterance_id": "7acb7e44-cb22-48d8-8f78-e45c2c9cbe36",
+          "reason": "VAD_SILENCE",
+          "text": "心配ですね。",
+          "t_wall": 1789184328.2850406,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "ceae29bf-1d3e-4928-ad2a-3c1d8cbf0190",
+          "reason": "VAD_SILENCE",
+          "text": "我が子の成長ぶりに安心したよう。",
+          "t_wall": 1789184333.8610241,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "1168396d-5874-42d2-b401-eae31dcd6bbe",
+          "reason": "VAD_SILENCE",
+          "text": "だって嘘だもん。",
+          "t_wall": 1789184337.8791063,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "179e312f-45d4-419a-ab08-bbee6d426ae1",
+          "reason": "VAD_SILENCE",
+          "text": "さあそれではまいりましょう。",
+          "t_wall": 1789184343.2873907,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "47b3e099-dd99-4dd3-aa7a-b8b30600e98f",
+          "reason": "VAD_SILENCE",
+          "text": "ここからはこの春スタートした見やすさの工夫を紹介しましょう。",
+          "t_wall": 1789184349.8843162,
+          "buffer_duration_sec": 0.18
+        },
+        {
+          "utterance_id": "3cb5f852-e67c-4ae6-b342-73259aa5199a",
+          "reason": "VAD_SILENCE",
+          "text": "まだゴールしたわけではありません。",
+          "t_wall": 1789184353.4351842,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c88da3c2-40d8-4956-a583-222c451dfe24",
+          "reason": "VAD_SILENCE",
+          "text": "そっちはできるんですもん。",
+          "t_wall": 1789184355.4106228,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "2cf1bf5f-2675-4871-b12e-532a3880a430",
+          "reason": "VAD_SILENCE",
+          "text": "これ、金融措置が取られていますけど当たり前ですけど朝さん、中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね。",
+          "t_wall": 1789184368.0091376,
+          "buffer_duration_sec": 0.12
+        },
+        {
+          "utterance_id": "55f04521-4ac5-434f-bc89-40a220d76572",
+          "reason": "VAD_SILENCE",
+          "text": "気をつけていきたい。",
+          "t_wall": 1789184369.6908274,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "0c5e31f7-d701-4235-a4db-ac3717a4f4ca",
+          "reason": "VAD_SILENCE",
+          "text": "と思います。",
+          "t_wall": 1789184370.8707507,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "8aa15b41-f200-442d-931b-4747e1cd4be7",
+          "reason": "VAD_SILENCE",
+          "text": "政府の方針を踏まえて。",
+          "t_wall": 1789184376.1948168,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "858780e6-5a4b-4dee-a0a7-f9186f2761c8",
+          "reason": "VAD_SILENCE",
+          "text": "同社を含む共同事業体として協議し",
+          "t_wall": 1789184380.4924648,
+          "buffer_duration_sec": 0.06
+        },
+        {
+          "utterance_id": "a04af72a-d124-4f65-81a8-e807cf623d18",
+          "reason": "VAD_SILENCE",
+          "text": "変更に応じた。",
+          "t_wall": 1789184382.7578516,
+          "buffer_duration_sec": 0.0
+        },
+        {
+          "utterance_id": "c22b9a7d-d448-46dd-bb1a-2fc8a850e24f",
+          "reason": "STABLE_PREFIX",
+          "text": "ただ、気がかりなのがこの航空機。",
+          "t_wall": 1789184392.0967238,
+          "buffer_duration_sec": 7.62
+        },
+        {
+          "utterance_id": "dc68a538-d38e-4c3d-be7b-e09aa4feb457",
+          "reason": "VAD_SILENCE",
+          "text": "年季が入っているということ。",
+          "t_wall": 1789184396.4928045,
+          "buffer_duration_sec": 0.0
+        }
+      ],
+      "inferences": [
+        {
+          "is_commit": true,
+          "audio_sec": 1.08,
+          "wall_ms": 228.1,
+          "text": "「まち!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 89.3,
+          "text": "ある!」"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 105.6,
+          "text": "「あればうれしい」"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 124.8,
+          "text": "「あればうれいなし」"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 90.8,
+          "text": "の」"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 111.0,
+          "text": "「のっときにそっくり」"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.06,
+          "wall_ms": 278.1,
+          "text": "「もしものときにそなえましょう」"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 83.6,
+          "text": "はい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 105.2,
+          "text": "心配じゃない?"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.4,
+          "wall_ms": 109.8,
+          "text": "心配ですね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.3,
+          "wall_ms": 79.2,
+          "text": "何?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 91.6,
+          "text": "我が子"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.32,
+          "wall_ms": 105.0,
+          "text": "我が子の成長"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.82,
+          "wall_ms": 278.0,
+          "text": "我が子の成長ぶりに安心して暮らしています。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 4.08,
+          "wall_ms": 130.9,
+          "text": "我が子の成長ぶりに安心したよう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.96,
+          "wall_ms": 92.5,
+          "text": "誰?"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.92,
+          "wall_ms": 113.5,
+          "text": "だってウソだもん。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.34,
+          "wall_ms": 113.8,
+          "text": "だって嘘だもん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 137.3,
+          "text": "そう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 112.4,
+          "text": "さあそれではまいりましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.82,
+          "wall_ms": 200.4,
+          "text": "さあそれではまいりましょう。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 92.7,
+          "text": "ここか。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.68,
+          "wall_ms": 100.9,
+          "text": "ここからは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.54,
+          "wall_ms": 144.9,
+          "text": "ここからはこの春スタートした見やすさの工夫をご紹介します。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 5.22,
+          "wall_ms": 296.2,
+          "text": "ここからはこの春スタートした見やすさの工夫を紹介しましょう。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.42,
+          "wall_ms": 77.4,
+          "text": "あ!"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 85.7,
+          "text": "まだ。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 112.7,
+          "text": "まだゴールしたわけない。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 2.46,
+          "wall_ms": 122.3,
+          "text": "まだゴールしたわけではありません。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 95.2,
+          "text": "天気"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.56,
+          "wall_ms": 113.0,
+          "text": "そっちはできるんですもん。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.02,
+          "wall_ms": 217.2,
+          "text": "これ"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 2.04,
+          "wall_ms": 108.6,
+          "text": "これ、金融措置が取られて"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 4.2,
+          "wall_ms": 149.4,
+          "text": "これ、金融措置が取られていますが当たり前ですけど浅尾さん"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 8.64,
+          "wall_ms": 339.3,
+          "text": "これ、金融措置が取られていますけど当たり前ですけど中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 9.18,
+          "wall_ms": 222.4,
+          "text": "これ、金融措置が取られていますけど当たり前ですけど朝さん、中国国民にとっては好きなものを食べたいしおいしいものを食べたいというところですよね。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.6,
+          "wall_ms": 87.4,
+          "text": "いい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.2,
+          "wall_ms": 102.0,
+          "text": "気をつけていきたい。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.44,
+          "wall_ms": 99.8,
+          "text": "気をつけていきたい。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.66,
+          "wall_ms": 91.4,
+          "text": "です。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 0.9,
+          "wall_ms": 92.8,
+          "text": "と思います。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.08,
+          "wall_ms": 96.0,
+          "text": "「NEW」"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.98,
+          "wall_ms": 106.3,
+          "text": "NECは。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 96.1,
+          "text": "政府の方針"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 110.0,
+          "text": "政府の方針を踏まえて"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.98,
+          "wall_ms": 112.9,
+          "text": "政府の方針を踏まえて。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.72,
+          "wall_ms": 90.8,
+          "text": "含む"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.62,
+          "wall_ms": 103.4,
+          "text": "同社を含む共同"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.24,
+          "wall_ms": 244.9,
+          "text": "各自の各自動車を含む共同事業体として協議し"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.42,
+          "wall_ms": 133.2,
+          "text": "同社を含む共同事業体として協議し"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.78,
+          "wall_ms": 86.2,
+          "text": ""
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.74,
+          "wall_ms": 107.5,
+          "text": "変更に応じた。"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 1.8,
+          "wall_ms": 108.6,
+          "text": "変更に応じた。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.84,
+          "wall_ms": 97.0,
+          "text": "本当。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.8,
+          "wall_ms": 101.7,
+          "text": "ただ気がかり"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 3.66,
+          "wall_ms": 276.0,
+          "text": "ただ、気がかりなのがこの航空機。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 7.32,
+          "wall_ms": 324.3,
+          "text": "ただ、気がかりなのがこの航空機。"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 0.86,
+          "wall_ms": 91.0,
+          "text": "連休"
+        },
+        {
+          "is_commit": false,
+          "audio_sec": 1.82,
+          "wall_ms": 102.9,
+          "text": "年季が入っている"
+        },
+        {
+          "is_commit": true,
+          "audio_sec": 3.68,
+          "wall_ms": 129.0,
+          "text": "年季が入っているということ。"
+        }
+      ]
+    }
+  ]
+}

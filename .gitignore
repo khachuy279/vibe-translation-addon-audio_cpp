@@ -28,6 +28,9 @@ backend_cpp/key.pem
 
 # 4. Audio Dumps & Large Test Artifacts
 debug_audio/
+data/
+scratch/npm-cache/
+scratch/pnpm/
 *.log
 
 # 5. Compressed Archives

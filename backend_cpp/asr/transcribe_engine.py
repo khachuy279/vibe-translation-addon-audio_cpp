@@ -2,6 +2,7 @@
 
 from abc import ABCMeta
 import asyncio
+import collections
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
@@ -11,7 +12,7 @@ import re
 import threading
 import time
 import uuid
-from typing import Any, AsyncIterator, Dict, Optional
+from typing import Any, AsyncIterator, Dict, Optional, Union
 
 import numpy as np
 import transcribe_cpp
@@ -47,7 +48,8 @@ from backend_cpp.asr.dedup import CommitDeduplicator
 from backend_cpp.asr.model_manager import ASRModelManager
 from backend_cpp.asr.model_registry import ModelRegistry
 from backend_cpp.asr.sentence_segmenter import SentenceSegmenter, count_content_tokens
-from backend_cpp.config import config, SentenceConfig
+from backend_cpp.asr.namo_detector import NamoTurnDetector
+from backend_cpp.config import config, SentenceConfig, NamoConfig
 from backend_cpp.utils.cuda_utils import setup_cuda_dll_paths
 from backend_cpp.utils.perf_profiler import perf
 from backend_cpp.utils.audio_dumper import dump_vad_utterance_f32, dump_asr_input
@@ -76,6 +78,7 @@ class ASREngineConfig:
     language: str = "auto"
     backend: str = "auto"
     sentence_config: Optional[SentenceConfig] = None
+    namo_config: Optional[NamoConfig] = None
 
 
 def clean_transcript_text(raw_text: str) -> str:
@@ -144,6 +147,133 @@ class _TranscribeEngineMeta(ABCMeta):
     @property
     def _commit_lock(cls):
         return ASRModelManager._commit_lock
+
+
+
+class CoalescingTokenQueue:
+    """Bounded token queue with latest-wins preview coalescing per utterance_id.
+
+    Replaces direct manipulation of CPython asyncio.Queue internals (C-01).
+    Exposes a standard async queue interface (get, get_nowait, put_nowait, task_done, qsize).
+    """
+
+    def __init__(self, maxsize: int = 64):
+        self.maxsize = max(1, int(maxsize))
+        self._items: collections.deque = collections.deque()
+        self._getters: collections.deque = collections.deque()
+        self._unfinished_tasks_count: int = 0
+
+    @property
+    def _queue(self) -> collections.deque:
+        """Compatibility property for inspection and backward-compatible tests."""
+        return self._items
+
+    @property
+    def _unfinished_tasks(self) -> int:
+        """Compatibility property for inspection and backward-compatible tests."""
+        return self._unfinished_tasks_count
+
+    def qsize(self) -> int:
+        return len(self._items)
+
+    def empty(self) -> bool:
+        return len(self._items) == 0
+
+    def full(self) -> bool:
+        return len(self._items) >= self.maxsize
+
+    def put_nowait(self, item: Any) -> None:
+        if self.full():
+            raise asyncio.QueueFull()
+        self._unfinished_tasks_count += 1
+        while self._getters:
+            getter = self._getters.popleft()
+            if not getter.done():
+                getter.set_result(item)
+                return
+        self._items.append(item)
+
+    def get_nowait(self) -> Any:
+        if not self._items:
+            raise asyncio.QueueEmpty()
+        return self._items.popleft()
+
+    async def get(self) -> Any:
+        while True:
+            if self._items:
+                return self._items.popleft()
+            loop = asyncio.get_running_loop()
+            getter = loop.create_future()
+            self._getters.append(getter)
+            try:
+                await getter
+                return getter.result()
+            except asyncio.CancelledError:
+                getter.cancel()
+                if getter in self._getters:
+                    self._getters.remove(getter)
+                raise
+
+    def task_done(self) -> None:
+        if self._unfinished_tasks_count > 0:
+            self._unfinished_tasks_count -= 1
+
+    def clear(self) -> None:
+        self._items.clear()
+        self._unfinished_tasks_count = 0
+
+    def evict_preview(self, utterance_id: Optional[str] = None) -> bool:
+        for idx, item in enumerate(self._items):
+            if not isinstance(item, dict) or item.get("is_final"):
+                continue
+            if utterance_id is not None and item.get("utterance_id") != utterance_id:
+                continue
+            del self._items[idx]
+            if self._unfinished_tasks_count > 0:
+                self._unfinished_tasks_count -= 1
+            perf.increment_counter("asr.preview_evicted")
+            return True
+        return False
+
+    def enqueue_token_message(self, msg: Dict[str, Any]) -> None:
+        is_final = bool(msg.get("is_final"))
+
+        if not is_final:
+            utt_id = msg.get("utterance_id")
+            for item in self._items:
+                if (
+                    isinstance(item, dict)
+                    and not item.get("is_final")
+                    and item.get("utterance_id") == utt_id
+                ):
+                    item.clear()
+                    item.update(msg)
+                    perf.increment_counter("asr.preview_coalesced")
+                    return
+
+        try:
+            self.put_nowait(msg)
+            return
+        except asyncio.QueueFull:
+            pass
+
+        if is_final:
+            if self.evict_preview():
+                try:
+                    self.put_nowait(msg)
+                    perf.increment_counter("asr.final_forced_preview_evict")
+                    return
+                except asyncio.QueueFull:
+                    pass
+            logger.error(
+                "ASR token queue is full and no preview could be evicted; "
+                "dropping a FINAL message (queue_maxsize=%s).",
+                self.maxsize,
+            )
+            perf.increment_counter("asr.final_dropped")
+            return
+
+        perf.increment_counter("asr.preview_dropped")
 
 
 class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
@@ -262,6 +392,7 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             max_chars=self.sentence_config.max_chars,
             max_duration_sec=self.sentence_config.max_duration_sec,
             min_words_to_commit=self.sentence_config.min_words_to_commit,
+            min_words_to_emit_final=getattr(self.sentence_config, "min_words_to_emit_final", None),
             split_on_stability=self.sentence_config.split_on_stability,
             stability_duration_sec=self.sentence_config.stability_duration_sec,
             stability_threshold_polls=self.sentence_config.stability_threshold_polls,
@@ -274,15 +405,23 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         self._last_partial_samples: int = 0
         self._last_polled_samples: int = 0
 
-        # Preview growth gate -- see config.ASRConfig.preview_min_growth_ratio for the
-        # measured justification (3.05x audio amplification, 79% of inferences).
-        self._preview_min_growth_ratio: float = float(
-            getattr(config.asr, "preview_min_growth_ratio", 0.0) or 0.0
+        # Namo Turn Detector (Priority #1 sentence completion)
+        self.namo_config: NamoConfig = (
+            getattr(self._engine_config, "namo_config", None)
+            or (config.namo.model_copy() if hasattr(config, "namo") else NamoConfig())
         )
-        self._preview_min_growth_sec: float = (
-            float(getattr(config.asr, "preview_min_growth_ms", 0) or 0) / 1000.0
-        )
-        self._last_preview_duration_sec: float = 0.0
+        self._namo_detector: Optional[NamoTurnDetector] = None
+        if self.namo_config.enabled:
+            try:
+                self._namo_detector = NamoTurnDetector.get_shared_instance(
+                    repo_id=self.namo_config.repo_id,
+                    model_dir=getattr(self.namo_config, "model_dir", None),
+                    confidence_threshold=self.namo_config.confidence_threshold,
+                    min_tokens=self.namo_config.min_tokens,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to initialize NamoTurnDetector: {e}")
+
 
         # Deduplication and prefix tracking
         self._deduplicator = CommitDeduplicator(cache_ttl_sec=RECENT_COMMITS_CACHE_SEC)
@@ -292,8 +431,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         self._boundary_state: BoundaryState = BoundaryState.NORMAL
         self._forced_boundary_start_dur: float = 0.0
         self._boundary_silence_samples: int = 0
+        self._max_duration_deferred_logged: bool = False
 
-        self._token_queue: Optional[asyncio.Queue] = None
+        self._token_queue: Optional[Union[CoalescingTokenQueue, asyncio.Queue]] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._poll_task: Optional[asyncio.Task] = None
         self._running: bool = True
@@ -301,58 +441,6 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
     @property
     def _buffer_duration_sec(self) -> float:
         return self._audio_buffer_mgr.duration_sec
-
-    def _preview_required_growth_sec(self, duration_sec: float) -> float:
-        """How much NEW audio justifies re-transcribing the whole utterance again."""
-        return max(
-            self._preview_min_growth_sec,
-            self._preview_min_growth_ratio * duration_sec,
-        )
-
-    def _should_run_preview(self, duration_sec: float) -> bool:
-        """Preview growth gate.
-
-        A preview re-transcribes the ENTIRE utterance, while the poller wakes every
-        ``poll_interval_ms``. Polling on a fixed timer therefore makes preview work grow
-        linearly in the number of polls: measured on 24s of real speech, the preview path
-        processed 54.6s of audio (+17.9s of commit audio) = 2.27x amplification, and 31 of
-        38 inferences (81%).
-
-        Requiring the utterance to have grown by a fraction of its own length SINCE THE LAST
-        PREVIEW turns that into logarithmic growth (measured 0.70x amplification and -49%
-        total ASR inference time at ratio 0.5, with bit-identical final transcripts).
-
-        The reference point must stay at the last preview. Advancing it on a skipped poll
-        would compare one poll of new audio (~350ms) against a threshold that grows with the
-        utterance, so the gate would never reopen and a long utterance would get exactly one
-        preview -- see ``test_gate_does_not_degenerate_to_one_preview_per_utterance``.
-
-        Only the preview path is gated; commits are untouched.
-        """
-        required = self._preview_required_growth_sec(duration_sec)
-        if required <= 0.0:
-            return True  # gate disabled: previous behaviour
-        if self._last_preview_duration_sec <= 0.0:
-            return True  # first preview of this utterance always runs
-        return (duration_sec - self._last_preview_duration_sec) >= required
-
-    def _note_preview_ran(self, duration_sec: float, snapshot_samples: int) -> None:
-        """Record that a preview was actually transcribed."""
-        self._last_polled_samples = snapshot_samples
-        self._last_preview_duration_sec = duration_sec
-
-    def _note_preview_skipped(self, snapshot_samples: int) -> None:
-        """Record that this poll produced no preview.
-
-        Deliberately does NOT advance ``_last_preview_duration_sec``. That attribute is the
-        reference point for the growth gate, so it must keep measuring from the LAST PREVIEW
-        and let new audio accumulate. Advancing it here would compare a single poll's worth of
-        audio (~``poll_interval_ms``) against a threshold that grows with the utterance: the
-        gate would then never reopen and a long utterance would get exactly one preview.
-        The first implementation had this bug and it was only caught by re-checking a number
-        that looked too good (0.26x amplification, 1 preview per utterance).
-        """
-        self._last_polled_samples = snapshot_samples
 
     def update_sentence_config(
         self,
@@ -364,6 +452,7 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         boundary_candidate_silence_ms: Optional[int] = None,
         max_chars: Optional[int] = None,
         min_words_to_commit: Optional[int] = None,
+        min_words_to_emit_final: Optional[int] = None,
     ) -> None:
         """Update sentence segmentation configuration dynamically."""
         if split_on_stability is not None:
@@ -387,10 +476,33 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         if min_words_to_commit is not None:
             self.sentence_config.min_words_to_commit = min_words_to_commit
             self._segmenter.min_words_to_commit = min_words_to_commit
+        if min_words_to_emit_final is not None:
+            self.sentence_config.min_words_to_emit_final = min_words_to_emit_final
+            self._segmenter.min_words_to_emit_final = min_words_to_emit_final
 
-    def _get_queue(self) -> asyncio.Queue:
+    def update_namo_config(
+        self,
+        enabled: Optional[bool] = None,
+        confidence_threshold: Optional[float] = None,
+        min_tokens: Optional[int] = None,
+        require_silence_ms: Optional[int] = None,
+    ) -> None:
+        """Update Namo Turn Detector configuration dynamically."""
+        if enabled is not None:
+            self.namo_config.enabled = enabled
+        if confidence_threshold is not None:
+            self.namo_config.confidence_threshold = confidence_threshold
+        if min_tokens is not None:
+            self.namo_config.min_tokens = min_tokens
+        if require_silence_ms is not None:
+            self.namo_config.require_silence_ms = require_silence_ms
+        if self._namo_detector:
+            self._namo_detector.confidence_threshold = self.namo_config.confidence_threshold
+            self._namo_detector.min_tokens = self.namo_config.min_tokens
+
+    def _get_queue(self) -> Union[CoalescingTokenQueue, asyncio.Queue]:
         if self._token_queue is None:
-            self._token_queue = asyncio.Queue(
+            self._token_queue = CoalescingTokenQueue(
                 maxsize=max(1, int(getattr(config.asr, "token_queue_maxsize", 64)))
             )
         return self._token_queue
@@ -412,6 +524,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         """Drain every pending message, keeping the queue's task accounting balanced."""
         q = self._token_queue
         if q is None:
+            return
+        if hasattr(q, "clear"):
+            q.clear()
             return
         while True:
             try:
@@ -436,6 +551,9 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         if q is None:
             return False
 
+        if hasattr(q, "evict_preview"):
+            return q.evict_preview(utterance_id)
+
         pending = getattr(q, "_queue", None)
         if pending is None:
             return False
@@ -459,6 +577,10 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         """Apply the backpressure policy and enqueue ``msg``. Event-loop thread only."""
         q = self._token_queue
         if q is None:
+            return
+
+        if hasattr(q, "enqueue_token_message"):
+            q.enqueue_token_message(msg)
             return
 
         is_final = bool(msg.get("is_final"))
@@ -516,6 +638,10 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
 
     def set_language(self, language: str) -> None:
         self._language = language or "auto"
+        # For CJK dialogue streams, enable 1-token final emission so genuine turns
+        # ("はい", "うん", "え？", "だろ") are preserved while preview fragment gates remain at 4.
+        if self._language.lower() in ("ja", "zh", "ko"):
+            self.update_sentence_config(min_words_to_emit_final=1)
 
     @staticmethod
     def normalize_speech(
@@ -852,7 +978,6 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             self._boundary_state = BoundaryState.NORMAL
             self._boundary_silence_samples = 0
         self._last_polled_samples = 0
-        self._last_preview_duration_sec = 0.0
         self._segmenter.reset()
 
     def on_speech_end(self, reason: str = "VAD_SILENCE", media_end_time: float = 0.0, epoch: int = 0) -> None:
@@ -884,7 +1009,6 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             self._current_media_end_time = 0.0
 
         self._last_polled_samples = 0
-        self._last_preview_duration_sec = 0.0
         self._segmenter.reset()
 
         # Dump VAD utterance for pipeline fidelity audit.
@@ -994,6 +1118,8 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         # Boundary telemetry
         if reason == "VAD_SILENCE":
             perf.increment_counter("asr.boundary.vad_silence")
+        elif reason == "NAMO_EOU":
+            perf.increment_counter("asr.boundary.namo_eou")
         elif reason == "MAX_DURATION_SAFE":
             perf.increment_counter("asr.boundary.max_duration_safe")
         elif reason == "MAX_DURATION_EMERGENCY":
@@ -1046,7 +1172,7 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
                 self._run_inference, pcm_combined, frame_state=frame_state, is_commit=True, utt_id=utt_id
             )
 
-        if text and not self._segmenter.is_text_filtered(text):
+        if text and not self._segmenter.is_final_too_short(text):
             if _is_max_duration_reason(reason):
                 with self._state_lock:
                     self._last_committed_head = text
@@ -1061,7 +1187,8 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             )
         elif text:
             clean_utt = (utt_id or "unknown")[:8]
-            logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {self.sentence_config.min_words_to_commit} words): '{text}'")
+            min_emit = getattr(self.sentence_config, "min_words_to_emit_final", self.sentence_config.min_words_to_commit)
+            logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {min_emit} words): '{text}'")
             perf.increment_counter("asr.short_commits_filtered")
 
     def _commit_sync(
@@ -1083,7 +1210,7 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             perf.increment_counter("asr.commit_inferences")
             text = self._run_inference(pcm_combined, frame_state=frame_state, is_commit=True, utt_id=utt_id)
 
-        if text and not self._segmenter.is_text_filtered(text):
+        if text and not self._segmenter.is_final_too_short(text):
             if _is_max_duration_reason(reason):
                 with self._state_lock:
                     self._last_committed_head = text
@@ -1098,7 +1225,8 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             )
         elif text:
             clean_utt = (utt_id or "unknown")[:8]
-            logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {self.sentence_config.min_words_to_commit} words): '{text}'")
+            min_emit = getattr(self.sentence_config, "min_words_to_emit_final", self.sentence_config.min_words_to_commit)
+            logger.info(f"[ASR FILTER] [utt={clean_utt}] Dropped short commit (< {min_emit} words): '{text}'")
             perf.increment_counter("asr.short_commits_filtered")
 
     def _push_message(self, msg: Dict[str, Any]) -> None:
@@ -1107,7 +1235,11 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
         Applies the outbound backpressure policy documented on
         ``_enqueue_token_message()``: finals are lossless, previews are latest-wins.
         """
+        is_final = bool(msg.get("is_final"))
         if not self._running:
+            if is_final:
+                logger.warning("Final ASR commit message dropped because engine is stopped.")
+                perf.increment_counter("asr.final_dropped_no_loop")
             return
         if self._loop and self._token_queue:
             def _safe_put():
@@ -1119,137 +1251,167 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             try:
                 self._loop.call_soon_threadsafe(_safe_put)
             except RuntimeError:
-                pass
+                if is_final:
+                    logger.warning("Final ASR commit message dropped because event loop is closed.")
+                    perf.increment_counter("asr.final_dropped_no_loop")
+        else:
+            if is_final:
+                logger.warning("Final ASR commit message dropped because event loop or token queue is None.")
+                perf.increment_counter("asr.final_dropped_no_loop")
+
+    async def check_preview_and_split(self) -> bool:
+        """Evaluate preview transcript and trigger Namo EOU or stability split if appropriate.
+
+        Returns True if a commit/split occurred, False otherwise.
+        """
+        with self._state_lock:
+            if not self._is_speech_active:
+                self._last_polled_samples = 0
+                return False
+
+        # Skip polling if a commit is currently waiting for lock
+        with TranscribeEngine._commit_lock:
+            if TranscribeEngine._commit_waiting > 0:
+                return False
+
+        perf.increment_counter("asr.preview_polls")
+
+        # Non-blocking snapshot with buffer version - avoids copy if buffer has not received new samples
+        snapshot = self._audio_buffer_mgr.get_snapshot_if_newer(self._last_polled_samples)
+        if snapshot is None:
+            return False
+
+        pcm_snapshot = snapshot.pcm
+        dur = snapshot.duration_sec
+        snapshot_samples = snapshot.sample_count
+        snap_ver = snapshot.version
+        frame_state = snapshot.frame_state
+
+        if dur < self._min_transcribe_sec:
+            return False
+
+        self._last_polled_samples = snapshot_samples
+
+        with self._state_lock:
+            utt_id = self._current_utterance_id
+            utt_epoch = self._current_epoch
+            utt_media_start = self._current_media_start_time
+            utt_media_end = self._current_media_end_time
+
+        # Run in worker thread non-blocking so the event loop NEVER blocks
+        perf.increment_counter("asr.preview_infers")
+        preview_text = await asyncio.to_thread(
+            self._run_inference, pcm_snapshot, frame_state=frame_state, is_commit=False, utt_id=utt_id
+        )
+
+        # Strip prefix if it overlaps with recently committed head (prevents re-transcribing same words)
+        with self._state_lock:
+            head = self._last_committed_head
+            head_time = self._last_committed_head_time
+
+        if head and (time.time() - head_time < PREFIX_STRIP_WINDOW_SEC):
+            preview_text = SentenceSegmenter.remove_prefix_overlap(head, preview_text)
+
+        if not preview_text:
+            return False
+
+        # 1. Namo Turn Detector (Priority #1) - non-blocking to protect event loop
+        is_namo_eou = False
+        namo_conf = 0.0
+        if self._namo_detector and getattr(self.namo_config, "enabled", True):
+            is_namo_eou, namo_conf = await asyncio.to_thread(
+                self._namo_detector.predict_eou,
+                preview_text,
+                confidence_threshold=self.namo_config.confidence_threshold,
+                min_tokens=self.namo_config.min_tokens,
+            )
+            if is_namo_eou:
+                req_sil = getattr(self.namo_config, "require_silence_ms", 0)
+                if req_sil > 0:
+                    trailing_sil_ms = self._audio_buffer_mgr.get_trailing_silence_ms()
+                    if trailing_sil_ms < req_sil:
+                        is_namo_eou = False
+
+        # 2. Stability check (Priority #3 / Failsafe fallback)
+        is_stable = False
+        if not is_namo_eou and self.sentence_config.split_on_stability:
+            is_stable = self._segmenter.check_stability(preview_text) and not self._segmenter.is_text_filtered(preview_text)
+
+        should_emit_partial = False
+        did_split = False
+        split_reason = ""
+
+        with self._state_lock:
+            if not self._is_speech_active or utt_id != self._current_utterance_id:
+                return False
+
+            if is_namo_eou:
+                self._current_utterance_id = str(uuid.uuid4())
+                self._last_partial_text = ""
+                did_split = True
+                split_reason = "NAMO_EOU"
+                logger.info(
+                    f"🎯 [NAMO EOU] [{utt_id[:8]}] EOU detected (conf={namo_conf:.2f}): '{preview_text}'"
+                )
+            elif is_stable:
+                self._current_utterance_id = str(uuid.uuid4())
+                self._last_partial_text = ""
+                did_split = True
+                split_reason = "STABLE_PREFIX"
+            elif preview_text != self._last_partial_text:
+                self._last_partial_text = preview_text
+                self._last_partial_samples = snapshot_samples
+                # Enforce min_words_to_commit: do not flash short fragments on screen
+                if count_content_tokens(preview_text) >= self.sentence_config.min_words_to_commit:
+                    should_emit_partial = True
+                else:
+                    should_emit_partial = False
+
+        if did_split:
+            with self._state_lock:
+                self._last_committed_head = preview_text
+                self._last_committed_head_time = time.time()
+            self._emit_final(
+                preview_text,
+                utt_id,
+                reason=split_reason,
+                epoch=utt_epoch,
+                media_start_time=utt_media_start,
+                media_end_time=utt_media_end,
+            )
+            self._audio_buffer_mgr.slice_after(snapshot_samples, expected_version=snap_ver)
+            self._last_polled_samples = 0
+            self._segmenter.reset_stability()
+            return True
+
+        if should_emit_partial:
+            out_msg = {
+                "type": "utterance_update",
+                "utterance_id": utt_id,
+                "text": preview_text,
+                "ui_text": preview_text,
+                "stable_text": "",
+                "unstable_text": preview_text,
+                "is_final": False,
+                "language": self._language,
+                "model": self.model_key,
+                "commit_method": "partial",
+                "filtered": False,
+                "epoch": utt_epoch,
+                "media_start_time": utt_media_start,
+                "media_end_time": utt_media_end,
+                "asr_commit_wall_time": time.time(),
+            }
+            self._push_message(out_msg)
+
+        return False
 
     async def _partial_preview_poller(self) -> None:
         """Background poller running non-blocking preview in worker threads."""
         while self._running:
             try:
                 await asyncio.sleep(self._poll_interval_sec)
-
-                with self._state_lock:
-                    if not self._is_speech_active:
-                        self._last_polled_samples = 0
-                        self._last_preview_duration_sec = 0.0
-                        continue
-
-                # Skip polling if a commit is currently waiting for lock
-                with TranscribeEngine._commit_lock:
-                    if TranscribeEngine._commit_waiting > 0:
-                        continue
-
-                perf.increment_counter("asr.preview_polls")
-
-                # Non-blocking snapshot with buffer version - avoids copy if buffer has not received new samples
-                snapshot = self._audio_buffer_mgr.get_snapshot_if_newer(self._last_polled_samples)
-                if snapshot is None:
-                    continue
-
-                pcm_snapshot = snapshot.pcm
-                dur = snapshot.duration_sec
-                snapshot_samples = snapshot.sample_count
-                snap_ver = snapshot.version
-                frame_state = snapshot.frame_state
-
-                if dur < self._min_transcribe_sec:
-                    continue
-
-                # Preview growth gate -- see config.ASRConfig.preview_min_growth_ratio.
-                if not self._should_run_preview(dur):
-                    # Record these samples as seen so the next wake-up only re-evaluates when
-                    # genuinely new audio arrives (and does not re-copy the whole buffer).
-                    self._note_preview_skipped(snapshot_samples)
-                    perf.increment_counter("asr.preview_skipped_growth")
-                    continue
-
-                self._note_preview_ran(dur, snapshot_samples)
-
-                with self._state_lock:
-                    utt_id = self._current_utterance_id
-                    utt_epoch = self._current_epoch
-                    utt_media_start = self._current_media_start_time
-                    utt_media_end = self._current_media_end_time
-
-                # Run in worker thread non-blocking so the event loop NEVER blocks
-                perf.increment_counter("asr.preview_infers")
-                preview_text = await asyncio.to_thread(
-                    self._run_inference, pcm_snapshot, frame_state=frame_state, is_commit=False, utt_id=utt_id
-                )
-
-                # Strip prefix if it overlaps with recently committed head (prevents re-transcribing same words)
-                with self._state_lock:
-                    head = self._last_committed_head
-                    head_time = self._last_committed_head_time
-
-                if head and (time.time() - head_time < PREFIX_STRIP_WINDOW_SEC):
-                    preview_text = SentenceSegmenter.remove_prefix_overlap(head, preview_text)
-
-                if not preview_text:
-                    continue
-
-                # Check stability outside state lock to keep critical section minimal
-                is_stable = False
-                if self.sentence_config.split_on_stability:
-                    is_stable = self._segmenter.check_stability(preview_text) and not self._segmenter.is_text_filtered(preview_text)
-
-                should_emit_partial = False
-                did_split = False
-
-                with self._state_lock:
-                    if not self._is_speech_active or utt_id != self._current_utterance_id:
-                        continue
-
-                    if is_stable:
-                        self._current_utterance_id = str(uuid.uuid4())
-                        self._last_partial_text = ""
-                        did_split = True
-                    elif preview_text != self._last_partial_text:
-                        self._last_partial_text = preview_text
-                        self._last_partial_samples = snapshot_samples
-                        # Enforce min_words_to_commit: do not flash short fragments on screen
-                        if count_content_tokens(preview_text) >= self.sentence_config.min_words_to_commit:
-                            should_emit_partial = True
-                        else:
-                            should_emit_partial = False
-
-                if did_split:
-                    with self._state_lock:
-                        self._last_committed_head = preview_text
-                        self._last_committed_head_time = time.time()
-                    self._emit_final(
-                        preview_text,
-                        utt_id,
-                        reason="STABLE_PREFIX",
-                        epoch=utt_epoch,
-                        media_start_time=utt_media_start,
-                        media_end_time=utt_media_end,
-                    )
-                    self._audio_buffer_mgr.slice_after(snapshot_samples, expected_version=snap_ver)
-                    self._last_polled_samples = 0
-                    self._last_preview_duration_sec = 0.0
-                    self._segmenter.reset_stability()
-                    continue
-
-                if should_emit_partial:
-                    # logger.debug(f"💬 [ASR PREVIEW] [{utt_id[:8]}]: '{preview_text}'")
-                    out_msg = {
-                        "type": "utterance_update",
-                        "utterance_id": utt_id,
-                        "text": preview_text,
-                        "ui_text": preview_text,
-                        "stable_text": "",
-                        "unstable_text": preview_text,
-                        "is_final": False,
-                        "language": self._language,
-                        "model": self.model_key,
-                        "commit_method": "PREVIEW",
-                        "filtered": False,
-                        "epoch": utt_epoch,
-                        "media_start_time": utt_media_start,
-                        "media_end_time": utt_media_end,
-                        "asr_commit_wall_time": time.time(),
-                    }
-                    self._push_message(out_msg)
+                await self.check_preview_and_split()
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -1301,7 +1463,6 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
 
         self._audio_buffer_mgr.clear()
         self._last_polled_samples = 0
-        self._last_preview_duration_sec = 0.0
 
     def reset_stream(self, epoch: Optional[int] = None) -> None:
         """Reset active utterance state and clear uncommitted audio on stream_reset."""
@@ -1323,6 +1484,5 @@ class TranscribeEngine(BaseASREngine, metaclass=_TranscribeEngineMeta):
             self._max_duration_deferred_logged = False
         self._audio_buffer_mgr.clear()
         self._last_polled_samples = 0
-        self._last_preview_duration_sec = 0.0
         self._segmenter.reset_stability()
         self._clear_token_queue()

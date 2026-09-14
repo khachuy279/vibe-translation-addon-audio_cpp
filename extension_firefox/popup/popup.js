@@ -31,12 +31,12 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   const DEFAULT_SETTINGS = {
     asrEngine: "qwen3-asr-1.7b",
     vadEngine: "fsmn-vad",
-    vadSilenceDurationMs: 150,
-    silenceDurationMs: 150,
-    silence_duration_ms: 150,
-    vadThreshold: 0.20,
-    vad_threshold: 0.20,
-    threshold: 0.20,
+    vadSilenceDurationMs: 500,
+    silenceDurationMs: 500,
+    silence_duration_ms: 500,
+    vadThreshold: 0.45,
+    vad_threshold: 0.45,
+    threshold: 0.45,
     minWordsToCommit: 4,
     min_words_to_commit: 4,
     sourceLanguage: "auto",
@@ -54,6 +54,28 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     ttsSpeed: "1.0",
     ttsDucking: true,
     duckingLevel: 0.25,
+  };
+
+  // Empirical optimal profiles per VAD engine (from benchmarks/vad_tuning_benchmark.py)
+  const VAD_PROFILES = {
+    "fsmn-vad": {
+      threshold: 0.45,
+      silenceDurationMs: 500,
+      hangoverMs: 300,
+      preSpeechBufferMs: 120,
+    },
+    "firered-vad": {
+      threshold: 0.80,
+      silenceDurationMs: 500,
+      hangoverMs: 300,
+      preSpeechBufferMs: 100,
+    },
+    "silero-vad": {
+      threshold: 0.50,
+      silenceDurationMs: 500,
+      hangoverMs: 288,
+      preSpeechBufferMs: 96,
+    },
   };
 
   const selAsrEngine = document.getElementById("selAsrEngine");
@@ -218,7 +240,12 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     return cfg;
   }
 
+  function updateVadControlsUI() {
+    // VAD is mandatory in streaming pipeline
+  }
+
   function updateRangeLabels() {
+    if (selVadEngine) updateVadControlsUI(selVadEngine.value);
     if (valVadSilence && rangeVadSilence) valVadSilence.textContent = rangeVadSilence.value;
     if (valVadThreshold && rangeVadThreshold) valVadThreshold.textContent = parseFloat(rangeVadThreshold.value).toFixed(2);
     if (valMinWords && rangeMinWords) {
@@ -405,6 +432,17 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       selAsrEngine.value = activeAsr;
     }
 
+    if (data.vad_profiles) {
+      for (const [k, prof] of Object.entries(data.vad_profiles)) {
+        VAD_PROFILES[k] = {
+          threshold: prof.threshold,
+          silenceDurationMs: prof.silence_duration_ms,
+          hangoverMs: prof.hangover_ms,
+          preSpeechBufferMs: prof.pre_speech_buffer_ms,
+        };
+      }
+    }
+
     if (selVadEngine) selVadEngine.value = activeVad;
     if (rangeVadSilence && (data.vad_silence_duration_ms || data.silence_duration_ms) && !rangeVadSilence.dataset.userEdited) {
       rangeVadSilence.value = data.vad_silence_duration_ms || data.silence_duration_ms;
@@ -422,7 +460,8 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     if (!isCapturingNow) {
       statusBadge.textContent = `${activeAsr.toUpperCase()}`;
       statusBadge.className = "badge badge-ready";
-      showMsg(`✅ Server Online (ASR: ${activeAsr.toUpperCase()} | VAD: ${data.resolved_vad || activeVad})`, "success");
+      const vadDisplay = data.resolved_vad || activeVad;
+      showMsg(`✅ Server Online (ASR: ${activeAsr.toUpperCase()} | VAD: ${vadDisplay})`, "success");
       btnStart.disabled = false;
     }
 
@@ -475,11 +514,14 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     showMsg(`⏳ Đang chuyển đổi sang ${labelDesc} & nạp model Finetunes... Vui lòng đợi.`, "info");
 
     try {
+      const vadProfile = VAD_PROFILES[newVad];
       const payload = {
         asr_engine: newAsr,
         vad_engine: newVad,
         silence_duration_ms: parseInt(rangeVadSilence ? rangeVadSilence.value : DEFAULT_SETTINGS.silenceDurationMs, 10) || DEFAULT_SETTINGS.silenceDurationMs,
         vad_threshold: !isNaN(parseFloat(rangeVadThreshold?.value)) ? parseFloat(rangeVadThreshold.value) : DEFAULT_SETTINGS.vadThreshold,
+        hangover_ms: vadProfile ? vadProfile.hangoverMs : undefined,
+        pre_speech_buffer_ms: vadProfile ? vadProfile.preSpeechBufferMs : undefined,
         min_words_to_commit: !isNaN(parseInt(rangeMinWords?.value, 10)) ? Math.max(0, parseInt(rangeMinWords.value, 10)) : DEFAULT_SETTINGS.minWordsToCommit,
         source_lang: newLang,
         tts_enabled: chkEnableTts ? chkEnableTts.checked : false,
@@ -1364,8 +1406,26 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     liveUpdateSettings(immediate);
   }
 
-  if (selAsrEngine) selAsrEngine.onchange = handleEngineSwitch;
-  if (selVadEngine) selVadEngine.onchange = handleEngineSwitch;
+  if (selAsrEngine) selAsrEngine.onchange = () => handleEngineSwitch();
+  if (selVadEngine) {
+    selVadEngine.onchange = () => {
+      const selectedVad = selVadEngine.value;
+      updateVadControlsUI(selectedVad);
+      const profile = VAD_PROFILES[selectedVad];
+      if (profile) {
+        if (rangeVadSilence) {
+          rangeVadSilence.value = profile.silenceDurationMs;
+          delete rangeVadSilence.dataset.userEdited;
+        }
+        if (rangeVadThreshold) {
+          rangeVadThreshold.value = profile.threshold;
+          delete rangeVadThreshold.dataset.userEdited;
+        }
+        updateRangeLabels();
+      }
+      handleEngineSwitch();
+    };
+  }
   if (rangeVadSilence) {
     rangeVadSilence.oninput = () => {
       rangeVadSilence.dataset.userEdited = "true";

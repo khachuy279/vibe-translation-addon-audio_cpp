@@ -89,16 +89,14 @@ def test_silence_duration_does_drive_speech_end():
 # The chosen default
 # ---------------------------------------------------------------------------
 def test_default_silence_duration_is_the_deliberate_tradeoff():
-    """150 ms was chosen on 2026-09-11 for ~300 ms lower latency.
+    """500 ms was chosen on 2026-09-13 to prevent sentence chopping and improve translation coherence.
 
-    Safe range check: too high gives back the latency this change bought; too low starts cutting
-    sentences at normal inter-word pauses.
+    Safe range check: too high causes speaker turn merges; too low cuts sentences at natural inter-word pauses.
     """
-    assert config.vad.silence_duration_ms == 150, (
-        "default changed; re-measure with scratch/compare_vad_silence.py and update the budget "
-        "table in backend_cpp/config.py before accepting a new value"
+    assert config.vad.silence_duration_ms == 500, (
+        "default changed; re-measure with benchmarks/ingress_benchmark.py before accepting a new value"
     )
-    assert 100 <= config.vad.silence_duration_ms <= 450
+    assert 100 <= config.vad.silence_duration_ms <= 800
     assert config.vad.hangover_ms >= 0, "hangover is a grace period; keep it non-negative"
 
 

@@ -20,6 +20,7 @@ from typing import Any, Callable, Deque, Dict, List, Optional, Tuple
 
 import numpy as np
 
+from backend_cpp.config import config
 from backend_cpp.vad.engines import (
     DEFAULT_THRESHOLDS,
     BaseVADEngine,
@@ -62,14 +63,17 @@ class VADProcessor:
         sample_rate: int = 16000,
         vad_engine: str = "fsmn-vad",
         threshold: Optional[float] = None,
-        silence_duration_ms: int = 600,
-        hangover_ms: int = 400,
-        pre_speech_buffer_ms: int = 450,
+        silence_duration_ms: Optional[int] = None,
+        hangover_ms: Optional[int] = None,
+        pre_speech_buffer_ms: Optional[int] = None,
         enabled: bool = True,
         on_speech_chunk: Optional[Callable[[bytes, float], None]] = None,
         on_speech_start: Optional[Callable[[], None]] = None,
         on_speech_end: Optional[Callable[[], None]] = None,
     ):
+        if isinstance(sample_rate, str):
+            vad_engine = sample_rate
+            sample_rate = 16000
         self.sample_rate = sample_rate
         self.vad_engine = (vad_engine or "fsmn-vad").lower().strip()
         if self.vad_engine not in DEFAULT_THRESHOLDS:
@@ -83,10 +87,11 @@ class VADProcessor:
             )
             self.vad_engine = "fsmn-vad"
 
-        self.threshold = threshold if threshold is not None else DEFAULT_THRESHOLDS.get(self.vad_engine, 0.5)
-        self.silence_duration_ms = silence_duration_ms
-        self.hangover_ms = hangover_ms
-        self.pre_speech_buffer_ms = pre_speech_buffer_ms
+        profile = config.vad.get_engine_profile(self.vad_engine)
+        self.threshold = threshold if threshold is not None else profile.threshold
+        self.silence_duration_ms = silence_duration_ms if silence_duration_ms is not None else profile.silence_duration_ms
+        self.hangover_ms = hangover_ms if hangover_ms is not None else profile.hangover_ms
+        self.pre_speech_buffer_ms = pre_speech_buffer_ms if pre_speech_buffer_ms is not None else profile.pre_speech_buffer_ms
         self.enabled = enabled
 
         self.on_speech_chunk = on_speech_chunk
@@ -108,7 +113,6 @@ class VADProcessor:
 
         self._ensure_model()
 
-
     def _ensure_model(self) -> None:
         """Ensure the engine is loaded and initialize session state."""
         if self._engine is None:
@@ -128,6 +132,7 @@ class VADProcessor:
         threshold: Optional[float] = None,
         silence_duration_ms: Optional[int] = None,
         hangover_ms: Optional[int] = None,
+        pre_speech_buffer_ms: Optional[int] = None,
         enabled: Optional[bool] = None,
     ) -> None:
         """Update VAD parameters dynamically."""
@@ -140,21 +145,52 @@ class VADProcessor:
                     self._frame_samples = getattr(self._engine, "native_frame_samples", 400)
                     self._frame_size_bytes = self._frame_samples * 2
                     self._frame_f32_buf = np.empty(self._frame_samples, dtype=np.float32)
-                    self._state = self._engine.create_initial_state(threshold=threshold)
+
+                    profile = config.vad.get_engine_profile(eng)
+                    if threshold is None:
+                        self.threshold = profile.threshold
+                    else:
+                        self.threshold = threshold
+
+                    if silence_duration_ms is None:
+                        self.silence_duration_ms = profile.silence_duration_ms
+                    else:
+                        self.silence_duration_ms = silence_duration_ms
+
+                    if hangover_ms is None:
+                        self.hangover_ms = profile.hangover_ms
+                    else:
+                        self.hangover_ms = hangover_ms
+
+                    if pre_speech_buffer_ms is None:
+                        self.pre_speech_buffer_ms = profile.pre_speech_buffer_ms
+                    else:
+                        self.pre_speech_buffer_ms = pre_speech_buffer_ms
+
+                    self._state = self._engine.create_initial_state(threshold=self.threshold)
                     max_pre_frames = max(1, int((self.pre_speech_buffer_ms / 1000.0) * self.sample_rate / self._frame_samples))
                     self._state.pre_speech_ring = collections.deque(maxlen=max_pre_frames)
-                    if threshold is None:
-                        self.threshold = DEFAULT_THRESHOLDS[eng]
+
+            if pre_speech_buffer_ms is not None and vad_engine is None:
+                self.pre_speech_buffer_ms = pre_speech_buffer_ms
+                if self._state is not None:
+                    max_pre_frames = max(1, int((self.pre_speech_buffer_ms / 1000.0) * self.sample_rate / self._frame_samples))
+                    self._state.pre_speech_ring = collections.deque(self._state.pre_speech_ring, maxlen=max_pre_frames)
 
             if threshold is not None:
                 self.threshold = threshold
+                if self._state is not None:
+                    if self._state.firered_postprocessor is not None:
+                        self._state.firered_postprocessor.speech_threshold = float(threshold)
+                    if self._state.silero_iterator is not None:
+                        self._state.silero_iterator.threshold = float(threshold)
+                    if self._state.fsmn_cache and "stats" in self._state.fsmn_cache:
+                        self._state.fsmn_cache["stats"].speech_noise_thres = float(threshold)
 
             if silence_duration_ms is not None:
                 self.silence_duration_ms = silence_duration_ms
             if hangover_ms is not None:
                 self.hangover_ms = hangover_ms
-            if enabled is not None:
-                self.enabled = enabled
 
     def feed_chunk(
         self,
@@ -169,11 +205,6 @@ class VADProcessor:
         Uses deterministic Audio Sample Clock for speech/silence duration tracking.
         """
         if not pcm_data:
-            return
-
-        if not self.enabled:
-            if self.on_speech_chunk:
-                self.on_speech_chunk(pcm_data, capture_timestamp, VAD_STATE_SPEECH, media_start_time, media_end_time, epoch)
             return
 
         self._ensure_model()
@@ -338,18 +369,37 @@ class VADProcessor:
                 state.silence_samples = 0
                 logger.info(f"[VAD END] Speech force-ended ({self.vad_engine})")
                 while state.pre_speech_ring:
-                    pre_bytes, pre_ts = state.pre_speech_ring.popleft()
+                    pre_item = state.pre_speech_ring.popleft()
+                    pre_bytes = pre_item[0]
+                    pre_ts = pre_item[1]
+                    pre_m_start = pre_item[2] if len(pre_item) > 2 else 0.0
+                    pre_m_end = pre_item[3] if len(pre_item) > 3 else 0.0
+                    pre_ep = pre_item[4] if len(pre_item) > 4 else 0
                     if self.on_speech_chunk:
-                        callbacks.append((self.on_speech_chunk, (pre_bytes, pre_ts)))
+                        callbacks.append((self.on_speech_chunk, (pre_bytes, pre_ts, VAD_STATE_PRE_ROLL, pre_m_start, pre_m_end, pre_ep)))
                 if self.on_speech_end:
-                    callbacks.append((self.on_speech_end, ()))
+                    callbacks.append((self.on_speech_end, ("FORCE_END", 0.0, 0)))
 
             if self._state:
                 self._state.reset()
 
         for cb, args in callbacks:
             try:
-                cb(*args)
+                try:
+                    cb(*args)
+                except TypeError:
+                    if len(args) == 6:
+                        try:
+                            cb(args[0], args[1], args[2])
+                        except TypeError:
+                            cb(args[0], args[1])
+                    elif len(args) == 3:
+                        try:
+                            cb(args[0])
+                        except TypeError:
+                            cb()
+                    else:
+                        cb()
             except Exception as e:
                 logger.error(f"Error in VAD force_end callback: {e}", exc_info=True)
 
@@ -373,4 +423,3 @@ class VADProcessor:
                 "callback_count": self._callback_count,
                 "avg_callback_ms": (self._total_callback_time_ms / self._callback_count) if self._callback_count > 0 else 0.0,
             }
-

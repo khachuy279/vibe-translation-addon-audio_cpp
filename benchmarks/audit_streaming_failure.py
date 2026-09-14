@@ -174,7 +174,6 @@ class InstrumentedTranscribeEngine(TranscribeEngine):
                 with self._state_lock:
                     if not self._is_speech_active:
                         self._last_polled_samples = 0
-                        self._last_preview_duration_sec = 0.0
                         continue
 
                 with TranscribeEngine._commit_lock:
@@ -326,7 +325,6 @@ class InstrumentedTranscribeEngine(TranscribeEngine):
                     self.boundary_records.append(b_cut)
 
                     self._last_polled_samples = 0
-                    self._last_preview_duration_sec = 0.0
                     self._segmenter.reset_stability()
 
                 self.telemetry_records.append(record)

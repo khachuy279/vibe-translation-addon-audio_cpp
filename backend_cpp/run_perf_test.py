@@ -119,15 +119,6 @@ async def main_async(args: argparse.Namespace) -> None:
 
     _app_config.perf.enabled = True
 
-    # W2.2 preview growth gate: expose it on the command line so the improvement can be
-    # measured against the default in the same harness.
-    if getattr(args, "preview_growth_ratio", None) is not None:
-        _app_config.asr.preview_min_growth_ratio = float(args.preview_growth_ratio)
-        logger.info(
-            "🔬 Preview growth gate ENABLED: preview_min_growth_ratio=%.2f",
-            _app_config.asr.preview_min_growth_ratio,
-        )
-
     mode = args.mode.lower()
     baseline_path = Path(args.baseline_out)
     if not baseline_path.is_absolute():
@@ -371,17 +362,6 @@ def main():
         nargs="+",
         default=[1, 2, 4],
         help="Concurrent session counts for the scaling scenario",
-    )
-    parser.add_argument(
-        "--preview-growth-ratio",
-        type=float,
-        default=None,
-        help=(
-            "W2.2 preview growth gate: skip a preview until the utterance grew by this "
-            "fraction of its own length since the previous preview. 0 (default) preserves "
-            "the current behaviour; 0.5 roughly halves preview work. Affects previews only, "
-            "never final transcripts."
-        ),
     )
     parser.add_argument("--host", default="127.0.0.1", help="Host address")
     parser.add_argument("--port", type=int, default=8765, help="Port")

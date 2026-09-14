@@ -1,0 +1,160 @@
+{
+  "results": [
+    {
+      "true_sentences": 95,
+      "vad_utterances": 149,
+      "utterances_per_sentence": 1.57,
+      "split_sentences": 42,
+      "split_sentence_pct": 44.2,
+      "extra_splits": 54,
+      "merged_utterances": 0,
+      "merged_pct": 0.0,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 0.996,
+        "true_boundary_pause_p10_sec": 0.772,
+        "spurious_cut_pause_median_sec": 1.284,
+        "spurious_cut_pause_p90_sec": 2.372,
+        "n_true": 20,
+        "n_spurious": 121
+      },
+      "label": "production default",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 150,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    },
+    {
+      "true_sentences": 95,
+      "vad_utterances": 149,
+      "utterances_per_sentence": 1.57,
+      "split_sentences": 42,
+      "split_sentence_pct": 44.2,
+      "extra_splits": 54,
+      "merged_utterances": 0,
+      "merged_pct": 0.0,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 0.996,
+        "true_boundary_pause_p10_sec": 0.772,
+        "spurious_cut_pause_median_sec": 1.284,
+        "spurious_cut_pause_p90_sec": 2.372,
+        "n_true": 20,
+        "n_spurious": 121
+      },
+      "label": "silence=150ms",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 150,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    },
+    {
+      "true_sentences": 95,
+      "vad_utterances": 126,
+      "utterances_per_sentence": 1.33,
+      "split_sentences": 27,
+      "split_sentence_pct": 28.4,
+      "extra_splits": 31,
+      "merged_utterances": 0,
+      "merged_pct": 0.0,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 0.996,
+        "true_boundary_pause_p10_sec": 0.772,
+        "spurious_cut_pause_median_sec": 1.54,
+        "spurious_cut_pause_p90_sec": 2.436,
+        "n_true": 20,
+        "n_spurious": 98
+      },
+      "label": "silence=250ms",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 250,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    },
+    {
+      "true_sentences": 95,
+      "vad_utterances": 117,
+      "utterances_per_sentence": 1.23,
+      "split_sentences": 19,
+      "split_sentence_pct": 20.0,
+      "extra_splits": 22,
+      "merged_utterances": 0,
+      "merged_pct": 0.0,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 0.996,
+        "true_boundary_pause_p10_sec": 0.772,
+        "spurious_cut_pause_median_sec": 1.604,
+        "spurious_cut_pause_p90_sec": 2.436,
+        "n_true": 20,
+        "n_spurious": 89
+      },
+      "label": "silence=400ms",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 400,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    },
+    {
+      "true_sentences": 95,
+      "vad_utterances": 109,
+      "utterances_per_sentence": 1.15,
+      "split_sentences": 14,
+      "split_sentence_pct": 14.7,
+      "extra_splits": 14,
+      "merged_utterances": 0,
+      "merged_pct": 0.0,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 0.996,
+        "true_boundary_pause_p10_sec": 0.772,
+        "spurious_cut_pause_median_sec": 1.668,
+        "spurious_cut_pause_p90_sec": 2.436,
+        "n_true": 20,
+        "n_spurious": 81
+      },
+      "label": "silence=600ms",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 600,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    },
+    {
+      "true_sentences": 95,
+      "vad_utterances": 96,
+      "utterances_per_sentence": 1.01,
+      "split_sentences": 8,
+      "split_sentence_pct": 8.4,
+      "extra_splits": 8,
+      "merged_utterances": 7,
+      "merged_pct": 7.3,
+      "silence_profile": {
+        "true_boundary_pause_median_sec": 1.22,
+        "true_boundary_pause_p10_sec": 0.964,
+        "spurious_cut_pause_median_sec": 1.668,
+        "spurious_cut_pause_p90_sec": 2.472,
+        "n_true": 13,
+        "n_spurious": 75
+      },
+      "label": "silence=900ms",
+      "config": {
+        "engine": "fsmn-vad",
+        "threshold": 0.2,
+        "silence_ms": 900,
+        "hangover_ms": 250,
+        "pre_speech_ms": 800
+      }
+    }
+  ]
+}

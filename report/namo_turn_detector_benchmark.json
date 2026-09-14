@@ -1,0 +1,782 @@
+{
+  "timestamp": "2026-09-14 09:16:36",
+  "audio_file": "D:\\vibe-translation-addon-transcribe_cpp\\debug_audio\\22d54213-6418-4985-86db-0d1fa892f2dc\\00_ingress_stream.wav",
+  "ground_truth_file": "D:\\vibe-translation-addon-transcribe_cpp\\debug_audio\\22d54213-6418-4985-86db-0d1fa892f2dc\\00_ingress_stream.txt",
+  "total_turns": 45,
+  "models": {
+    "sensevoice-small": {
+      "baseline_vad500": {
+        "model": "sensevoice-small",
+        "namo_enabled": false,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 11.25,
+        "cer_itn": 11.12,
+        "subs": 35,
+        "dels": 23,
+        "ins": 34,
+        "total_commits": 83,
+        "namo_commits": 0,
+        "vad_commits": 83,
+        "other_commits": 0,
+        "namo_ratio_pct": 0.0,
+        "avg_namo_chars": 0.0,
+        "avg_namo_tokens": 0.0,
+        "elapsed_sec": 32.07,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業周りを終え",
+            "dur": 2.81
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "夕食をお済まし",
+            "dur": 1.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日私たちは出張先の宿に向かっていた",
+            "dur": 4.29
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "このホテル初めてですよねトラベルダウで星三点九でさ温泉がいいらしいよ温",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますかだろ",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "ア田さんの絶対知らなそうなおテルとりますから",
+            "dur": 5.18
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないな変ったお前",
+            "dur": 3.39
+          }
+        ]
+      },
+      "joint_namo070": {
+        "model": "sensevoice-small",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 12.71,
+        "cer_itn": 12.59,
+        "subs": 40,
+        "dels": 25,
+        "ins": 39,
+        "total_commits": 89,
+        "namo_commits": 20,
+        "vad_commits": 69,
+        "other_commits": 0,
+        "namo_ratio_pct": 22.5,
+        "avg_namo_chars": 9.1,
+        "avg_namo_tokens": 9.1,
+        "elapsed_sec": 37.66,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業周りを終え",
+            "dur": 2.81
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "夕食を済まし",
+            "dur": 1.53
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日私たちは出張先の宿に向かっていた",
+            "dur": 4.29
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよねあトラベルダウで星三点九でさ温泉がいいらしいよ",
+            "dur": 7.61
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "やった相変わらず何も調べてないんだ",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますかだろ",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "ア田さんの絶対知らなそうなおテルとりますから",
+            "dur": 5.18
+          }
+        ]
+      },
+      "joint_namo075": {
+        "model": "sensevoice-small",
+        "namo_enabled": true,
+        "namo_threshold": 0.75,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 12.59,
+        "cer_itn": 12.47,
+        "subs": 38,
+        "dels": 25,
+        "ins": 40,
+        "total_commits": 88,
+        "namo_commits": 14,
+        "vad_commits": 74,
+        "other_commits": 0,
+        "namo_ratio_pct": 15.9,
+        "avg_namo_chars": 11.0,
+        "avg_namo_tokens": 11.0,
+        "elapsed_sec": 38.79,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業周りを終え",
+            "dur": 2.81
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "夕食を済まし",
+            "dur": 1.53
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日私たちは出張先の宿に向かっていた",
+            "dur": 4.29
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよねあトラベルダウで星三点九でさ温泉がいいらしいよ",
+            "dur": 7.61
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "やった相変わらず何も調べてないんだ",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますかだろ",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "ア田さんの絶対知らなそうなおテルとりますから",
+            "dur": 5.18
+          }
+        ]
+      },
+      "dominant_sil700": {
+        "model": "sensevoice-small",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 700,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 13.69,
+        "cer_itn": 13.69,
+        "subs": 42,
+        "dels": 38,
+        "ins": 32,
+        "total_commits": 78,
+        "namo_commits": 19,
+        "vad_commits": 59,
+        "other_commits": 0,
+        "namo_ratio_pct": 24.4,
+        "avg_namo_chars": 9.7,
+        "avg_namo_tokens": 9.7,
+        "elapsed_sec": 38.64,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業周りを終え辞職を済ましその日私たちは出張先の宿に向かって",
+            "dur": 9.15
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよねあトラベルダウで星三点九でさ温泉がいいらしいよ",
+            "dur": 7.61
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "やった相変わらず何も調べてないんだ羽田さんのホテル選びのセス信用してま",
+            "dur": 18.11
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてくださいア田さんの絶対知らなそうな",
+            "dur": 9.72
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないな変ったお前",
+            "dur": 3.58
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "あ",
+            "dur": 1.02
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "前先輩の羽田さんとは入社してすぐ同じチームになり二人で出張に来ることも",
+            "dur": 8.89
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "部屋どうでした",
+            "dur": 1.53
+          }
+        ]
+      },
+      "dominant_sil900": {
+        "model": "sensevoice-small",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 900,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 12.96,
+        "cer_itn": 12.96,
+        "subs": 43,
+        "dels": 40,
+        "ins": 23,
+        "total_commits": 65,
+        "namo_commits": 16,
+        "vad_commits": 49,
+        "other_commits": 0,
+        "namo_ratio_pct": 24.6,
+        "avg_namo_chars": 9.5,
+        "avg_namo_tokens": 9.5,
+        "elapsed_sec": 40.98,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業周りを終え辞職を済ましその日私たちは出張先の宿に向かって",
+            "dur": 9.34
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよねあトラベルダウで星三点九でさ温泉がいいらしいよ",
+            "dur": 7.61
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "やった相変わらず何も調べてないんだ羽田さんのホテル選びのセス信用してま",
+            "dur": 18.3
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてくださいア田さんの絶対知らなそうな",
+            "dur": 9.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないなぁっお先先輩の羽田さんとは入社してすぐ同じチームに",
+            "dur": 12.6
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "あ",
+            "dur": 1.15
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "部屋どうでした",
+            "dur": 1.53
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "すまわ満室だって",
+            "dur": 6.01
+          }
+        ]
+      }
+    },
+    "nemotron-3.5-streaming": {
+      "baseline_vad500": {
+        "model": "nemotron-3.5-streaming",
+        "namo_enabled": false,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 26.65,
+        "cer_itn": 26.65,
+        "subs": 67,
+        "dels": 107,
+        "ins": 44,
+        "total_commits": 64,
+        "namo_commits": 0,
+        "vad_commits": 62,
+        "other_commits": 2,
+        "namo_ratio_pct": 0.0,
+        "avg_namo_chars": 0.0,
+        "avg_namo_tokens": 0.0,
+        "elapsed_sec": 55.37,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先の営業回りを終え。",
+            "dur": 2.81
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "予職お済まし",
+            "dur": 1.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日たちは出張先の宿に向かっていた。",
+            "dur": 4.29
+          },
+          {
+            "reason": "STABLE_PREFIX",
+            "text": "このホテル初めてですよね。 トラベルダウで星三点九でさ、温泉がいいらし",
+            "dur": 8.0
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "やった相変わらず何も調べてないんだ。",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びの先生、信用してますか?",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください。",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "エラダさんの絶対知らなそうなホテル取りますから",
+            "dur": 5.18
+          }
+        ]
+      },
+      "joint_namo070": {
+        "model": "nemotron-3.5-streaming",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 26.04,
+        "cer_itn": 26.04,
+        "subs": 83,
+        "dels": 102,
+        "ins": 28,
+        "total_commits": 64,
+        "namo_commits": 2,
+        "vad_commits": 62,
+        "other_commits": 0,
+        "namo_ratio_pct": 3.1,
+        "avg_namo_chars": 21.5,
+        "avg_namo_tokens": 19.5,
+        "elapsed_sec": 50.04,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先の営業回りを終え。",
+            "dur": 2.81
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "予職お済まし",
+            "dur": 1.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日たちは出張先の宿に向かっていた。",
+            "dur": 4.29
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよね。 トラベルダウで星三点九でさ、温泉がいいらし",
+            "dur": 6.9
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "何も調べてないんだ。",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びの先生、信用してますか?",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください。",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "エラダさんの絶対知らなそうなホテル取りますから",
+            "dur": 5.18
+          }
+        ]
+      },
+      "dominant_sil700": {
+        "model": "nemotron-3.5-streaming",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 700,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 27.14,
+        "cer_itn": 27.14,
+        "subs": 52,
+        "dels": 127,
+        "ins": 43,
+        "total_commits": 57,
+        "namo_commits": 6,
+        "vad_commits": 49,
+        "other_commits": 2,
+        "namo_ratio_pct": 10.5,
+        "avg_namo_chars": 11.3,
+        "avg_namo_tokens": 11.0,
+        "elapsed_sec": 74.77,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先の営業回りを終え、歩食を済まし、その日たちは出張先の宿に向かって",
+            "dur": 9.15
+          },
+          {
+            "reason": "STABLE_PREFIX",
+            "text": "このホテル初めてですよね。 トラベルダウで星三点九でさ、温泉がいいらし",
+            "dur": 12.22
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてくださいさんの絶対知らなそうなホテ",
+            "dur": 9.72
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "あ、なんか信用できないな",
+            "dur": 3.58
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "年先輩の羽田さんとは入社してすぐ同じチームになり、二人で出張に来ること",
+            "dur": 8.89
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "僕は真室だって",
+            "dur": 2.43
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "部屋どうでした?",
+            "dur": 3.39
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "スマがあるから二部屋ってことらしい",
+            "dur": 4.09
+          }
+        ]
+      },
+      "dominant_sil900": {
+        "model": "nemotron-3.5-streaming",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 900,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 26.28,
+        "cer_itn": 26.28,
+        "subs": 59,
+        "dels": 125,
+        "ins": 31,
+        "total_commits": 47,
+        "namo_commits": 6,
+        "vad_commits": 38,
+        "other_commits": 3,
+        "namo_ratio_pct": 12.8,
+        "avg_namo_chars": 11.2,
+        "avg_namo_tokens": 10.7,
+        "elapsed_sec": 103.11,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先の営業回りを終え、歩食を済まし、その日たちは出張先の宿に向かって",
+            "dur": 9.34
+          },
+          {
+            "reason": "STABLE_PREFIX",
+            "text": "このホテル初めてですよね。 トラベルダウで星三点九でさ、温泉がいいらし",
+            "dur": 12.22
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてくださいさんの絶対知らなそうなホテ",
+            "dur": 9.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないな先輩の羽田さんとは入社してすぐ同じチームになり、二",
+            "dur": 12.6
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "スマがあるから二部屋ってことらしい",
+            "dur": 4.28
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "部屋どうでした?真室だって",
+            "dur": 6.01
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "あ、本当申し訳ない",
+            "dur": 2.56
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "ヘア選び失敗したな",
+            "dur": 3.45
+          }
+        ]
+      }
+    },
+    "qwen3-asr-1.7b": {
+      "baseline_vad500": {
+        "model": "qwen3-asr-1.7b",
+        "namo_enabled": false,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 10.02,
+        "cer_itn": 9.9,
+        "subs": 33,
+        "dels": 16,
+        "ins": 33,
+        "total_commits": 83,
+        "namo_commits": 0,
+        "vad_commits": 83,
+        "other_commits": 0,
+        "namo_ratio_pct": 0.0,
+        "avg_namo_chars": 0.0,
+        "avg_namo_tokens": 0.0,
+        "elapsed_sec": 65.43,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業回りを終え。",
+            "dur": 2.81
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "夕食を済まし。",
+            "dur": 1.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日、私たちは出張先の宿に向かっていた。",
+            "dur": 4.29
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "このホテル初めてですよね。トラベルダウで星三点九でさ、温泉がいいらしい",
+            "dur": 12.16
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますか。だろ。",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください。",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "アナダさんの絶対知らなそうなホテル取りますから。",
+            "dur": 5.18
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないなあ、来たお前。",
+            "dur": 3.39
+          }
+        ]
+      },
+      "joint_namo070": {
+        "model": "qwen3-asr-1.7b",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 500,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 10.88,
+        "cer_itn": 10.76,
+        "subs": 30,
+        "dels": 22,
+        "ins": 37,
+        "total_commits": 88,
+        "namo_commits": 17,
+        "vad_commits": 71,
+        "other_commits": 0,
+        "namo_ratio_pct": 19.3,
+        "avg_namo_chars": 11.5,
+        "avg_namo_tokens": 10.2,
+        "elapsed_sec": 69.66,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業回りを終え。",
+            "dur": 2.81
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "夕食を済まし。",
+            "dur": 1.92
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "その日、私たちは出張先の宿に向かっていた。",
+            "dur": 4.29
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよね。トラベルダウで星三点九でさ、温泉がいいらしい",
+            "dur": 6.9
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "温泉やった。相変わらず何も調べてないんだ。",
+            "dur": 11.84
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますか。だろ。",
+            "dur": 5.76
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください。",
+            "dur": 4.35
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "アナダさんの絶対知らなそうなホテル取りますから。",
+            "dur": 5.18
+          }
+        ]
+      },
+      "dominant_sil700": {
+        "model": "qwen3-asr-1.7b",
+        "namo_enabled": true,
+        "namo_threshold": 0.7,
+        "namo_require_silence_ms": 120,
+        "vad_silence_ms": 700,
+        "vad_engine": "fsmn-vad",
+        "vad_threshold": 0.45,
+        "cer_strict": 11.86,
+        "cer_itn": 11.86,
+        "subs": 39,
+        "dels": 25,
+        "ins": 33,
+        "total_commits": 82,
+        "namo_commits": 23,
+        "vad_commits": 59,
+        "other_commits": 0,
+        "namo_ratio_pct": 28.0,
+        "avg_namo_chars": 10.3,
+        "avg_namo_tokens": 9.0,
+        "elapsed_sec": 80.1,
+        "commits_preview": [
+          {
+            "reason": "VAD_SILENCE",
+            "text": "得意先への営業回りを終え夕食を済まし、その日私たちは出張先の宿に向かっ",
+            "dur": 9.15
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "このホテル初めてですよね。トラベルダウで星三点九でさ、温泉がいいらしい",
+            "dur": 6.9
+          },
+          {
+            "reason": "NAMO_EOU",
+            "text": "温泉やった。相変わらず何も調べてないんだ。",
+            "dur": 11.84
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "金田さんのホテル選びのセンス信用してますか。だろ。",
+            "dur": 18.11
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "来月の出張先のホテルは私に決めさせてください。カナダさんの絶対知らなそ",
+            "dur": 9.72
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "なんか信用できないなあ、来たお前。",
+            "dur": 3.58
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "あ。",
+            "dur": 1.02
+          },
+          {
+            "reason": "VAD_SILENCE",
+            "text": "先輩の花田さんとは入社してすぐ同じチームになり、二人で出張に来ることも",
+            "dur": 8.89
+          }
+        ]
+      }
+    }
+  }
+}
