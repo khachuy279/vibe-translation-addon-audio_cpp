@@ -202,10 +202,13 @@ class SessionState:
                 final_pcm = bytes(self._speech_buffer)
                 utt_id = str(res.utterance_id or self._active_utterance_id)
                 self._speech_buffer.clear()
+                last_partial = self._last_partial_text
                 self._last_partial_text = ""
-                # Commit final utterance
+                # Commit final utterance with last partial preview attached for recovery
                 asyncio.run_coroutine_threadsafe(
-                    self._async_commit_utterance(final_pcm, utt_id, res.reason or "VAD_SILENCE"),
+                    self._async_commit_utterance(
+                        final_pcm, utt_id, res.reason or "VAD_SILENCE", last_partial=last_partial
+                    ),
                     self.loop,
                 )
 
@@ -235,18 +238,39 @@ class SessionState:
         except Exception as e:
             logger.debug(f"Partial ASR error: {e}")
 
-    async def _async_commit_utterance(self, pcm_bytes: bytes, utt_id: str, reason: str) -> None:
+    async def _async_commit_utterance(
+        self,
+        pcm_bytes: bytes,
+        utt_id: str,
+        reason: str,
+        last_partial: str = "",
+    ) -> None:
         """Transcribe final speech chunk, check commit constraints, and enqueue for Translation."""
-        if len(pcm_bytes) < 3200:
+        if len(pcm_bytes) < 3200 and not last_partial:
             return
         try:
-            text, _ = await asyncio.to_thread(
-                self.asr_engine.transcribe_chunk,
-                pcm_bytes,
-                utt_id,
-                False,  # is_final
-                self.config.get("asr_engine"),
-            )
+            text = ""
+            if len(pcm_bytes) >= 3200:
+                text, _ = await asyncio.to_thread(
+                    self.asr_engine.transcribe_chunk,
+                    pcm_bytes,
+                    utt_id,
+                    False,  # is_final
+                    self.config.get("asr_engine"),
+                )
+
+            # Text Recovery Feature: If COMMIT text is shorter than last PARTIAL preview, recover last PARTIAL
+            if last_partial:
+                final_tokens = count_content_tokens(text)
+                partial_tokens = count_content_tokens(last_partial)
+                if partial_tokens > final_tokens:
+                    logger.info(
+                        f"🔄 [RECOVERY] [utt_{utt_id}] Final COMMIT ('{text}', {final_tokens} tokens) "
+                        f"is shorter than last PARTIAL ('{last_partial}', {partial_tokens} tokens). "
+                        f"Recovered text from last PARTIAL preview!"
+                    )
+                    text = last_partial
+
             if not text:
                 return
 
