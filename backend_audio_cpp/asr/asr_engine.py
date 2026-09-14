@@ -88,6 +88,27 @@ class AudioCppASREngine:
         """Return catalog of models with their download and active state."""
         return self.registry.list_models()
 
+    def unload_model(self, model_id: str) -> bool:
+        """Unload specific model from audio.cpp server VRAM via POST /v1/models/unload."""
+        if not model_id:
+            return False
+        try:
+            resp = requests.post(
+                f"{self.server_url}/v1/models/unload",
+                json={"id": model_id},
+                timeout=3.0,
+            )
+            if resp.status_code == 200:
+                logger.info(f"[ASR] Successfully unloaded model '{model_id}' from VRAM")
+                return True
+            else:
+                logger.warning(
+                    f"[ASR] Unload '{model_id}' status {resp.status_code}: {resp.text}"
+                )
+        except Exception as e:
+            logger.warning(f"[ASR] Error unloading model '{model_id}': {e}")
+        return False
+
     def switch_model(self, model_key_or_alias: str) -> str:
         """Switch ASR model live without restarting the backend.
 
@@ -99,6 +120,11 @@ class AudioCppASREngine:
         """
         old_model = self.active_model_id
         canonical_key = self.registry.set_active_model_key(model_key_or_alias)
+
+        if old_model and old_model != canonical_key:
+            logger.info(f"[ASR] Unloading previous model '{old_model}' from VRAM...")
+            self.unload_model(old_model)
+
         self.active_model_id = canonical_key
 
         logger.info(
@@ -136,7 +162,12 @@ class AudioCppASREngine:
         if not server_exe.exists():
             raise FileNotFoundError(f"audiocpp_server.exe not found at {server_exe}")
 
-        cmd = [str(server_exe), "--config", str(cfg_file)]
+        cmd = [
+            str(server_exe),
+            "--config", str(cfg_file),
+            "--ui-management",
+            "--max-loaded-models", "1",
+        ]
         subprocess.Popen(
             cmd,
             cwd=str(bin_dir),

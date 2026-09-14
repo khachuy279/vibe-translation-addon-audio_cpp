@@ -174,7 +174,7 @@ class ASRModelRegistry:
             "device": 0,
             "threads": 4,
             "lazy_load": True,
-            "max_loaded_models": 2,
+            "max_loaded_models": 1,
             "models": models_list,
         }
 
