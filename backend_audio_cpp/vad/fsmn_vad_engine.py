@@ -212,11 +212,14 @@ class FsmnVADEngine(BaseVADEngine):
         state.in_cache2 = outs[3][:, :, :19, :]
         state.in_cache3 = outs[4][:, :, :19, :]
 
-        # Softmax speech probability: 1.0 - prob(silence_pdf_0)
-        exp_l = np.exp(logits - np.max(logits, axis=-1, keepdims=True))
-        probs = exp_l / np.sum(exp_l, axis=-1, keepdims=True)
-        sil_prob = probs[0, -1, 0]
+        # Direct softmax posterior from ONNX model output
+        sil_prob = float(logits[0, -1, 0])
         speech_prob = float(1.0 - sil_prob)
+
+        # Acoustic Energy Gate: If raw audio is silent / paused (RMS < 0.003), enforce silence prob
+        rms = float(np.sqrt(np.mean(frame_float32 ** 2)))
+        if rms < 0.003:
+            speech_prob = min(speech_prob, 0.05)
 
         return speech_prob
 
