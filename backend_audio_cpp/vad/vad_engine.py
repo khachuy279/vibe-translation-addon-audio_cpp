@@ -193,14 +193,24 @@ class SileroVADEngine:
         pcm_int16 = np.frombuffer(frame_pcm16, dtype=np.int16)
         frame_float32 = pcm_int16.astype(np.float32) / 32768.0
 
-        prob = self._infer_frame(frame_float32, state)
+        raw_prob = self._infer_frame(frame_float32, state)
         threshold = self.config.threshold
+
+        # Whisper & ASMR Sensitivity Booster:
+        # Whispered speech lacks neural pitch/vocal cord vibration so Silero neural scores drop to 0.10-0.25.
+        # When threshold is set low (<= 0.35) and acoustic RMS energy is detected (> 0.003), boost probability.
+        rms = float(np.sqrt(np.mean(frame_float32 ** 2)))
+        if threshold <= 0.35 and rms > 0.003:
+            prob = max(raw_prob, min(1.0, raw_prob + rms * 20.0))
+        else:
+            prob = raw_prob
 
         event: Optional[str] = None
         reason: Optional[str] = None
         duration_sec = 0.0
         speech_start_sec = state.speech_start_time
         speech_end_sec: Optional[float] = None
+        frame_dur = state.frame_samples / state.sample_rate  # 0.032s
 
         if prob >= threshold:
             # Current frame is SPEECH
@@ -216,28 +226,20 @@ class SileroVADEngine:
                 event = "SPEECH_START"
                 self._log(
                     f"[VAD] >> SPEECH START at {timestamp_sec:.2f}s "
-                    f"(prob={prob:.2f}, threshold={threshold:.2f}, utt_id={state.current_utterance_id})"
+                    f"(prob={prob:.2f}, raw={raw_prob:.2f}, rms={rms:.4f}, threshold={threshold:.2f}, utt_id={state.current_utterance_id})"
                 )
 
             # Check for MAX_SPEECH_DURATION_REACHED
-            speech_dur = timestamp_sec - state.speech_start_time
+            speech_dur = (timestamp_sec - state.speech_start_time) + frame_dur
             if speech_dur >= self.config.max_speech_duration_sec:
-                if speech_dur >= self.config.min_speech_duration_sec:
-                    event = "SPEECH_END"
-                    reason = "MAX_SPEECH_DURATION_REACHED"
-                    duration_sec = speech_dur
-                    speech_end_sec = timestamp_sec
-                    self._log(
-                        f"[VAD] << SPEECH END at {timestamp_sec:.2f}s (duration={duration_sec:.2f}s, utt_id={state.current_utterance_id}) "
-                        f"| Reason: MAX_SPEECH_DURATION_REACHED ({self.config.max_speech_duration_sec:.1f}s limit)"
-                    )
-                else:
-                    reason = "SHORT_SPEECH_DISCARDED"
-                    self._log(
-                        f"[VAD] Discarded short speech spike at {timestamp_sec:.2f}s "
-                        f"(duration={speech_dur:.2f}s < min={self.config.min_speech_duration_sec:.2f}s, utt_id={state.current_utterance_id})"
-                    )
-
+                event = "SPEECH_END"
+                reason = "MAX_SPEECH_DURATION_REACHED"
+                duration_sec = speech_dur
+                speech_end_sec = timestamp_sec
+                self._log(
+                    f"[VAD] << SPEECH END at {timestamp_sec:.2f}s (duration={duration_sec:.2f}s, utt_id={state.current_utterance_id}) "
+                    f"| Reason: MAX_SPEECH_DURATION_REACHED ({self.config.max_speech_duration_sec:.1f}s limit)"
+                )
                 state.is_speech_active = False
                 state.speech_start_time = None
                 state.last_speech_time = None
@@ -250,26 +252,19 @@ class SileroVADEngine:
 
                 silence_dur = timestamp_sec - state.silence_start_time
                 if silence_dur >= self.config.min_silence_duration_sec:
-                    # Candidate transition: SPEECH -> SILENCE
+                    # Transition: SPEECH -> SILENCE
                     last_speech = state.last_speech_time or timestamp_sec
                     start_speech = state.speech_start_time or timestamp_sec
-                    raw_duration = last_speech - start_speech
+                    raw_duration = (last_speech - start_speech) + frame_dur
 
-                    if raw_duration >= self.config.min_speech_duration_sec:
-                        event = "SPEECH_END"
-                        reason = "SILENCE_TIMEOUT"
-                        duration_sec = raw_duration
-                        speech_end_sec = last_speech
-                        self._log(
-                            f"[VAD] << SPEECH END at {timestamp_sec:.2f}s (duration={duration_sec:.2f}s, utt_id={state.current_utterance_id}) "
-                            f"| Reason: SILENCE_TIMEOUT (silence={silence_dur:.2f}s >= {self.config.min_silence_duration_sec:.2f}s)"
-                        )
-                    else:
-                        reason = "SHORT_SPEECH_DISCARDED"
-                        self._log(
-                            f"[VAD] Discarded short speech spike at {timestamp_sec:.2f}s "
-                            f"(duration={raw_duration:.2f}s < min={self.config.min_speech_duration_sec:.2f}s, utt_id={state.current_utterance_id})"
-                        )
+                    event = "SPEECH_END"
+                    reason = "SILENCE_TIMEOUT"
+                    duration_sec = max(frame_dur, raw_duration)
+                    speech_end_sec = last_speech
+                    self._log(
+                        f"[VAD] << SPEECH END at {timestamp_sec:.2f}s (duration={duration_sec:.2f}s, utt_id={state.current_utterance_id}) "
+                        f"| Reason: SILENCE_TIMEOUT (silence={silence_dur:.2f}s >= {self.config.min_silence_duration_sec:.2f}s)"
+                    )
 
                     state.is_speech_active = False
                     state.speech_start_time = None
