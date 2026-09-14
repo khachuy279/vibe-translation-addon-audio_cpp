@@ -92,12 +92,14 @@ class SessionState:
         self.vad_engine = SileroVADEngine(self.vad_cfg)
         self.vad_state: VADStreamState = self.vad_engine.create_state()
 
-        # Audio buffering
+        # Audio buffering & Seek tracking
         self._frame_buffer: bytearray = bytearray()
         self._speech_buffer: bytearray = bytearray()
         self._active_utterance_id: int = 1
         self._last_partial_poll_time: float = 0.0
         self._last_partial_text: str = ""
+        self._last_capture_ts: float = 0.0
+        self._last_chunk_idx: Optional[int] = None
 
         # ASR Engine & Commit
         self.asr_engine: AudioCppASREngine = AudioCppASREngine.get_instance()
@@ -112,6 +114,16 @@ class SessionState:
 
     async def send_json(self, payload: Dict[str, Any]) -> bool:
         return await self.connection.send_json(payload)
+
+    def reset_vad_and_buffers(self, reason: str = "seek") -> None:
+        """Reset VAD stream state and clear frame/speech buffers (called on video seek or stream reset)."""
+        logger.info(f"⏩ [SESSION RESET] Session {self.session_id}: Resetting VAD state & audio buffers (reason: {reason})")
+        self.vad_state.reset()
+        self._frame_buffer.clear()
+        self._speech_buffer.clear()
+        self._last_partial_text = ""
+        self._last_capture_ts = 0.0
+        self._last_chunk_idx = None
 
     def apply_config(self, new_config: Dict[str, Any]) -> None:
         """Dynamically update parameters on the fly."""
@@ -163,7 +175,22 @@ class SessionState:
 
     def feed_pcm(self, pcm_bytes: bytes, capture_ts: float, chunk_idx: Optional[int]) -> None:
         """Feed incoming PCM chunks into VAD frame slicer and accumulate speech."""
+        # Auto-detect Seek / Audio Discontinuity
+        if self._last_capture_ts > 0.0:
+            # 1. Backward seek check (time regression > 0.5s)
+            if capture_ts < (self._last_capture_ts - 0.5):
+                self.reset_vad_and_buffers(f"backward seek ({self._last_capture_ts:.2f}s -> {capture_ts:.2f}s)")
+            # 2. Forward seek / large gap check (time gap > 3.0s)
+            elif (capture_ts - self._last_capture_ts) > 3.0:
+                self.reset_vad_and_buffers(f"forward gap ({self._last_capture_ts:.2f}s -> {capture_ts:.2f}s)")
+            # 3. Chunk index sequence drop check
+            elif chunk_idx is not None and self._last_chunk_idx is not None:
+                if chunk_idx < (self._last_chunk_idx - 5) or (self._last_chunk_idx > 10 and chunk_idx <= 2):
+                    self.reset_vad_and_buffers(f"chunk index reset ({self._last_chunk_idx} -> {chunk_idx})")
+
+        self._last_capture_ts = capture_ts
         if chunk_idx is not None:
+            self._last_chunk_idx = chunk_idx
             self.chunk_index = chunk_idx
         else:
             self.chunk_index += 1

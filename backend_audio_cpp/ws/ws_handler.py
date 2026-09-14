@@ -76,13 +76,17 @@ async def handle_ws(ws: WebSocket) -> None:
 
 
 async def _handle_text_message(session: SessionState, text: str) -> None:
-    """Handle control JSON messages (set_config, ping)."""
+    """Handle control JSON messages (set_config, ping, seek, reset)."""
     try:
         msg = json.loads(text)
         action = msg.get("type") or msg.get("action", "")
 
         if action in ("set_config", "configure"):
             session.apply_config(msg)
+
+        elif action in ("seek", "reset", "flush", "clear"):
+            logger.info(f"Session {session.session_id}: Client sent '{action}' control action.")
+            session.reset_vad_and_buffers(reason=f"client_{action}")
 
         elif action == "ping":
             pong = make_pong_msg(msg.get("timestamp", 0))

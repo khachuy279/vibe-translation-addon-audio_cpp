@@ -162,9 +162,13 @@ class SileroVADEngine:
         Returns:
             VADResult with speech state, probability score, and triggered events.
         """
-        # 1. Monotonic timestamp check
-        if timestamp_sec < state.last_timestamp_sec:
-            timestamp_sec = state.last_timestamp_sec
+        # 1. Monotonic timestamp & Seek recovery check
+        if state.last_timestamp_sec > 0.0 and timestamp_sec < (state.last_timestamp_sec - 0.5):
+            self._log(
+                f"[VAD] Time regression detected ({state.last_timestamp_sec:.2f}s -> {timestamp_sec:.2f}s). "
+                f"Resetting VAD stream state for seek recovery."
+            )
+            state.reset()
         state.last_timestamp_sec = timestamp_sec
 
         # 2. Strict sample rate check
