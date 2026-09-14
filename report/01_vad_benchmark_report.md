@@ -1,6 +1,6 @@
 # Báo Cáo Benchmark Module VAD (`silero_vad`)
 
-- **Thời gian chạy**: 2026-09-14 21:52:10
+- **Thời gian chạy**: 2026-09-14 23:44:10
 - **Model**: `backend_audio_cpp/models/silero_vad.onnx`
 - **Runtime Provider**: CPUExecutionProvider
 - **Frame Size**: 512 samples (32.0 ms @ 16kHz)
@@ -9,14 +9,14 @@
 
 | Tệp Audio | Thời lượng (s) | Thời gian xử lý (s) | RTF | Tốc độ | Latency TB (ms) | P95 Latency (ms) | Số câu (Utterance) | Tỷ lệ tiếng nói (%) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `00_ingress_stream.wav` | 332.03 | 1.506 | **0.0045** | **220.4x** | 0.14 | 0.19 | 67 | 43.1% |
-| `Chinese_fast_speed_11s.wav` | 11.38 | 0.055 | **0.0048** | **207.8x** | 0.15 | 0.22 | 2 | 97.9% |
-| `Chinese_noise_28s.wav` | 28.26 | 0.145 | **0.0051** | **195.4x** | 0.16 | 0.23 | 4 | 99.3% |
-| `Cross_lingual_English_French_Italian_Spanish_6s.wav` | 6.23 | 0.030 | **0.0048** | **207.3x** | 0.15 | 0.20 | 1 | 89.9% |
-| `English_low_speech_quality_19s.wav` | 19.02 | 0.089 | **0.0047** | **213.4x** | 0.15 | 0.20 | 7 | 49.3% |
-| `English_multiple_kinds_of_noise_88s.wav` | 88.19 | 0.400 | **0.0045** | **220.5x** | 0.14 | 0.18 | 12 | 93.3% |
-| `Japanese_5s.wav` | 5.08 | 0.022 | **0.0044** | **228.1x** | 0.14 | 0.15 | 1 | 84.4% |
-| `Russian_4s.wav` | 4.76 | 0.023 | **0.0048** | **209.3x** | 0.15 | 0.22 | 1 | 79.3% |
+| `00_ingress_stream.wav` | 332.03 | 1.495 | **0.0045** | **222.1x** | 0.14 | 0.17 | 60 | 43.0% |
+| `Chinese_fast_speed_11s.wav` | 11.38 | 0.056 | **0.0049** | **202.4x** | 0.16 | 0.23 | 2 | 97.9% |
+| `Chinese_noise_28s.wav` | 28.26 | 0.127 | **0.0045** | **222.0x** | 0.14 | 0.17 | 4 | 99.3% |
+| `Cross_lingual_English_French_Italian_Spanish_6s.wav` | 6.23 | 0.028 | **0.0044** | **224.9x** | 0.14 | 0.15 | 1 | 89.9% |
+| `English_low_speech_quality_19s.wav` | 19.02 | 0.097 | **0.0051** | **195.6x** | 0.16 | 0.23 | 7 | 49.3% |
+| `English_multiple_kinds_of_noise_88s.wav` | 88.19 | 0.401 | **0.0045** | **219.9x** | 0.14 | 0.18 | 12 | 93.3% |
+| `Japanese_5s.wav` | 5.08 | 0.026 | **0.0051** | **194.4x** | 0.16 | 0.24 | 1 | 84.4% |
+| `Russian_4s.wav` | 4.76 | 0.022 | **0.0045** | **221.4x** | 0.14 | 0.17 | 1 | 79.3% |
 
 ## 2. Chi Tiết Phát Hiện Đoạn Tiếng Nói (Speech Segments & Lý do ngắt)
 
@@ -42,13 +42,11 @@
 | 17 | 80.7s | 83.1s | 2.4s | `SILENCE_TIMEOUT` |
 | 18 | 84.29s | 85.7s | 1.41s | `SILENCE_TIMEOUT` |
 | 19 | 87.94s | 88.29s | 0.35s | `SILENCE_TIMEOUT` |
-| 20 | 90.3s | 90.4s | 0.1s | `SILENCE_TIMEOUT` |
 | 21 | 91.1s | 91.74s | 0.64s | `SILENCE_TIMEOUT` |
 | 22 | 92.48s | 95.9s | 3.42s | `SILENCE_TIMEOUT` |
 | 23 | 96.8s | 97.54s | 0.74s | `SILENCE_TIMEOUT` |
 | 24 | 98.24s | 106.24s | 8.0s | `MAX_SPEECH_DURATION_REACHED` |
 | 25 | 106.27s | 109.12s | 2.85s | `SILENCE_TIMEOUT` |
-| 26 | 110.56s | 110.69s | 0.13s | `SILENCE_TIMEOUT` |
 | 27 | 112.16s | 114.05s | 1.89s | `SILENCE_TIMEOUT` |
 | 28 | 134.78s | 135.46s | 0.67s | `SILENCE_TIMEOUT` |
 | 29 | 136.29s | 138.66s | 2.37s | `SILENCE_TIMEOUT` |
@@ -58,7 +56,6 @@
 | 33 | 167.97s | 168.26s | 0.29s | `SILENCE_TIMEOUT` |
 | 34 | 169.38s | 170.66s | 1.28s | `SILENCE_TIMEOUT` |
 | 35 | 171.58s | 174.94s | 3.36s | `SILENCE_TIMEOUT` |
-| 36 | 175.62s | 175.78s | 0.16s | `SILENCE_TIMEOUT` |
 | 37 | 176.54s | 177.86s | 1.31s | `SILENCE_TIMEOUT` |
 | 38 | 178.82s | 179.23s | 0.42s | `SILENCE_TIMEOUT` |
 | 39 | 180.51s | 181.47s | 0.96s | `SILENCE_TIMEOUT` |
@@ -75,7 +72,6 @@
 | 50 | 225.31s | 225.86s | 0.54s | `SILENCE_TIMEOUT` |
 | 51 | 227.39s | 230.14s | 2.75s | `SILENCE_TIMEOUT` |
 | 52 | 231.52s | 231.74s | 0.22s | `SILENCE_TIMEOUT` |
-| 53 | 234.53s | 234.56s | 0.03s | `SILENCE_TIMEOUT` |
 | 54 | 239.49s | 242.85s | 3.36s | `SILENCE_TIMEOUT` |
 | 55 | 243.49s | 249.28s | 5.79s | `SILENCE_TIMEOUT` |
 | 56 | 250.21s | 252.58s | 2.37s | `SILENCE_TIMEOUT` |
@@ -84,10 +80,7 @@
 | 59 | 263.39s | 264.03s | 0.64s | `SILENCE_TIMEOUT` |
 | 60 | 264.9s | 265.22s | 0.32s | `SILENCE_TIMEOUT` |
 | 61 | 265.95s | 273.15s | 7.2s | `SILENCE_TIMEOUT` |
-| 62 | 274.34s | 274.4s | 0.06s | `SILENCE_TIMEOUT` |
 | 63 | 275.49s | 279.36s | 3.87s | `SILENCE_TIMEOUT` |
-| 64 | 280.96s | 281.06s | 0.1s | `SILENCE_TIMEOUT` |
-| 65 | 289.76s | 289.76s | 0.0s | `SILENCE_TIMEOUT` |
 | 66 | 301.38s | 301.73s | 0.35s | `SILENCE_TIMEOUT` |
 | 67 | 308.83s | 309.15s | 0.32s | `SILENCE_TIMEOUT` |
 
@@ -149,7 +142,7 @@
 
 ## 3. Đánh Giá & Kết Luận
 
-- **RTF trung bình**: **0.0047** (Nhanh gấp **212.4x** thời gian thực).
+- **RTF trung bình**: **0.0047** (Nhanh gấp **212.1x** thời gian thực).
 - **Độ trễ xử lý mỗi frame 32ms**: **0.15 ms** (cực kỳ thấp, hoàn toàn không gây nghẽn stream).
 - **Khả năng chống nhiễu**: Các file nhiễu nặng (`Chinese_noise_28s.wav`, `English_multiple_kinds_of_noise_88s.wav`) đều phát hiện chính xác các khoảng ngắt nghỉ tự nhiên với lý do `SILENCE_TIMEOUT`.
 - **Kết luận Module 1**: **ĐẠT YÊU CẦU XUẤT SẮC** để tích hợp sang Module 2 (ASR).
