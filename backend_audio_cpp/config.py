@@ -36,7 +36,7 @@ class WSConfig:
 
 @dataclass
 class VADConfig:
-    vad_engine: str = "silero-vad"
+    vad_engine: str = "fsmn-vad"
     threshold: float = 0.50
     silence_duration_ms: int = 450
     hangover_ms: int = 200

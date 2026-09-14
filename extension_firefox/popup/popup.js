@@ -50,7 +50,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   let isCapturingNow = false;
   let isSwitchingEngine = false;
   let lastActiveAsr = "qwen3-asr-1.7b";
-  let lastActiveVad = "silero-vad";
+  let lastActiveVad = "fsmn-vad";
   let lastActiveLang = "auto";
 
   function renderVoiceOptions(voicesList, currentVoiceId) {
@@ -206,6 +206,30 @@ const api = typeof browser !== "undefined" ? browser : chrome;
     }
   }
 
+  function renderVadEngineOptions(availableVadEngines, currentActiveId) {
+    if (!selVadEngine || !availableVadEngines || !Array.isArray(availableVadEngines) || availableVadEngines.length === 0) return;
+    const previousSelection = currentActiveId || selVadEngine.value || "fsmn-vad";
+    selVadEngine.textContent = "";
+
+    availableVadEngines.forEach((item) => {
+      const opt = document.createElement("option");
+      const id = typeof item === "string" ? item : item.id;
+      const name = typeof item === "string" ? item : (item.name || item.id);
+      opt.value = id;
+      opt.textContent = name;
+      if (typeof item === "object" && item.description) {
+        opt.title = item.description;
+      }
+      selVadEngine.appendChild(opt);
+    });
+
+    if (availableVadEngines.some((item) => (typeof item === "string" ? item : item.id) === previousSelection)) {
+      selVadEngine.value = previousSelection;
+    } else {
+      selVadEngine.value = typeof availableVadEngines[0] === "string" ? availableVadEngines[0] : availableVadEngines[0].id;
+    }
+  }
+
   function renderLanguageOptions(supportedLanguages, currentLangCode) {
     if (!selSourceLang || !supportedLanguages || supportedLanguages.length === 0) return;
     const targetSelection = currentLangCode || savedPreferredLang || selSourceLang.value || "auto";
@@ -306,7 +330,11 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       selAsrEngine.value = activeAsr;
     }
 
-    if (selVadEngine) selVadEngine.value = activeVad;
+    if (data.available_vad_engines && data.available_vad_engines.length > 0) {
+      renderVadEngineOptions(data.available_vad_engines, activeVad);
+    } else if (selVadEngine) {
+      selVadEngine.value = activeVad;
+    }
     if (rangeVadSilence && (data.vad_silence_duration_ms || data.silence_duration_ms) && !rangeVadSilence.dataset.userEdited) {
       rangeVadSilence.value = data.vad_silence_duration_ms || data.silence_duration_ms;
       updateRangeLabels();

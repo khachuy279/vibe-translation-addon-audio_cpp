@@ -10,7 +10,12 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend_audio_cpp.config import config
-from backend_audio_cpp.vad.vad_engine import SileroVADEngine, VADConfig, VADStreamState
+from backend_audio_cpp.vad import (
+    BaseVADEngine,
+    BaseVADStreamState,
+    VADConfig,
+    VADFactory,
+)
 from backend_audio_cpp.asr.asr_engine import AudioCppASREngine
 from backend_audio_cpp.asr.model_registry import ModelRegistry
 from backend_audio_cpp.commit.sentence_committer import SentenceCommitter, count_content_tokens
@@ -50,7 +55,7 @@ class SessionConfig:
             "target_lang": config.translation.target_lang,
             "translation_model": config.translation.base,
             "asr_engine": ModelRegistry.get_instance().get_active_model_key(),
-            "vad_engine": "silero-vad",
+            "vad_engine": config.vad.vad_engine,
             "vad_threshold": config.vad.threshold,
             "silence_duration_ms": config.vad.silence_duration_ms,
             "min_words_to_commit": config.sentence.min_words_to_commit,
@@ -84,13 +89,13 @@ class SessionState:
         self.connected_at: float = time.time()
         self.chunk_index: int = 0
 
-        # VAD
+        # VAD Engine & Stream State via VADFactory
         self.vad_cfg = VADConfig(
             threshold=float(self.config["vad_threshold"]),
             min_silence_duration_sec=float(self.config["silence_duration_ms"]) / 1000.0,
         )
-        self.vad_engine = SileroVADEngine(self.vad_cfg)
-        self.vad_state: VADStreamState = self.vad_engine.create_state()
+        self.vad_engine: BaseVADEngine = VADFactory.get_engine(self.config["vad_engine"], self.vad_cfg)
+        self.vad_state: BaseVADStreamState = self.vad_engine.create_state()
 
         # Audio buffering & Seek tracking
         self._frame_buffer: bytearray = bytearray()
@@ -150,6 +155,11 @@ class SessionState:
         if parsed.silence_duration_ms is not None:
             self.config["silence_duration_ms"] = parsed.silence_duration_ms
             self.vad_cfg.min_silence_duration_sec = parsed.silence_duration_ms / 1000.0
+        if parsed.vad_engine is not None and parsed.vad_engine != self.config["vad_engine"]:
+            self.config["vad_engine"] = parsed.vad_engine
+            self.vad_engine = VADFactory.get_engine(parsed.vad_engine, self.vad_cfg)
+            self.vad_state = self.vad_engine.create_state()
+            logger.info(f"Session {self.session_id}: Switched VAD Engine live -> '{parsed.vad_engine}'")
         if parsed.min_words_to_commit is not None:
             self.config["min_words_to_commit"] = parsed.min_words_to_commit
             self.committer.config.min_words_to_commit = parsed.min_words_to_commit

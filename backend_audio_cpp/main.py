@@ -30,7 +30,7 @@ from backend_audio_cpp.translation.hy_translator import HyMTTranslator
 from backend_audio_cpp.translation.model_registry import TranslationModelRegistry
 from backend_audio_cpp.tts.voice_manager import VoiceManager
 from backend_audio_cpp.tts.omnivoice_engine import OmniVoiceTTSEngine
-from backend_audio_cpp.vad.vad_engine import SileroVADEngine
+from backend_audio_cpp.vad import VADFactory
 from backend_audio_cpp.utils.ssl_utils import ensure_ssl_certificates
 from backend_audio_cpp.ws.ws_handler import handle_ws
 
@@ -81,9 +81,9 @@ async def lifespan(app: FastAPI):
             translator = HyMTTranslator.get_instance()
             logger.info("✅ [STARTUP] Hunyuan-MT2 Translation model ready on GPU!")
 
-            # 3. Prewarm Silero VAD on CPU
-            _ = SileroVADEngine()
-            logger.info("✅ [STARTUP] Silero VAD model ready on CPU!")
+            # 3. Prewarm Default VAD (FSMN-VAD & Silero) on CPU
+            _ = VADFactory.get_engine(config.vad.vad_engine)
+            logger.info(f"✅ [STARTUP] {config.vad.vad_engine.upper()} model ready on CPU!")
 
             # 4. Prewarm OmniVoice TTS
             _ = OmniVoiceTTSEngine.get_instance()
@@ -168,9 +168,9 @@ def _build_config_response(include_catalog: bool = True) -> Dict[str, Any]:
         "asr_engine": active_asr_key,
         "active_model": active_asr_key,
         "loaded_model": loaded_model_name,
-        "resolved_vad": "silero-vad",
-        "vad_engine": "silero-vad",
-        "available_vad_engines": SUPPORTED_VAD_ENGINES,
+        "resolved_vad": config.vad.vad_engine,
+        "vad_engine": config.vad.vad_engine,
+        "available_vad_engines": VADFactory.list_engines(),
         "vad_silence_duration_ms": config.vad.silence_duration_ms,
         "silence_duration_ms": config.vad.silence_duration_ms,
         "vad_threshold": config.vad.threshold,
@@ -228,6 +228,10 @@ async def update_backend_config(req: SwitchModelRequest):
             logger.info(f"Switched active ASR model to '{canonical_key}'")
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+
+    if req.vad_engine is not None:
+        config.vad.vad_engine = req.vad_engine
+        logger.info(f"Updated default vad_engine to '{config.vad.vad_engine}'")
 
     if req.vad_threshold is not None:
         config.vad.threshold = req.vad_threshold
