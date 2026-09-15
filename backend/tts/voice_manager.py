@@ -93,25 +93,6 @@ class VoiceManager:
             except Exception as e:
                 logger.warning(f"Lỗi khi quét thư mục giọng mẫu: {e}")
 
-            # 3. Fallback sang LEGACY_VOICES_DIR nếu thư mục chính rỗng
-            if not voices and voices_dir != LEGACY_VOICES_DIR and LEGACY_VOICES_DIR.exists():
-                logger.info(f"Fallback sang legacy voices dir: {LEGACY_VOICES_DIR}")
-                for file_path in sorted(LEGACY_VOICES_DIR.glob("*.wav")):
-                    clean_name = file_path.stem.replace("_", " ").replace("-", " ").title()
-                    sibling_txt = file_path.with_suffix(".txt")
-                    ref_text = ""
-                    if sibling_txt.exists():
-                        try:
-                            ref_text = sibling_txt.read_text(encoding="utf-8").strip()
-                        except Exception:
-                            pass
-                    voices.append({
-                        "id": file_path.name,
-                        "name": f"🎙️ {clean_name} ({file_path.name})",
-                        "audio": str(file_path),
-                        "text": ref_text,
-                    })
-
             cls._cached_voices = voices
             return voices
 
