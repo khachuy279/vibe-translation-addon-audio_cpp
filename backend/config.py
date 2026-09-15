@@ -156,14 +156,13 @@ class TranslationConfig(BaseModel):
 
 
 class TTSConfig(BaseModel):
-    """Cấu hình tổng hợp giọng nói Voice Cloning OmniVoice (C++ GGUF / PyTorch Native)."""
+    """Cấu hình tổng hợp giọng nói Voice Cloning OmniVoice."""
     enabled: bool = True
-    engine: str = "omnivoice.cpp"  # omnivoice.cpp (GGUF C++ Native) hoặc omnivoice (PyTorch Native)
-    model: str = "omnivoice-base-Q8_0.gguf"
-    codec_model: str = "omnivoice-tokenizer-F32.gguf"
+    engine: str = "omnivoice"  # PyTorch native OmniVoice
+    model: str = "splendor1811/omnivoice-vietnamese"
     device: str = "cuda:0"
     speed: float = 1.0
-    num_inference_steps: int = 2
+    num_inference_steps: int = 8
     default_voice: str = "speaker_01_0039.wav"
     voices_dir: str = str(VOICES_DIR)
     volume: float = 0.8

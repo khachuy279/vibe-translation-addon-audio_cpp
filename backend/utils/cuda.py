@@ -29,12 +29,6 @@ def setup_cuda_dll_paths() -> None:
 
         dll_dirs: Set[str] = set()
 
-        # 0. Thêm backend/bin của dự án
-        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        bin_dir = os.path.join(here, "bin")
-        if os.path.isdir(bin_dir):
-            dll_dirs.add(os.path.abspath(bin_dir))
-
         # 1. Tìm trong site-packages (torch, llama_cpp, nvidia)
         try:
             import site

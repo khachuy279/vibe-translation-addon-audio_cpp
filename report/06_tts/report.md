@@ -1,31 +1,29 @@
-# Báo Cáo Đo Lường & Kiểm Thử Phase 6: Module OmniVoice Clone TTS (`omnivoice.cpp` GGUF C-ABI)
+# Báo Cáo Đo Lường & Kiểm Thử Phase 6: Module OmniVoice Clone TTS
 
-- **Thời gian thực hiện**: 2026-09-15 09:44:30
-- **Mô hình TTS**: `omnivoice-base-Q8_0.gguf` + `omnivoice-tokenizer-F32.gguf` (GGML C++17 Native)
-- **C-ABI Binding**: `backend/tts/bindings.py` (ctypes liên kết `omnivoice.dll`)
-- **Sampling Rate**: `24,000 Hz Mono S16`
-- **Mẫu Giọng Mặc Định**: `speaker_01_0039.rvq` (Pre-encoded RVQ Latent 3.2 KB) + `speaker_01_0039.txt`
+- **Thời gian thực hiện**: 2026-09-15 08:39:53
+- **Mô hình TTS**: `splendor1811/omnivoice-vietnamese` (Native PyTorch)
+- **Thiết bị chạy**: `cuda:0`
+- **Sampling Rate**: `24,000 Hz`
+- **Mẫu Giọng Mặc Định**: `speaker_01_0039.wav`
 
-## 1. So Sánh Hiệu Năng & Tối Ưu Hóa Bộ Nhớ
+## 1. Kết Quả Benchmark Hiệu Năng & Tốc Độ Voice Cloning
 
-| Tiêu Chí Kỹ Thuật | PyTorch Native OmniVoice | `omnivoice.cpp` (GGUF C-ABI) | Đánh Giá Cải Thiện |
-| :--- | :--- | :--- | :--- |
-| **Dung Lượng VRAM / RAM** | ~2.0 GB - 3.5 GB (CUDA caching pool) | **~700 MB - 1.1 GB** (Q8_0 weights) | 📉 **Giảm ~60% VRAM** |
-| **VRAM Spike lúc khởi tạo** | Có (Do `cudaMalloc` tensor allocations) | **Không (0 MB Spike)** | 🛡️ Ổn định tuyệt đối |
-| **Khởi động Context** | ~5.20 s | **< 0.30 s (mmap)** | ⚡ Nhanh hơn **17 lần** |
-| **Pre-encoded Voice Latent** | Trích xuất embedding PyTorch | Pre-encoded `.rvq` (3.2 KB) | 🎙️ Bỏ qua codec encode runtime |
-| **Thời Gian Giải Phóng (Unload)** | ~1.5 s | **< 182 ms** | ⚡ Fast Cleanup < 200ms |
+| Mẫu Câu Thử Nghiệm | Nguồn Ngôn Ngữ | Độ Trễ Xử Lý | Thời Lượng Audio | RTF (Real-Time Factor) | Nội Dung Câu Nói |
+|---|---|---|---|---|---|
+| `English_trans` | `en -> vi` | **410.0 ms** | **4.43 s** | **0.093** | Sẵn sàng chưa? Ừ. Thật điên rồ. Trời lạnh cóng. Mọi thứ hoàn toàn dừng lại rồi. |
+| `Chinese_trans` | `zh -> vi` | **411.7 ms** | **6.13 s** | **0.067** | Khi cậu ấy mười một tuổi, mẹ cậu qua đời vì một vụ tai nạn giao thông. Mẹ của Quế Lan gõ vài tiếng vào chiếc cốc. |
+| `Japanese_trans` | `ja -> vi` | **504.5 ms** | **9.11 s** | **0.055** | Người ấy nói một cách nhẹ nhàng về việc đi thăm khách hàng, rồi chúng tôi cùng nhau hướng về khách sạn ở nơi đi công tác. Đây là lần đầu tiên tôi đến khách sạn này nhỉ. |
+| `Russian_trans` | `ru -> vi` | **357.9 ms** | **3.85 s** | **0.093** | Con chồn mỏ sống tại sở thú Kiev đã trốn thoát khỏi chuồng của mình. |
 
-## 2. Kết Quả Kiểm Thử Thực Tế
+## 2. Đánh Giá Hiệu Năng & Trải Nghiệm Thời Gian Thực
 
-- **Khởi tạo và nạp Context**: Hoàn tất trong **< 300ms**.
-- **Độ phân giải âm thanh**: Chuẩn **24,000 Hz mono PCM WAV**.
-- **Xử lý tín hiệu âm thanh**: Hỗ trợ Phase Vocoder điều chỉnh tốc độ đọc (0.5x - 2.0x) và Peak Normalization chống méo tiếng.
-- **Tương thích toàn diện**: Hỗ trợ chạy song song 100% C++ GGUF Stack (`transcribe.cpp` + `llama.cpp` + `omnivoice.cpp`).
+- **Độ Trễ Tổng Hợp Trung Bình**: **421.0 ms / câu** (Độ trễ thấp, phản hồi ngay lập tức sau khi có bản dịch).
+- **Hệ Số Real-Time Factor (RTF)**: **0.077** (Nhanh gấp ~**13.0 lần** thời gian phát audio thực tế).
+- **Tổng Thời Lượng Âm Thanh Đã Sinh**: **23.52 giây**.
+- **Voice Clone Prompt Caching**: Tiết kiệm ~70ms cho mỗi câu phát âm tiếp theo do không cần lặp lại I/O và embedding mẫu giọng.
+- **Audio Processing**: Tích hợp Phase Vocoder time-stretching và Peak Normalization chống méo tiếng.
 
-## 3. Kết Luận Nghiệm Thu
+## 3. Kết Luận Nghiệm Thu Phase 6
 
-Module TTS đã chuyển đổi thành công sang **`omnivoice.cpp` C-ABI Native**, đáp ứng toàn diện các tiêu chuẩn:
-1. Zero VRAM Spikes.
-2. Tiết kiệm ~60% VRAM so với PyTorch.
-3. Giải phóng bộ nhớ nhanh < 200ms.
+- Module OmniVoice Voice Cloning TTS hoàn toàn đáp ứng các tiêu chuẩn khắt khe về độ trễ và chất lượng giọng nói.
+- Sẵn sàng chuyển sang **Phase 7: WebSocket Server, Fast Cleanup & Benchmark Đối Đầu E2E**.
