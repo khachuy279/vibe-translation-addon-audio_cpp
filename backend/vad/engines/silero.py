@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 import numpy as np
 import torch
 
-from backend.config import config, MODELS_DIR, LEGACY_MODELS_DIR
+from backend.config import config, MODELS_DIR
 from backend.vad.base import BaseVADEngine, VADResult, VADStreamState
 from backend.utils.logger import logger
 
