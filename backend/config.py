@@ -163,7 +163,7 @@ class TTSConfig(BaseModel):
     codec_model: str = "omnivoice-tokenizer-F32.gguf"
     device: str = "cuda:0"
     speed: float = 1.0
-    num_inference_steps: int = 4
+    num_inference_steps: int = 2
     default_voice: str = "speaker_01_0039.wav"
     voices_dir: str = str(VOICES_DIR)
     volume: float = 0.8

@@ -20,12 +20,14 @@ from ctypes import (
     CFUNCTYPE,
 )
 import io
+import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import threading
+import time
 from typing import Optional, Tuple, Union, List
 import numpy as np
 import soundfile as sf
@@ -167,24 +169,32 @@ def unpack_rvq_file(path: Union[str, Path], k: int = 8, code_bits: int = 11) -> 
 
 
 class OmniVoiceCppEngine:
-    """Engine gọi C++ omnivoice (hỗ trợ cả Native C-ABI ctypes và CLI Subprocess)."""
+    """Engine gọi C++ omnivoice (hỗ trợ C-ABI DLL, Persistent Micro-Daemon, và CLI Subprocess)."""
 
-    def __init__(self, dll_path: Optional[str] = None, cli_path: Optional[str] = None):
+    def __init__(
+        self,
+        dll_path: Optional[str] = None,
+        cli_path: Optional[str] = None,
+        daemon_port: int = 18888,
+    ):
         self.dll_path = dll_path or _find_omnivoice_dll()
         self.cli_path = cli_path or _find_omnivoice_cli()
+        self.daemon_port = daemon_port
+        self.daemon_url = f"http://127.0.0.1:{self.daemon_port}"
+        self._daemon_process: Optional[subprocess.Popen] = None
         self._mode = "none"
         self._lib = None
         self._ctx = None
         self._lock = threading.RLock()
         self._is_initialized = False
 
-        # Model configs for CLI mode
+        # Model configs for CLI / Daemon mode
         self._model_path: Optional[str] = None
         self._codec_path: Optional[str] = None
         self._use_fa: bool = True
         self._clamp_fp16: bool = False
 
-        # 1. Thử nạp qua ctypes C-ABI DLL
+        # 1. Thử nạp qua ctypes C-ABI DLL (in-process)
         if self.dll_path and os.path.exists(self.dll_path):
             dll_dir = os.path.dirname(os.path.abspath(self.dll_path))
             if hasattr(os, "add_dll_directory"):
@@ -193,7 +203,6 @@ class OmniVoiceCppEngine:
                 except Exception:
                     pass
 
-            # Nạp trước các DLL phụ thuộc trong cùng thư mục để tránh xung đột
             for dep in ["ggml-base.dll", "ggml-cpu.dll", "ggml.dll"]:
                 dep_p = os.path.join(dll_dir, dep)
                 if os.path.exists(dep_p):
@@ -207,21 +216,56 @@ class OmniVoiceCppEngine:
                 self._setup_function_signatures()
                 self._mode = "dll"
                 logger.info("⚡ Đã nạp thành công OmniVoice C-ABI DLL.")
-            except Exception as e:
-                logger.warning(
-                    f"⚠️ Không thể nạp trực tiếp omnivoice.dll ({e}). Sẽ sử dụng CLI Subprocess Engine."
-                )
+            except Exception:
                 self._lib = None
 
-        # 2. Nếu DLL không khả dụng, sử dụng CLI Subprocess
+        # 2. Nếu in-process DLL không khả dụng (xung đột DLL Windows), dùng Persistent Micro-Daemon
         if self._mode == "none":
-            if self.cli_path and os.path.exists(self.cli_path):
-                self._mode = "cli"
-                logger.info(f"🚀 Khởi động omnivoice.cpp ở chế độ CLI Subprocess Engine ({Path(self.cli_path).name})")
-            else:
-                raise FileNotFoundError(
-                    "Không tìm thấy cả omnivoice.dll lẫn omnivoice-tts.exe! Vui lòng kiểm tra thư mục backend/bin."
-                )
+            self._mode = "daemon"
+            logger.info(
+                f"🚀 Sử dụng OmniVoice Persistent Daemon Engine (127.0.0.1:{self.daemon_port}, giữ model RAM thường trú, không reload)"
+            )
+
+    def _ensure_daemon_running(self) -> None:
+        """Khởi động Daemon Process nếu chưa chạy."""
+        import urllib.request
+
+        # Kiểm tra xem daemon đã chạy sẵn chưa
+        try:
+            with urllib.request.urlopen(f"{self.daemon_url}/health", timeout=1.0) as r:
+                if r.status == 200:
+                    return
+        except Exception:
+            pass
+
+        # Khởi động daemon script
+        daemon_script = os.path.join(os.path.dirname(__file__), "daemon.py")
+        popen_kwargs = {}
+        if sys.platform == "win32":
+            popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+        cmd = [sys.executable, daemon_script, "--port", str(self.daemon_port)]
+        logger.info(f"🔄 Đang khởi động OmniVoice TTS Daemon: {' '.join(cmd)}")
+        self._daemon_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            **popen_kwargs,
+        )
+
+        # Đợi daemon sẵn sàng
+        start_t = time.perf_counter()
+        while time.perf_counter() - start_t < 10.0:
+            try:
+                with urllib.request.urlopen(f"{self.daemon_url}/health", timeout=1.0) as r:
+                    if r.status == 200:
+                        logger.info(f"✅ OmniVoice TTS Daemon đã sẵn sàng tại {self.daemon_url}")
+                        return
+            except Exception:
+                time.sleep(0.2)
+
+        logger.warning("Không thể kết nối với Daemon trong 10s. Sẽ fallback sang CLI.")
+        self._mode = "cli"
 
     def _setup_function_signatures(self) -> None:
         """Khai báo kiểu tham số và kiểu trả về cho C functions."""
@@ -267,7 +311,7 @@ class OmniVoiceCppEngine:
                 return v.decode("utf-8") if v else "native-dll"
             except Exception:
                 pass
-        return "native-cli"
+        return "native-daemon" if self._mode == "daemon" else "native-cli"
 
     def init_context(
         self,
@@ -305,18 +349,84 @@ class OmniVoiceCppEngine:
                 if not ctx:
                     err = self._lib.ov_last_error()
                     err_msg = err.decode("utf-8") if err else "Lỗi không xác định khi gọi ov_init"
-                    logger.warning(f"ov_init DLL thất bại: {err_msg}. Chuyển sang chế độ CLI fallback.")
-                    self._mode = "cli"
+                    logger.warning(f"ov_init DLL thất bại: {err_msg}. Chuyển sang chế độ Daemon.")
+                    self._mode = "daemon"
                 else:
                     self._ctx = ctx
                     self._is_initialized = True
                     logger.info(f"✅ Nạp thành công omnivoice.cpp C-ABI DLL engine (v{self.get_version()})")
                     return True
 
-            # CLI Mode
+            if self._mode == "daemon":
+                import urllib.request
+                self._ensure_daemon_running()
+                payload = json.dumps({
+                    "model_path": self._model_path,
+                    "codec_path": self._codec_path,
+                    "use_fa": self._use_fa,
+                    "clamp_fp16": self._clamp_fp16,
+                }).encode("utf-8")
+                req = urllib.request.Request(
+                    f"{self.daemon_url}/init",
+                    data=payload,
+                    headers={"Content-Type": "application/json"},
+                )
+                with urllib.request.urlopen(req, timeout=30.0) as r:
+                    res = json.loads(r.read().decode("utf-8"))
+                    if res.get("status") == "ok":
+                        self._is_initialized = True
+                        logger.info(f"✅ Daemon đã nạp xong mô hình OmniVoice (GGUF: {Path(model_path).name})")
+                        return True
+                    else:
+                        raise RuntimeError(f"Daemon init failed: {res.get('error')}")
+
+            # CLI Fallback
             self._is_initialized = True
             logger.info(f"✅ Đã khởi tạo omnivoice.cpp CLI engine (Model: {Path(model_path).name})")
             return True
+
+    def _synthesize_daemon(
+        self,
+        text: str,
+        ref_rvq_path: Optional[str] = None,
+        ref_text: Optional[str] = None,
+        ref_wav_path: Optional[str] = None,
+        lang: str = "",
+        instruct: str = "",
+        num_steps: int = 2,
+        guidance_scale: float = 2.0,
+        seed: int = 42,
+    ) -> Tuple[np.ndarray, int]:
+        """Gửi yêu cầu tổng hợp giọng nói tới Persistent Daemon HTTP."""
+        import urllib.request
+        self._ensure_daemon_running()
+
+        payload = json.dumps({
+            "text": text,
+            "ref_rvq": os.path.abspath(ref_rvq_path) if ref_rvq_path else None,
+            "ref_text": ref_text,
+            "ref_wav": os.path.abspath(ref_wav_path) if ref_wav_path else None,
+            "lang": lang,
+            "instruct": instruct,
+            "num_steps": max(1, int(num_steps)),
+            "guidance_scale": float(guidance_scale),
+            "seed": int(seed),
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            f"{self.daemon_url}/synthesize",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+
+        with urllib.request.urlopen(req, timeout=60.0) as r:
+            wav_bytes = r.read()
+            if not wav_bytes:
+                return np.zeros((0,), dtype=np.float32), 24000
+            audio_data, sr = sf.read(io.BytesIO(wav_bytes), dtype="float32")
+            if audio_data.ndim > 1:
+                audio_data = audio_data.mean(axis=1)
+            return audio_data, sr
 
     def _resolve_ref_text_file(self, ref_text: Optional[str], ref_file_path: Optional[str]) -> Optional[str]:
         """Xác định đường dẫn file text transcript cho reference sample."""
@@ -452,7 +562,24 @@ class OmniVoiceCppEngine:
             if not self._is_initialized:
                 raise RuntimeError("OmniVoiceCppEngine chưa được khởi tạo qua init_context!")
 
-            # 1. Chế độ CLI Subprocess
+            # 1. Chế độ Persistent Micro-Daemon (Ưu tiên số 1 khi cách ly tiến trình)
+            if self._mode == "daemon":
+                try:
+                    return self._synthesize_daemon(
+                        text=text,
+                        ref_rvq_path=ref_rvq_path,
+                        ref_text=ref_text,
+                        ref_wav_path=ref_wav_path,
+                        lang=lang,
+                        instruct=instruct,
+                        num_steps=num_steps,
+                        guidance_scale=guidance_scale,
+                        seed=seed,
+                    )
+                except Exception as e:
+                    logger.warning(f"Daemon synthesize lỗi ({e}), fallback sang CLI...")
+
+            # 2. Chế độ CLI Subprocess (Dự phòng)
             if self._mode == "cli":
                 return self._synthesize_cli(
                     text=text,
@@ -466,7 +593,7 @@ class OmniVoiceCppEngine:
                     seed=seed,
                 )
 
-            # 2. Chế độ C-ABI DLL
+            # 3. Chế độ In-Process C-ABI DLL
             if not self._ctx:
                 raise RuntimeError("OmniVoiceCppEngine DLL context chưa được khởi tạo!")
 
@@ -535,6 +662,15 @@ class OmniVoiceCppEngine:
                 except Exception as e:
                     logger.debug(f"ov_free notice: {e}")
                 self._ctx = None
+
+            if self._daemon_process is not None:
+                try:
+                    self._daemon_process.terminate()
+                    self._daemon_process.wait(timeout=2.0)
+                except Exception:
+                    pass
+                self._daemon_process = None
+
             self._is_initialized = False
             logger.info("🗑️ Đã giải phóng OmniVoiceCppEngine context.")
 
