@@ -14,6 +14,8 @@ Hệ thống xử lý âm thanh thời gian thực ngoại tuyến (100% Offline
 - **Dịch thuật Neural GGUF (Local Translation)**: Tencent Hunyuan-MT2 7B (`llama-cpp-python` GPU acceleration) tốc độ 67+ tokens/giây.
 - **Lồng tiếng AI Voice Cloning (OmniVoice TTS)**: Tái tạo chất giọng mẫu tham chiếu tự nhiên với độ trễ thấp (RTF ~0.077, sinh 3-7s audio chỉ trong ~400ms).
 
+Repository: [https://github.com/khachuy279/vibe-translation-addon-transcribe_cpp](https://github.com/khachuy279/vibe-translation-addon-transcribe_cpp)
+
 Được đo lường và tối ưu hóa hoàn hảo trên GPU **NVIDIA GeForce RTX 5060 Ti 16GB**, cho phép xem video trực tiếp trên YouTube, Bilibili, Coursera, Twitch, Zoom với phụ đề song ngữ và giọng đọc thuyết minh tức thì **hoàn toàn riêng tư, không gửi dữ liệu ra ngoài Internet**.
 
 ---
