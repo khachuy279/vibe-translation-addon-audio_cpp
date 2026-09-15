@@ -58,6 +58,7 @@ def test_context_manager_and_dedup():
     assert dedup.is_duplicate("Chào buổi sáng") is False
 
 
+@pytest.mark.slow
 def test_translator_prewarm_and_single_sentence():
     """Kiểm tra nạp model, prewarm và dịch câu đơn lẻ trên GPU."""
     translator = get_translator()
@@ -71,6 +72,7 @@ def test_translator_prewarm_and_single_sentence():
     logger.info(f"Dịch mẫu ({elapsed_ms:.1f}ms): '{trans_text}'", extra={"module_tag": "TRANSLATE"})
 
 
+@pytest.mark.slow
 def test_translation_benchmark_on_multilingual_texts(wav_test_dir, report_dir):
     """Benchmark tốc độ và chất lượng dịch các đoạn văn bản /wav_test/*.txt sang Tiếng Việt."""
     translator = get_translator()

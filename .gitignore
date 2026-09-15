@@ -3,11 +3,9 @@
 # ==========================================
 
 # 1. User specified exclusions: Sub-repos & external directories
-transcribe.cpp/
-audio.cpp/
-docs/
 external/
 debug/
+scratch/
 
 # 2. Models & Model Weights (large files > 50MB)
 backend/models/

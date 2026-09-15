@@ -98,6 +98,72 @@ class CommitDeduplicator:
         words = frozenset(norm_text.split()) if norm_text else frozenset()
         self._history.append((now, raw_text, norm_text, words))
 
+    # ------------------------------------------------------------------ P2.7
+    def trim_boundary_overlap(self, text: str) -> str:
+        """Cắt phần ĐẦU câu bị lặp lại do chồng lấn ở ranh giới cắt (P2.7).
+
+        Khi CommitManager cắt câu giữa lúc đang nói, đoạn audio của câu kế tiếp được
+        lùi lại `boundary_overlap_ms` để không mất từ ở ranh giới. Hệ quả là vài từ đầu
+        của câu mới trùng với đuôi câu trước. Hàm này TRIM phần trùng đó thay vì
+        DROP cả câu (khác hẳn `is_duplicate`, vốn dùng để lọc rác hallucination).
+
+        Hỗ trợ cả chữ Latin (so khớp theo từ) và CJK (so khớp theo ký tự).
+        """
+        if not text or not self._history:
+            return text
+
+        prev_raw = self._history[-1][1]
+        if not prev_raw:
+            return text
+
+        prev_tokens = prev_raw.split()
+        cur_tokens = text.split()
+        if len(prev_tokens) > 1 and len(cur_tokens) > 1:
+            return self._trim_by_tokens(text, prev_tokens, cur_tokens)
+        return self._trim_by_chars(text, prev_raw)
+
+    @staticmethod
+    def _norm_token(tok: str) -> str:
+        return normalize_for_dedup(tok)
+
+    def _trim_by_tokens(self, text: str, prev_tokens, cur_tokens) -> str:
+        prev_norm = [self._norm_token(t) for t in prev_tokens]
+        cur_norm = [self._norm_token(t) for t in cur_tokens]
+        max_k = min(len(prev_norm), len(cur_norm))
+        best_k = 0
+        for k in range(max_k, 0, -1):
+            if prev_norm[-k:] == cur_norm[:k] and any(cur_norm[:k]):
+                best_k = k
+                break
+        if best_k <= 0:
+            return text
+        remainder = " ".join(cur_tokens[best_k:]).strip()
+        return remainder if remainder else text
+
+    def _trim_by_chars(self, text: str, prev_raw: str) -> str:
+        prev_norm = normalize_for_dedup(prev_raw).replace(" ", "")
+        cur_norm = normalize_for_dedup(text).replace(" ", "")
+        if not prev_norm or not cur_norm:
+            return text
+        max_k = min(len(prev_norm), len(cur_norm))
+        best_k = 0
+        for k in range(max_k, 0, -1):
+            if prev_norm[-k:] == cur_norm[:k]:
+                best_k = k
+                break
+        if best_k <= 0:
+            return text
+        # CJK: cắt theo số ký tự (bỏ qua dấu câu/khoảng trắng khi đếm)
+        stripped = text.lstrip()
+        count = 0
+        idx = 0
+        while idx < len(stripped) and count < best_k:
+            if normalize_for_dedup(stripped[idx]) and not stripped[idx].isspace():
+                count += 1
+            idx += 1
+        remainder = stripped[idx:].strip()
+        return remainder if remainder else text
+
     def clear(self) -> None:
         """Xóa sạch lịch sử dedup."""
         self._history.clear()

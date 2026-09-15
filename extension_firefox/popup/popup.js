@@ -33,6 +33,8 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   const selFontFamily = document.getElementById("selFontFamily");
   const rangeMaxLines = document.getElementById("rangeMaxLines");
   const valMaxLines = document.getElementById("valMaxLines");
+  // "Tắt chạy chữ" cho bản dịch (mặc định BẬT: hiện bản dịch 1 lần).
+  const chkTranslationOnce = document.getElementById("chkTranslationOnce");
 
   const chkEnableTts = document.getElementById("chkEnableTts");
   const selTtsVoice = document.getElementById("selTtsVoice");
@@ -107,6 +109,8 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       fontWeight: parseInt(rangeFontWeight ? rangeFontWeight.value : 600, 10) || 600,
       fontFamily: selFontFamily ? selFontFamily.value : "default",
       maxLines: parseInt(rangeMaxLines ? rangeMaxLines.value : 3, 10) || 3,
+      // "Tắt chạy chữ": chỉ hiện bản dịch MỘT LẦN khi có bản dịch hoàn chỉnh.
+      showTranslationOnce: chkTranslationOnce ? chkTranslationOnce.checked : true,
       ttsEnabled: isTts,
       ttsVoice: selectedVoiceId,
       ttsInstruct: "",
@@ -161,7 +165,9 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       const opt = document.createElement("option");
       const id = typeof item === "string" ? item : item.id;
       let name = typeof item === "string" ? item : (item.name || item.id);
-      if (typeof item === "object" && item.is_downloaded) {
+      if (typeof item === "object" && item.is_downloaded === false) {
+        name += " ⤓ chưa tải";
+      } else if (typeof item === "object" && item.is_downloaded) {
         name += " ⚡";
       }
       opt.value = id;
@@ -188,7 +194,9 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       const opt = document.createElement("option");
       const id = typeof item === "string" ? item : item.id;
       let name = typeof item === "string" ? item : (item.name || item.id);
-      if (typeof item === "object" && item.is_downloaded) {
+      if (typeof item === "object" && item.is_downloaded === false) {
+        name += " ⤓ chưa tải";
+      } else if (typeof item === "object" && item.is_downloaded) {
         name += " ⚡";
       }
       opt.value = id;
@@ -346,6 +354,16 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       } else if (activeTrans && selTranslationModel) {
         selTranslationModel.value = activeTrans;
       }
+
+      // Backend có thể đang tải/nạp model dịch ở nền (F-51) ⇒ báo rõ để không tưởng là treo.
+      const dl = data.translation.download;
+      if (dl && dl.model && (dl.state === "downloading" || dl.state === "loading")) {
+        const verb = dl.state === "downloading" ? "tải" : "nạp";
+        const note = dl.state === "downloading" ? ` (${describeDownloadProgress(dl)})` : "";
+        showMsg(`⏳ Backend đang ${verb} model dịch '${dl.model}'${note} ở chế độ nền. Model hiện tại vẫn dịch bình thường.`, "info");
+      } else if (dl && dl.state === "error" && dl.error) {
+        showMsg(`❌ Model dịch '${dl.model || "?"}' lỗi: ${dl.error}`, "error");
+      }
     }
 
     return true;
@@ -447,6 +465,64 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   // ── Hot-swap Translation Model on Backend ─────────────────
   let isSwitchingTranslationModel = false;
 
+  const MODEL_DOWNLOAD_POLL_MS = 4000;
+  const MODEL_DOWNLOAD_TIMEOUT_MS = 30 * 60 * 1000;
+
+  function describeDownloadProgress(dl) {
+    if (dl.percent != null) return `${Math.round(dl.percent)}%`;
+    if (dl.downloaded_mb != null) return `${dl.downloaded_mb} MB`;
+    return "đang tải";
+  }
+
+  // Chờ backend tải (nếu thiếu file) + nạp model dịch. Backend trả HTTP 202 và làm việc
+  // trong nền, nên popup hỏi tiến độ qua /api/config cho tới khi ready/error.
+  async function waitForTranslationActivation(modelId, shortDesc) {
+    const deadline = Date.now() + MODEL_DOWNLOAD_TIMEOUT_MS;
+    let lastNote = "";
+
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, MODEL_DOWNLOAD_POLL_MS));
+
+      let data = null;
+      try {
+        const res = await fetchBackend("/api/config", { timeout: 15000 });
+        if (!res || !res.ok) continue;
+        data = await res.json();
+      } catch (e) {
+        continue;
+      }
+
+      const tr = data.translation || {};
+      const dl = tr.download || {};
+      if (dl.model && dl.model !== modelId) continue; // lượt tải của model khác
+
+      if (dl.state === "downloading") {
+        const note = describeDownloadProgress(dl);
+        if (note !== lastNote) {
+          lastNote = note;
+          if (statusBadge) statusBadge.textContent = `Tải ${shortDesc} ${note}`;
+          showMsg(`⏳ Đang tải model dịch ${shortDesc} về máy: ${note}. Model hiện tại vẫn dịch bình thường.`, "info");
+        }
+        continue;
+      }
+      if (dl.state === "loading") {
+        if (statusBadge) statusBadge.textContent = `Nạp ${shortDesc}...`;
+        if (lastNote !== "loading") {
+          lastNote = "loading";
+          showMsg(`⏳ Đã tải xong ${shortDesc}, đang nạp vào GPU...`, "info");
+        }
+        continue;
+      }
+      if (dl.state === "error") {
+        throw new Error(dl.error || `Tải/nạp model dịch ${shortDesc} thất bại`);
+      }
+      if (dl.state === "ready" || tr.base === modelId) {
+        return true;
+      }
+    }
+    throw new Error("Hết thời gian chờ tải model dịch (30 phút). Kiểm tra mạng rồi thử lại.");
+  }
+
   async function handleTranslationModelSwitch() {
     if (isCapturingNow) {
       showMsg("⚠️ Không thể đổi model dịch khi đang dịch! Hãy bấm 'Dừng dịch' trước.", "warning");
@@ -475,7 +551,12 @@ const api = typeof browser !== "undefined" ? browser : chrome;
         timeout: 180000,
       });
 
-      if (!res || !res.ok) {
+      if (res && res.status === 202) {
+        // Backend chưa có file GGUF ⇒ trả 202 và tải trong nền (model cũ vẫn chạy).
+        const body = await res.json().catch(() => ({}));
+        showMsg(`⏳ ${body.detail || `Đang tải model dịch ${modelDesc} về máy (chạy nền).`}`, "info");
+        await waitForTranslationActivation(newModel, shortDesc);
+      } else if (!res || !res.ok) {
         const errorDetail = res ? await res.text() : "Network error";
         throw new Error(errorDetail);
       }
@@ -581,6 +662,10 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       if (s.fontWeight && rangeFontWeight) rangeFontWeight.value = s.fontWeight;
       if (s.fontFamily) selFontFamily.value = s.fontFamily;
       if (s.maxLines && rangeMaxLines) rangeMaxLines.value = s.maxLines;
+      // Mặc định BẬT (tắt chạy chữ) nếu người dùng chưa từng đặt.
+      if (chkTranslationOnce) {
+        chkTranslationOnce.checked = s.showTranslationOnce === undefined ? true : !!s.showTranslationOnce;
+      }
 
       // Restore TTS Settings
       if (s.ttsEnabled !== undefined && chkEnableTts) {
@@ -754,6 +839,8 @@ const api = typeof browser !== "undefined" ? browser : chrome;
   if (rangeFontWeight) rangeFontWeight.oninput = onSettingChange;
   if (selFontFamily) selFontFamily.onchange = onSettingChange;
   if (rangeMaxLines) rangeMaxLines.oninput = onSettingChange;
+  // Tắt chạy chữ: áp dụng NGAY (không debounce) để thấy hiệu quả tức thì.
+  if (chkTranslationOnce) chkTranslationOnce.onchange = () => onSettingChange(true);
 
   function syncTtsConfig(enabled) {
     const payload = {

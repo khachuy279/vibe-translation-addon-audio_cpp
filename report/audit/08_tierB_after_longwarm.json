@@ -1,0 +1,200 @@
+{
+  "model": "qwen3-asr-0.6b",
+  "seconds": 20.0,
+  "speed": 1.0,
+  "poll_interval_ms": 300,
+  "wall_sec": 21.274921800009906,
+  "previews": 61,
+  "finals": 4,
+  "report": {
+    "uptime_sec": 35.59,
+    "counters": {
+      "asr.speech_start": 1,
+      "asr.preview_skipped": 1,
+      "asr.commit_reason.STABLE_PREFIX": 2,
+      "asr.commit_reason.MAX_DURATION": 1,
+      "asr.commit_reason.VAD_SILENCE": 1,
+      "asr.inference_cancelled": 1
+    },
+    "gauges": {
+      "vad.overflow_count": 0.0,
+      "asr.effective_poll_ms": 300.0,
+      "asr.preview_median_ms": 118.47169999964535,
+      "asr.pending_commits": 0.0,
+      "asr.pending_commits_peak": 1.0
+    },
+    "stages": {
+      "asr.model_load_ms": {
+        "count": 2,
+        "avg_ms": 929.51,
+        "min_ms": 929.14,
+        "max_ms": 929.89,
+        "p50_ms": 929.51,
+        "p90_ms": 929.81,
+        "p95_ms": 929.85,
+        "p99_ms": 929.88
+      },
+      "asr.ensure_model_ms": {
+        "count": 69,
+        "avg_ms": 0.01,
+        "min_ms": 0.0,
+        "max_ms": 0.06,
+        "p50_ms": 0.0,
+        "p90_ms": 0.01,
+        "p95_ms": 0.01,
+        "p99_ms": 0.06
+      },
+      "asr.normalize_ms": {
+        "count": 69,
+        "avg_ms": 0.11,
+        "min_ms": 0.04,
+        "max_ms": 0.25,
+        "p50_ms": 0.1,
+        "p90_ms": 0.14,
+        "p95_ms": 0.21,
+        "p99_ms": 0.24
+      },
+      "asr.infer_core_ms": {
+        "count": 69,
+        "avg_ms": 244.21,
+        "min_ms": 43.12,
+        "max_ms": 7022.71,
+        "p50_ms": 85.63,
+        "p90_ms": 125.54,
+        "p95_ms": 138.59,
+        "p99_ms": 4838.69
+      },
+      "asr.model_warmup_ms": {
+        "count": 2,
+        "avg_ms": 10906.61,
+        "min_ms": 10877.07,
+        "max_ms": 10936.16,
+        "p50_ms": 10906.61,
+        "p90_ms": 10930.25,
+        "p95_ms": 10933.21,
+        "p99_ms": 10935.57
+      },
+      "asr.warmup_short_ms": {
+        "count": 2,
+        "avg_ms": 7044.51,
+        "min_ms": 7022.87,
+        "max_ms": 7066.15,
+        "p50_ms": 7044.51,
+        "p90_ms": 7061.82,
+        "p95_ms": 7063.99,
+        "p99_ms": 7065.72
+      },
+      "asr.warmup_long_ms": {
+        "count": 2,
+        "avg_ms": 3862.1,
+        "min_ms": 3854.19,
+        "max_ms": 3870.01,
+        "p50_ms": 3862.1,
+        "p90_ms": 3868.43,
+        "p95_ms": 3869.22,
+        "p99_ms": 3869.85
+      },
+      "vad.chunk_ms": {
+        "count": 848,
+        "avg_ms": 3.05,
+        "min_ms": 2.39,
+        "max_ms": 5.55,
+        "p50_ms": 2.99,
+        "p90_ms": 3.66,
+        "p95_ms": 3.84,
+        "p99_ms": 4.19
+      },
+      "asr.idle_wait_ms": {
+        "count": 63,
+        "avg_ms": 231.97,
+        "min_ms": 0.0,
+        "max_ms": 605.28,
+        "p50_ms": 220.65,
+        "p90_ms": 256.45,
+        "p95_ms": 404.14,
+        "p99_ms": 603.68
+      },
+      "asr.slice_ms": {
+        "count": 61,
+        "avg_ms": 0.03,
+        "min_ms": 0.01,
+        "max_ms": 0.06,
+        "p50_ms": 0.04,
+        "p90_ms": 0.05,
+        "p95_ms": 0.05,
+        "p99_ms": 0.06
+      },
+      "asr.preview_ms": {
+        "count": 61,
+        "avg_ms": 89.83,
+        "min_ms": 43.48,
+        "max_ms": 368.44,
+        "p50_ms": 82.18,
+        "p90_ms": 119.77,
+        "p95_ms": 131.27,
+        "p99_ms": 230.52
+      },
+      "asr.preview_audio_sec": {
+        "count": 61,
+        "avg_ms": 3.18,
+        "min_ms": 0.65,
+        "max_ms": 6.0,
+        "p50_ms": 3.1,
+        "p90_ms": 5.45,
+        "p95_ms": 5.75,
+        "p99_ms": 5.88
+      },
+      "ws.send_ms": {
+        "count": 65,
+        "avg_ms": 0.02,
+        "min_ms": 0.02,
+        "max_ms": 0.03,
+        "p50_ms": 0.02,
+        "p90_ms": 0.02,
+        "p95_ms": 0.02,
+        "p99_ms": 0.03
+      },
+      "ws.send_bytes": {
+        "count": 65,
+        "avg_ms": 418.09,
+        "min_ms": 266.0,
+        "max_ms": 621.0,
+        "p50_ms": 441.0,
+        "p90_ms": 551.0,
+        "p95_ms": 551.0,
+        "p99_ms": 585.8
+      },
+      "asr.commit_ms": {
+        "count": 4,
+        "avg_ms": 118.41,
+        "min_ms": 102.97,
+        "max_ms": 139.24,
+        "p50_ms": 115.71,
+        "p90_ms": 134.79,
+        "p95_ms": 137.01,
+        "p99_ms": 138.79
+      },
+      "asr.commit_audio_sec": {
+        "count": 4,
+        "avg_ms": 5.29,
+        "min_ms": 3.5,
+        "max_ms": 6.1,
+        "p50_ms": 5.78,
+        "p90_ms": 6.01,
+        "p95_ms": 6.05,
+        "p99_ms": 6.09
+      },
+      "session.cleanup_ms": {
+        "count": 1,
+        "avg_ms": 0.43,
+        "min_ms": 0.43,
+        "max_ms": 0.43,
+        "p50_ms": 0.43,
+        "p90_ms": 0.43,
+        "p95_ms": 0.43,
+        "p99_ms": 0.43
+      }
+    },
+    "checkpoints_retained": 0
+  }
+}

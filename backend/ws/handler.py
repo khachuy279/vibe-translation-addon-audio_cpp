@@ -6,8 +6,9 @@ Audio Stream -> VAD -> ASR Streaming (transcribe.cpp) -> Commit Manager -> Trans
 
 import asyncio
 import json
+import threading
 import time
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import WebSocket, WebSocketDisconnect
 
 from concurrent.futures import ThreadPoolExecutor
@@ -24,6 +25,7 @@ from backend.ws.serializers import (
     make_utterance_update_msg,
     make_translation_msg,
     make_tts_audio_msg,
+    make_tts_binary_frame,
 )
 from backend.core.commit_manager import count_content_tokens
 from backend.ws.session import SessionState
@@ -35,11 +37,47 @@ logger = get_logger("ws.handler")
 # Dedicated Single-Thread Worker cho VAD: Triệt tiêu tranh chấp lock và giảm 70% CPU
 _VAD_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="vad_worker")
 
+# P1.10: registry phiên đang hoạt động để REST /api/config áp dụng được cho phiên
+# đang chạy (trước đây REST chỉ ghi vào `config` toàn cục và bỏ quên session).
+_ACTIVE_SESSIONS: Dict[str, "SessionState"] = {}
+_ACTIVE_SESSIONS_LOCK = threading.Lock()
+
+
+def register_session(session: "SessionState") -> None:
+    with _ACTIVE_SESSIONS_LOCK:
+        _ACTIVE_SESSIONS[session.session_id] = session
+
+
+def unregister_session(session: "SessionState") -> None:
+    with _ACTIVE_SESSIONS_LOCK:
+        _ACTIVE_SESSIONS.pop(session.session_id, None)
+
+
+def get_active_sessions() -> List["SessionState"]:
+    with _ACTIVE_SESSIONS_LOCK:
+        return list(_ACTIVE_SESSIONS.values())
+
+
+def count_active_sessions() -> int:
+    with _ACTIVE_SESSIONS_LOCK:
+        return len(_ACTIVE_SESSIONS)
+
 
 def shutdown_vad_executor(wait: bool = False) -> None:
     """Giải phóng executor chuyên dụng cho VAD khi máy chủ tắt."""
     try:
         _VAD_EXECUTOR.shutdown(wait=wait, cancel_futures=True)
+    except Exception:
+        pass
+
+
+def _record_queue_gauges(session: SessionState) -> None:
+    """P0.1: ghi độ sâu queue để bottleneck trở thành quan sát được (F-22)."""
+    try:
+        if session.translation_queue is not None:
+            metrics_collector.record_gauge("queue", "translation_depth", session.translation_queue.qsize())
+        if session.tts_queue is not None:
+            metrics_collector.record_gauge("queue", "tts_depth", session.tts_queue.qsize())
     except Exception:
         pass
 
@@ -52,9 +90,23 @@ async def handle_ws(ws: WebSocket) -> None:
     session = SessionState(safe_ws)
     metrics_collector.increment_counter("ws.sessions_connected")
     metrics_collector.record_checkpoint(f"session_start_{session.session_id[:8]}")
-    logger.info(f"Session {session.session_id[:8]}: Đã kết nối từ client")
+    logger.info(f"Session {session.session_id}: Đã kết nối từ client", extra={"module_tag": "WS"})
 
     session.init_components()
+    register_session(session)
+
+    # P3.0: cho client biết server hỗ trợ gì TRƯỚC khi client khai báo phiên bản của nó.
+    # Nhờ vậy có thể triển khai backend trước extension mà không phá extension cũ.
+    try:
+        await session.send_json({
+            "type": "connected",
+            "protocol_version": int(config.ws.protocol_version),
+            "binary_tts": True,          # server có thể gửi TTS dạng binary frame
+            "stream_translation": bool(getattr(config.translation, "stream_tokens", False)),
+            "session_id": session.session_id[:8],
+        })
+    except Exception as e:  # noqa: BLE001
+        logger.debug(f"Không gửi được gói connected: {e}", extra={"module_tag": "WS"})
 
     asr_task = asyncio.create_task(_stream_asr_tokens(session), name=f"asr_{session.session_id[:8]}")
     translation_task = asyncio.create_task(_translation_worker(session), name=f"trans_{session.session_id[:8]}")
@@ -73,7 +125,7 @@ async def handle_ws(ws: WebSocket) -> None:
                 logger.error(
                     f"Worker {t.get_name()} gặp sự cố bất ngờ: {exc}",
                     exc_info=exc,
-                    extra={"module_tag": "WS.HANDLER"},
+                    extra={"module_tag": "WS"},
                 )
                 if main_task and not main_task.done():
                     main_task.cancel()
@@ -88,7 +140,7 @@ async def handle_ws(ws: WebSocket) -> None:
             msg_type = message.get("type", "")
 
             if msg_type == "websocket.disconnect":
-                logger.info(f"Session {session.session_id[:8]}: Client ngắt kết nối")
+                logger.info(f"Session {session.session_id}: Client ngắt kết nối", extra={"module_tag": "WS"})
                 break
             elif "text" in message:
                 await _handle_text_message(session, message["text"])
@@ -96,19 +148,21 @@ async def handle_ws(ws: WebSocket) -> None:
                 await _handle_binary_message(session, message["bytes"])
 
     except WebSocketDisconnect:
-        logger.info(f"Session {session.session_id[:8]}: Client ngắt kết nối an toàn")
+        logger.info(f"Session {session.session_id}: Client ngắt kết nối an toàn", extra={"module_tag": "WS"})
     except asyncio.CancelledError:
         if session_error:
             logger.error(
-                f"Session {session.session_id[:8]}: Buộc đóng phiên do worker gặp sự cố: {session_error}",
-                extra={"module_tag": "WS.HANDLER"},
+                f"Session {session.session_id}: Buộc đóng phiên do worker gặp sự cố: {session_error}",
+                extra={"module_tag": "WS"},
             )
         else:
-            logger.info(f"Session {session.session_id[:8]}: Phiên bị hủy")
+            logger.info(f"Session {session.session_id}: Phiên bị hủy", extra={"module_tag": "WS"})
     except Exception as e:
-        logger.warning(f"Session {session.session_id[:8]}: Kết thúc vòng lặp do lỗi ({e})", exc_info=True)
+        logger.warning(f"Session {session.session_id}: Kết thúc vòng lặp do lỗi ({e})", exc_info=True, extra={"module_tag": "WS"})
     finally:
         t_cleanup_start = time.perf_counter()
+
+        unregister_session(session)
 
         for t in workers:
             t.remove_done_callback(_on_worker_done)
@@ -124,9 +178,11 @@ async def handle_ws(ws: WebSocket) -> None:
         await session.cleanup()
         await safe_ws.close()
 
+        metrics_collector.increment_counter("ws.sessions_disconnected")
         metrics_collector.record_checkpoint(f"session_end_{session.session_id[:8]}")
+        metrics_collector.record_gauge("ws", "active_sessions", count_active_sessions())
         cleanup_ms = (time.perf_counter() - t_cleanup_start) * 1000.0 if t_cleanup_start else 0.0
-        logger.info(f"Session {session.session_id[:8]}: Đã đóng và giải phóng tài nguyên hoàn tất ({cleanup_ms:.2f}ms)")
+        logger.info(f"Session {session.session_id}: Đã đóng và giải phóng tài nguyên hoàn tất ({cleanup_ms:.2f}ms)", extra={"module_tag": "WS"})
 
 
 async def _handle_text_message(session: SessionState, text: str) -> None:
@@ -134,33 +190,47 @@ async def _handle_text_message(session: SessionState, text: str) -> None:
     try:
         msg = json.loads(text)
         action = msg.get("type") or msg.get("action", "")
+        # F-44: `reset_stream` có thể tới dưới 2 dạng:
+        #   {"type": "reset_stream", ...}                        (extension mới)
+        #   {"type": "set_config", "action": "reset_stream"}      (bản cũ / client khác)
+        if msg.get("action") == "reset_stream":
+            action = "reset_stream"
 
         if action in ("set_config", "configure"):
             session.apply_config(msg)
             logger.info(
-                f"[WS CONFIG UPDATE] Session {session.session_id[:8]}: Đồng bộ cấu hình từ Extension Popup "
-                f"(vad={session.config.get('vad_engine')}, "
-                f"threshold={session.config.get('vad_threshold')}, "
-                f"silence={session.config.get('silence_duration_ms')}ms, "
-                f"hangover={session.config.get('hangover_ms')}ms, "
-                f"min_words={session.config.get('min_words_to_commit')}, "
-                f"lang: {session.config.get('source_lang')} -> {session.config.get('target_lang')}, "
-                f"tts={session.config.get('tts_enabled')}, "
-                f"voice='{session.config.get('tts_voice')}')",
-                extra={"module_tag": "CONFIG"},
+                f"Session {session.session_id}: Đồng bộ cấu hình từ Extension Popup "
+                    f"(vad={session.config.get('vad_engine')}, "
+                        f"threshold={session.config.get('vad_threshold')}, "
+                        f"silence={session.config.get('silence_duration_ms')}ms, "
+                        f"hangover={session.config.get('hangover_ms')}ms, "
+                        f"min_words={session.config.get('min_words_to_commit')}, "
+                        f"lang: {session.config.get('source_lang')} -> {session.config.get('target_lang')}, "
+                        f"tts={session.config.get('tts_enabled')}, "
+                        f"voice='{session.config.get('tts_voice')}')",
+                extra={"module_tag": "WS"},
             )
             if session.config.get("tts_enabled"):
                 prewarm_task = asyncio.create_task(
                     get_tts_engine().prewarm(), name=f"tts_prewarm_{session.session_id[:8]}"
                 )
                 prewarm_task.add_done_callback(
-                    lambda t: logger.error(f"TTS prewarm failed: {t.exception()}")
+                    lambda t: logger.error(f"TTS prewarm failed: {t.exception()}", extra={"module_tag": "WS"})
                     if not t.cancelled() and t.exception()
                     else None
                 )
 
+        elif action == "reset_stream":
+            # F-44: client báo vừa TUA video (hoặc nhảy vị trí) ⇒ xoá audio/trạng thái cũ để
+            # phụ đề không trộn nội dung trước-sau khi tua.
+            reason = str(msg.get("reason") or "seek")
+            await _reset_session_stream(session, reason)
+
         elif action == "ping":
-            pong_payload = make_pong_msg(msg.get("timestamp", 0))
+            pong_payload = make_pong_msg(
+                msg.get("timestamp", 0),
+                compact=bool(getattr(session, "supports_compact_payload", False)),
+            )
             await session.send_json(pong_payload)
 
     except json.JSONDecodeError:
@@ -191,9 +261,12 @@ async def _stream_asr_tokens(session: SessionState) -> None:
     engine = session.asr_engine
     if not engine:
         return
+    # F-30: client khai báo protocol >= 3 thì nhận payload GỌN (không field trùng lặp).
+    compact = bool(getattr(session, "supports_compact_payload", False))
 
     try:
         async for msg in engine.stream_tokens():
+            _record_queue_gauges(session)
             if msg.get("type") == "utterance_update":
                 utt_id = msg.get("utterance_id", "")
                 text = msg.get("text", "")
@@ -207,7 +280,7 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                     min_words = int(val if val is not None else config.sentence.min_words_to_commit)
                     token_cnt = count_content_tokens(text)
                     if token_cnt < min_words:
-                        logger.info(f"[TRANSLATE FILTER] Lọc bỏ câu quá ngắn ({token_cnt} < {min_words} từ): '{text}'")
+                        logger.info(f"Lọc bỏ câu quá ngắn ({token_cnt} < {min_words} từ): '{text}'", extra={"module_tag": "WS"})
                         metrics_collector.increment_counter("translation.short_words_filtered")
                         # Gửi gói tin filtered=True để Extension xóa bỏ ngay lập tức subtitle draft trên màn hình
                         out_msg = make_utterance_update_msg(
@@ -216,6 +289,7 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                             translated="",
                             is_final=True,
                             filtered=True,
+                            compact=compact,
                         )
                         await session.send_json(out_msg)
                         continue
@@ -229,6 +303,7 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                     stable_text=stable_text,
                     unstable_text=unstable_text,
                     filtered=False,
+                    compact=compact,
                 )
 
                 sent = await session.send_json(out_msg)
@@ -247,13 +322,78 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                             "_queued_at": time.perf_counter(),
                         })
                     except asyncio.QueueFull:
-                        logger.warning(f"Session {session.session_id[:8]}: Hàng đợi Translation đầy, bỏ qua")
+                        logger.warning(f"Session {session.session_id}: Hàng đợi Translation đầy, bỏ qua", extra={"module_tag": "WS"})
+                        metrics_collector.increment_counter("queue.translation_dropped")
 
 
     except asyncio.CancelledError:
         pass
     except Exception as e:
-        logger.error(f"Lỗi worker stream ASR: {e}", exc_info=True)
+        logger.error(f"Lỗi worker stream ASR: {e}", exc_info=True, extra={"module_tag": "WS"})
+
+
+async def _reset_session_stream(session: SessionState, reason: str = "seek") -> None:
+    """F-44: reset pipeline ASR/VAD/queue khi video bị tua.
+
+    Xoá audio đang có (kể cả pre-roll), bỏ commit đang chờ, dọn hàng đợi dịch/TTS và thông
+    báo cho client xoá phụ đề cũ — nhờ vậy tua video không còn sinh phụ đề trộn nội dung cũ.
+    """
+    # F-44c: `seeking` và `seeked` bắn liền nhau (~50-100 ms) ⇒ chỉ reset MỘT lần cho mỗi
+    # cú tua. Reset hai lần sát nhau làm pipeline khởi động lại giữa chừng (dễ sinh race).
+    now = time.monotonic()
+    last = getattr(session, "_last_stream_reset_at", 0.0)
+    if now - last < 0.5:
+        metrics_collector.increment_counter("ws.stream_reset_coalesced")
+        return
+    session._last_stream_reset_at = now  # type: ignore[attr-defined]
+
+    engine = getattr(session, "asr_engine", None)
+    if engine is not None and hasattr(engine, "reset_stream"):
+        try:
+            await engine.reset_stream(reason)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"Session {session.session_id[:8]}: reset ASR stream lỗi: {exc}",
+                           extra={"module_tag": "WS"})
+
+    vad = getattr(session, "vad_processor", None)
+    if vad is not None and hasattr(vad, "reset"):
+        try:
+            vad.reset()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"Session {session.session_id[:8]}: reset VAD lỗi: {exc}",
+                           extra={"module_tag": "WS"})
+
+    # Hàng đợi dịch/TTS còn câu của đoạn CŨ ⇒ bỏ hết (kết quả sẽ lệch với vị trí mới).
+    # F-44b: PHẢI gọi `task_done()` cho mỗi mục bị bỏ. Không gọi thì bộ đếm
+    # `_unfinished_tasks` của asyncio.Queue không bao giờ về 0 ⇒ mọi `queue.join()` sau đó
+    # treo (đây là một dạng "server treo" rất khó thấy).
+    for q_name in ("translation_queue", "tts_queue"):
+        q = getattr(session, q_name, None)
+        if q is None:
+            continue
+        dropped = 0
+        while True:
+            try:
+                q.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+            except Exception:  # noqa: BLE001
+                break
+            dropped += 1
+            try:
+                q.task_done()
+            except Exception:  # noqa: BLE001
+                pass
+        if dropped:
+            metrics_collector.increment_counter(f"queue.{q_name}_cleared_on_seek")
+
+    metrics_collector.increment_counter("ws.stream_reset")
+    logger.info(
+        f"Session {session.session_id[:8]}: reset stream do {reason} — đã xoá audio cũ, "
+        f"hàng đợi dịch/TTS và phụ đề đang hiển thị.",
+        extra={"module_tag": "WS"},
+    )
+    await session.send_json({"type": "stream_reset", "reason": reason, "status": "ok"})
 
 
 async def _process_translation_item(
@@ -277,24 +417,72 @@ async def _process_translation_item(
     metrics_collector.record_metric("translation", "queue_wait_ms", queue_wait_ms)
 
     clean_utt = (utt_id or "unknown")[:8]
+    # F-30: payload gọn cho client protocol >= 3.
+    compact = bool(getattr(session, "supports_compact_payload", False))
     if dedup.is_duplicate(text):
         metrics_collector.increment_counter("translation.dedup_skipped")
-        logger.info(f"[TRANSLATE DEDUP] [utt={clean_utt}] Bỏ qua câu dịch trùng lặp: '{text}'")
+        logger.info(f"[utt={clean_utt}] Bỏ qua câu dịch trùng lặp: '{text}'", extra={"module_tag": "WS"})
         return
 
     start_t = time.monotonic()
     context_str = ctx_tracker.get_context_str() if config.translation.use_context else ""
 
-    res = await trans_engine.translate(
-        text=text,
-        source_lang=src_lang,
-        target_lang=tgt_lang,
-        context=context_str,
+    translated = ""
+    # P3.3: đẩy token dịch dần để bản dịch hiện sớm (K3: < 120ms tới token đầu).
+    use_stream = bool(getattr(config.translation, "stream_tokens", False)) and hasattr(
+        trans_engine, "translate_stream"
     )
-    elapsed_ms = int((time.monotonic() - start_t) * 1000)
-    translated = res.get("translated_text", text)
+    if use_stream:
+        last_sent_t = time.monotonic()
+        last_sent_text = ""
+        first_token_ms: Optional[float] = None
+        min_chars = int(getattr(config.translation, "partial_min_chars", 3) or 0)
+        min_interval = float(getattr(config.translation, "partial_min_interval_ms", 120) or 0) / 1000.0
+        try:
+            async for partial in trans_engine.translate_stream(
+                text=text, source_lang=src_lang, target_lang=tgt_lang, context=context_str
+            ):
+                translated = partial
+                if first_token_ms is None:
+                    first_token_ms = (time.monotonic() - start_t) * 1000.0
+                    metrics_collector.record_metric("translation", "first_token_ms", first_token_ms)
+                now = time.monotonic()
+                # Throttle kép: đủ ký tự MỚI và đủ thời gian. Không gửi tiền tố rác
+                # (ví dụ một khoảng trắng) và không ngập WebSocket.
+                if (
+                    partial != last_sent_text
+                    and len(partial) >= min_chars
+                    and (now - last_sent_t) >= min_interval
+                ):
+                    last_sent_t = now
+                    last_sent_text = partial
+                    await session.send_json(
+                        make_translation_msg(
+                            utt_id=utt_id,
+                            translated=partial,
+                            elapsed_ms=int((now - start_t) * 1000),
+                            target_lang=tgt_lang,
+                            partial=True,
+                            compact=compact,
+                        )
+                    )
+                    metrics_collector.increment_counter("translation.partial_sent")
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Streaming thất bại, fallback sang dịch một lần: {e}", extra={"module_tag": "WS"})
 
-    logger.info(f"[TRANSLATE] [utt={clean_utt}] ({src_lang} -> {tgt_lang} in {elapsed_ms}ms): '{text}' => '{translated}'")
+    if not translated:
+        res = await trans_engine.translate(
+            text=text,
+            source_lang=src_lang,
+            target_lang=tgt_lang,
+            context=context_str,
+        )
+        translated = res.get("translated_text", text)
+
+    elapsed_ms = int((time.monotonic() - start_t) * 1000)
+    metrics_collector.record_metric("translation", "infer_ms", float(elapsed_ms))
+
+    logger.info(f"[utt={clean_utt}] ({src_lang} -> {tgt_lang} in {elapsed_ms}ms): '{translated}'", extra={"module_tag": "WS"})
     ctx_tracker.add(text, translated)
 
     # 1. Gói tin translation chuyên biệt
@@ -303,6 +491,7 @@ async def _process_translation_item(
         translated=translated,
         elapsed_ms=elapsed_ms,
         target_lang=tgt_lang,
+        compact=compact,
     )
 
     # 2. Gói tin utterance_update cập nhật trạng thái chốt kèm bản dịch
@@ -311,6 +500,7 @@ async def _process_translation_item(
         text=text,
         translated=translated,
         is_final=True,
+        compact=compact,
     )
 
     sent1 = await session.send_json(trans_msg)
@@ -334,28 +524,31 @@ async def _process_translation_item(
                     "speed": float(session.config.get("tts_speed", 1.0)),
                     "_queued_at": time.perf_counter(),
                 })
-                logger.info(f"🔊 [TTS QUEUED] Đã đưa vào hàng đợi lồng tiếng: '{translated}'")
+                logger.info(f"Đã đưa vào hàng đợi lồng tiếng: '{translated}'", extra={"module_tag": "WS"})
             except asyncio.QueueFull:
-                logger.warning(f"Session {session.session_id[:8]}: Hàng đợi TTS đầy, bỏ qua câu này")
+                logger.warning(f"Session {session.session_id}: Hàng đợi TTS đầy, bỏ qua câu này", extra={"module_tag": "WS"})
+                metrics_collector.increment_counter("queue.tts_dropped")
 
 
 async def _translation_worker(session: SessionState) -> None:
     """Worker tuần tự dịch thuật GGUF đảm bảo không tắc nghẽn queue."""
-    trans_engine = GGUFTranslationEngine.get_instance()
     ctx_tracker = TranslationContextTracker(window_size=config.translation.context_window)
     dedup = TranslationDeduplicator()
 
     while True:
         try:
+            # P1.7: lấy singleton MỖI lần để không giữ tham chiếu cũ nếu bị thay.
+            trans_engine = GGUFTranslationEngine.get_instance()
             item = await session.translation_queue.get()
             try:
+                _record_queue_gauges(session)
                 await _process_translation_item(session, trans_engine, ctx_tracker, item, dedup)
             finally:
                 session.translation_queue.task_done()
         except asyncio.CancelledError:
             break
         except Exception as e:
-            logger.error(f"Lỗi Translation worker: {e}", exc_info=True)
+            logger.error(f"Lỗi Translation worker: {e}", exc_info=True, extra={"module_tag": "WS"})
             await asyncio.sleep(0.05)
 
 
@@ -380,37 +573,68 @@ async def _process_tts_item(
 
     if dedup_state.is_duplicate(text):
         metrics_collector.increment_counter("tts.dedup_skipped")
-        logger.info(f"[TTS DEDUP] Bỏ qua câu phát âm trùng lặp: '{text}'")
+        logger.info(f"Bỏ qua câu phát âm trùng lặp: '{text}'", extra={"module_tag": "WS"})
         return
 
     try:
         t_tts_start = time.perf_counter()
-        audio_b64, duration_sec = await tts.synthesize_clone(
-            text=text,
-            voice_id=voice,
-            speed=speed,
+        # P3.1: nếu client khai báo protocol >= 2 thì gửi WAV thô dạng binary frame
+        # (bỏ base64 +33%, bỏ vòng lặp per-byte trên main thread của client).
+        use_binary = bool(getattr(session, "supports_binary_tts", False)) and hasattr(
+            tts, "synthesize_clone_bytes"
         )
+        if use_binary:
+            wav_bytes, duration_sec = await tts.synthesize_clone_bytes(
+                text=text, voice_id=voice, speed=speed
+            )
+        else:
+            audio_b64, duration_sec = await tts.synthesize_clone(
+                text=text,
+                voice_id=voice,
+                speed=speed,
+            )
+            wav_bytes = None
         synthesis_ms = (time.perf_counter() - t_tts_start) * 1000.0
         metrics_collector.record_metric("tts", "synthesis_ms", synthesis_ms)
         tts_rtf = (synthesis_ms / 1000.0) / max(0.001, duration_sec)
         metrics_collector.record_metric("tts", "rtf", tts_rtf)
         metrics_collector.increment_counter("tts.synthesized_utterances")
 
-        if audio_b64:
+        if use_binary and wav_bytes:
+            frame = make_tts_binary_frame(
+                utt_id=utt_id,
+                text=text,
+                wav_bytes=wav_bytes,
+                duration_sec=duration_sec,
+                sample_rate=tts.sample_rate,
+                compact=bool(getattr(session, "supports_compact_payload", False)),
+            )
+            sent = await session.connection.send_bytes(frame)
+            metrics_collector.record_metric("tts", "payload_bytes", float(len(frame)))
+            metrics_collector.increment_counter("tts.sent_binary")
+            if sent:
+                e2e_tts_ms = (time.perf_counter() - queued_at) * 1000.0
+                metrics_collector.record_metric("pipeline", "e2e_sub_to_tts_ms", e2e_tts_ms)
+                logger.info(
+                    f"{duration_sec:.2f}s ({len(frame)} bytes) cho utt "
+                        f"'{utt_id}'(synth={synthesis_ms:.1f}ms, RTF={tts_rtf:.2f})", extra={"module_tag": "WS"}
+                )
+        elif audio_b64:
             out_msg = make_tts_audio_msg(
                 utt_id=utt_id,
                 text=text,
                 audio_b64=audio_b64,
                 duration_sec=duration_sec,
                 sample_rate=tts.sample_rate,
+                compact=bool(getattr(session, "supports_compact_payload", False)),
             )
             sent = await session.send_json(out_msg)
             if sent:
                 e2e_tts_ms = (time.perf_counter() - queued_at) * 1000.0
                 metrics_collector.record_metric("pipeline", "e2e_sub_to_tts_ms", e2e_tts_ms)
-                logger.info(f"🔊 [TTS SENT] Gửi {duration_sec:.2f}s audio về client cho utt '{utt_id[:8]}' (synth={synthesis_ms:.1f}ms, RTF={tts_rtf:.2f})")
+                logger.info(f"Gửi {duration_sec:.2f}s audio về client cho utt '{utt_id}'(synth={synthesis_ms:.1f}ms, RTF={tts_rtf:.2f})", extra={"module_tag": "WS"})
     except Exception as e:
-        logger.error(f"Lỗi TTS synthesis: {e}", exc_info=True)
+        logger.error(f"Lỗi TTS synthesis: {e}", exc_info=True, extra={"module_tag": "WS"})
 
 
 async def _tts_worker(session: SessionState) -> None:
@@ -422,7 +646,9 @@ async def _tts_worker(session: SessionState) -> None:
         try:
             item = await session.tts_queue.get()
             try:
+                _record_queue_gauges(session)
                 if not session.config.get("tts_enabled"):
+                    metrics_collector.increment_counter("tts.skipped_disabled")
                     continue
                 if tts is None:
                     tts = get_tts_engine()
@@ -432,8 +658,15 @@ async def _tts_worker(session: SessionState) -> None:
         except asyncio.CancelledError:
             break
         except Exception as e:
-            logger.error(f"Lỗi TTS worker loop: {e}", exc_info=True)
+            logger.error(f"Lỗi TTS worker loop: {e}", exc_info=True, extra={"module_tag": "WS"})
             await asyncio.sleep(0.05)
 
 
-__all__ = ["handle_ws", "shutdown_vad_executor"]
+__all__ = [
+    "handle_ws",
+    "shutdown_vad_executor",
+    "register_session",
+    "unregister_session",
+    "get_active_sessions",
+    "count_active_sessions",
+]

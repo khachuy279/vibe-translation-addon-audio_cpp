@@ -1,0 +1,22 @@
+[
+  {
+    "label": "A: pytest (tang A, engine gia)",
+    "base_vram_mb": 1707.0,
+    "peak_vram_mb": 6451.0,
+    "delta_vram_mb": 4744.0,
+    "peak_util_pct": 18.0,
+    "avg_util_pct": 3.1,
+    "seconds": 12.1,
+    "exit": 0
+  },
+  {
+    "label": "B: tier-B streaming (model that)",
+    "base_vram_mb": 1687.0,
+    "peak_vram_mb": 3205.0,
+    "delta_vram_mb": 1518.0,
+    "peak_util_pct": 77.0,
+    "avg_util_pct": 10.5,
+    "seconds": 23.4,
+    "exit": 0
+  }
+]

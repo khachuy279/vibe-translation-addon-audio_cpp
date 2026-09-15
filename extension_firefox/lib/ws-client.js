@@ -14,6 +14,16 @@ class WSClient {
     this.pingInterval = null;
     this.listeners = new Map();
     this._textEncoder = new TextEncoder();
+    // P3.5d: handle của timer reconnect. Trước đây handle không được lưu nên KHÔNG THỂ
+    // huỷ: sau khi người dùng bấm Stop, timer vẫn bắn (tới 30s sau) và mở WebSocket +
+    // port "zombie" không có chủ.
+    this._reconnectTimer = null;
+    // P3.2: trạng thái backpressure do service worker báo về.
+    this.backpressureState = "ok";
+    this.droppedAudioFrames = 0;
+    // P3.1: backend có gửi audio TTS dạng binary frame không (do backend quyết định
+    // theo protocol version mà client khai báo).
+    this.supportsBinaryTts = false;
   }
 
   // ── Connection ──────────────────────────────────────────
@@ -52,8 +62,27 @@ class WSClient {
           } else if (msg.type === "ws_json") {
             const data = msg.data;
             const payload = data.payload !== undefined ? data.payload : data;
+            if (data.type === "connected" || data.type === "hello") {
+              // Backend xác nhận phiên bản giao thức -> biết có được dùng binary TTS không.
+              if (typeof data.binary_tts === "boolean") {
+                this.supportsBinaryTts = data.binary_tts;
+              }
+            }
             this._emit(data.type, payload);
             this._emit("message", data);
+          } else if (msg.type === "ws_binary") {
+            // P3.1: audio TTS dạng binary frame (không base64, không JSON).
+            this._emit("tts_binary", msg.data);
+            this._emit("message", { type: "tts_binary", data: msg.data });
+          } else if (msg.type === "backpressure") {
+            // P3.2: service worker báo socket đang tắc.
+            this.backpressureState = msg.state;
+            this.droppedAudioFrames = msg.droppedFrames || 0;
+            this._emit("backpressure", {
+              state: msg.state,
+              bufferedAmount: msg.bufferedAmount,
+              droppedFrames: this.droppedAudioFrames,
+            });
           } else if (msg.type === "disconnected") {
             this.isConnected = false;
             this._stopPing();
@@ -140,6 +169,7 @@ class WSClient {
 
   disconnect() {
     this._stopPing();
+    this._cancelReconnect();   // P3.5d: huỷ timer reconnect còn treo
     if (this.port) {
       try {
         this.port.postMessage({ action: "DISCONNECT" });
@@ -155,6 +185,18 @@ class WSClient {
       this.ws = null;
     }
     this.isConnected = false;
+    this.backpressureState = "ok";
+  }
+
+  // P3.5d: huỷ timer reconnect. Không có hàm này thì sau khi Stop, timer vẫn bắn và mở
+  // WebSocket + port "zombie" không có chủ (rò kết nối mỗi lần stop-sau-khi-drop).
+  _cancelReconnect() {
+    if (this._reconnectTimer !== null) {
+      try {
+        clearTimeout(this._reconnectTimer);
+      } catch (e) {}
+      this._reconnectTimer = null;
+    }
   }
 
   _scheduleReconnect() {
@@ -166,8 +208,11 @@ class WSClient {
     this.reconnectAttempts++;
     this._emit("reconnecting", { attempt: this.reconnectAttempts, delayMs: delay });
 
-    setTimeout(() => {
-      if (!this.isConnected) {
+    this._cancelReconnect();
+    this._reconnectTimer = setTimeout(() => {
+      this._reconnectTimer = null;
+      // Kiểm tra lại tại thời điểm bắn: có thể người dùng đã Stop hoặc đã kết nối lại.
+      if (!this.isConnected && (this.port || this.ws || this.reconnectAttempts > 0)) {
         this.connect().catch(() => {});
       }
     }, delay);

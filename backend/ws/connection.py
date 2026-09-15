@@ -6,9 +6,11 @@ cùng ghi đồng thời vào một kênh kết nối ASGI WebSocket.
 
 import asyncio
 import json
+import time
 from typing import Any, Dict
 from fastapi import WebSocket, WebSocketDisconnect
 
+from backend.core.metrics import metrics_collector
 from backend.utils.logger import get_logger
 
 logger = get_logger("ws.connection")
@@ -19,7 +21,7 @@ try:
     def _fast_dumps(obj: Any) -> str:
         """Serialize dict thanh JSON string dung orjson (fast path)."""
         return _orjson_lib.dumps(obj).decode("utf-8")
-    logger.debug("[WS] Dung orjson cho JSON serialization")
+    logger.debug("Dùng orjson cho JSON serialization", extra={"module_tag": "WS"})
 except ImportError:
     def _fast_dumps(obj: Any) -> str:  # type: ignore[misc]
         """Serialize dict thanh JSON string dung stdlib json (fallback)."""
@@ -67,7 +69,25 @@ class SafeWebSocketConnection:
             self._is_closed = True
             return False
         except Exception as e:
-            logger.debug(f"SafeWebSocketConnection send_text error: {e}")
+            logger.debug(f"SafeWebSocketConnection send_text error: {e}", extra={"module_tag": "WS"})
+            self._is_closed = True
+            return False
+
+    async def send_bytes(self, data: bytes) -> bool:
+        """P3.1: gửi binary frame (dùng cho audio TTS, tránh base64 +33% và nhiều bản copy)."""
+        if self._is_closed:
+            return False
+        try:
+            async with self._send_lock:
+                if self._is_closed:
+                    return False
+                await self._ws.send_bytes(data)
+            return True
+        except (WebSocketDisconnect, RuntimeError):
+            self._is_closed = True
+            return False
+        except Exception as e:
+            logger.debug(f"SafeWebSocketConnection send_bytes error: {e}", extra={"module_tag": "WS"})
             self._is_closed = True
             return False
 
@@ -77,10 +97,19 @@ class SafeWebSocketConnection:
             return False
         try:
             raw_text = _fast_dumps(payload)
-            return await self.send_text(raw_text)
         except (TypeError, ValueError) as e:
-            logger.error(f"Loi tuan tu hoa JSON payload: {e}")
+            logger.error(f"Lỗi tuần tự hoá JSON payload: {e}", extra={"module_tag": "WS"})
             return False
+        t0 = time.perf_counter()
+        ok = await self.send_text(raw_text)
+        try:
+            metrics_collector.record_metric("ws", "send_ms", (time.perf_counter() - t0) * 1000.0)
+            metrics_collector.record_metric("ws", "send_bytes", float(len(raw_text)))
+            if not ok:
+                metrics_collector.increment_counter("ws.send_failed")
+        except Exception:
+            pass
+        return ok
 
     async def close(self, code: int = 1000) -> None:
         """Đóng kết nối an toàn và giải phóng lock."""

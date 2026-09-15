@@ -41,7 +41,7 @@ class AudioProcessor:
             elif isinstance(item, torch.Tensor):
                 arr = item.detach().cpu().numpy().astype(np.float32)
             else:
-                logger.debug(f"Bỏ qua phần tử âm thanh không hợp lệ: {type(item)}")
+                logger.debug(f"Bỏ qua phần tử âm thanh không hợp lệ: {type(item)}", extra={"module_tag": "TTS"})
                 continue
 
             arr = np.atleast_1d(np.squeeze(arr))
@@ -107,7 +107,7 @@ class AudioProcessor:
             _, stretched = signal.istft(spec_out, fs=sample_rate, nperseg=n_fft, noverlap=n_fft - hop)
             return stretched.astype(np.float32)
         except Exception as e:
-            logger.warning(f"Time stretch thất bại ({e}), dùng âm thanh gốc.")
+            logger.warning(f"Time stretch thất bại ({e}), dùng âm thanh gốc.", extra={"module_tag": "TTS"})
             return audio
 
     @staticmethod
@@ -129,12 +129,18 @@ class AudioProcessor:
         return audio
 
     @staticmethod
-    def encode_wav_to_base64(audio: np.ndarray, sample_rate: int) -> str:
-        """Mã hóa mảng float32 thành chuỗi Base64 định dạng WAV PCM 16-bit."""
+    def encode_wav_bytes(audio: np.ndarray, sample_rate: int) -> bytes:
+        """Mã hóa mảng float32 thành bytes WAV PCM 16-bit (KHÔNG base64)."""
         if audio is None or len(audio) == 0 or sample_rate <= 0:
-            return ""
-
+            return b""
         wav_buffer = io.BytesIO()
         sf.write(wav_buffer, audio, sample_rate, format="WAV", subtype="PCM_16")
-        wav_bytes = wav_buffer.getvalue()
+        return wav_buffer.getvalue()
+
+    @staticmethod
+    def encode_wav_to_base64(audio: np.ndarray, sample_rate: int) -> str:
+        """Mã hóa mảng float32 thành chuỗi Base64 định dạng WAV PCM 16-bit."""
+        wav_bytes = AudioProcessor.encode_wav_bytes(audio, sample_rate)
+        if not wav_bytes:
+            return ""
         return base64.b64encode(wav_bytes).decode("ascii")

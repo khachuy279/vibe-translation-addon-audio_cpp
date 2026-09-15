@@ -50,6 +50,7 @@ def test_language_normalization():
     assert normalize_language_for_family("auto", "qwen3_asr") is None
 
 
+@pytest.mark.slow
 def test_transcribe_engine_prewarm_and_single_file(wav_test_dir):
     """Kiểm tra khởi tạo TranscribeEngine, prewarm và nhận dạng 1 file mẫu."""
     engine = TranscribeEngine(model_key=config.asr.active_model)
@@ -65,6 +66,7 @@ def test_transcribe_engine_prewarm_and_single_file(wav_test_dir):
     logger.info(f"Russian_4s transcript ({infer_ms:.1f}ms): '{transcript}'", extra={"module_tag": "ASR"})
 
 
+@pytest.mark.slow
 def test_asr_benchmark_on_wav_test_and_generate_report(wav_test_dir, report_dir):
     """Benchmark toàn diện TranscribeEngine trên các file trong /wav_test/ và xuất Report."""
     wav_files = sorted(list(wav_test_dir.glob("*.wav")))

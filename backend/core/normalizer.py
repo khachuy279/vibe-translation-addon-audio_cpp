@@ -4,23 +4,34 @@
 - Tự động bù âm lượng cho các đoạn phát âm quá nhỏ hoặc nén các đoạn hét to/tiếng ồn đột ngột.
 - Sử dụng ngưỡng mềm (Soft Knee) để tránh hiện tượng kéo tăng nhiễu nền khi im lặng.
 - Khống chế đỉnh tín hiệu (Peak Limiter) để không bao giờ bị méo tiếng (clipping).
-- Tốc độ xử lý siêu nhanh (< 0.1ms cho 10s audio) bằng numpy vectorization.
+- Vector hoá numpy, chỉ cấp phát MỘT mảng đích cho mỗi lần normalize.
+
+Lịch sử tối ưu (P2.6):
+- Trước đây mỗi lần `normalize()` cấp phát ~7 mảng tạm (RMS, peak, gain, clip, RMS/peak
+  của kết quả) và trả về 4 field không ai đọc. Nay:
+    * RMS tính bằng `np.dot` (không tạo mảng tạm).
+    * Peak tính bằng hai phép rút gọn `max()`/`min()` của C (không tạo mảng tạm).
+    * Chỉ cấp phát đúng một mảng đích, dùng `out=` cho cả nhân gain và clip.
+    * `NormalizationResult` chỉ còn các field thực sự được dùng.
+- Cấu hình được truyền từ `ASRConfig` qua `SpeechNormalizer.from_config()`; trước đây
+  engine gọi `SpeechNormalizer()` không tham số nên toàn bộ config `normalize_*` bị bỏ qua.
 """
 
 from dataclasses import dataclass
-import math
+from typing import Any, Optional
 import numpy as np
 
 
-@dataclass
+@dataclass(slots=True)
 class NormalizationResult:
-    """Kết quả chi tiết của quá trình chuẩn hóa âm lượng."""
+    """Kết quả chuẩn hóa âm lượng.
+
+    Lưu ý: `audio` có thể là CHÍNH mảng đầu vào (khi không cần biến đổi) để tránh
+    cấp phát thừa. Bên gọi không được giả định đây là bản sao.
+    """
     audio: np.ndarray
     applied_gain: float
     original_rms: float
-    normalized_rms: float
-    original_peak: float
-    normalized_peak: float
     is_modified: bool
 
 
@@ -35,92 +46,99 @@ class SpeechNormalizer:
         min_gain: float = 0.3333,        # Nén tối đa 0.33x (-9.5 dB)
         knee_start: float = 0.025,       # Dưới mức này coi là nhiễu nền, không boost
         knee_end: float = 0.050,         # Vùng chuyển tiếp mượt mà
+        log_stats: bool = False,
     ):
-        self.target_rms = target_rms
-        self.target_peak = target_peak
-        self.max_gain = max_gain
-        self.min_gain = min_gain
-        self.knee_start = knee_start
-        self.knee_end = knee_end
+        self.target_rms = float(target_rms)
+        self.target_peak = float(target_peak)
+        self.max_gain = float(max_gain)
+        self.min_gain = float(min_gain)
+        self.knee_start = float(knee_start)
+        self.knee_end = float(knee_end)
+        self.log_stats = bool(log_stats)
 
-    def calculate_rms(self, audio: np.ndarray) -> float:
-        """Tính giá trị RMS (Root Mean Square) của mảng âm thanh."""
+    @classmethod
+    def from_config(cls, asr_cfg: Optional[Any] = None) -> "SpeechNormalizer":
+        """Khởi tạo từ `ASRConfig` (hoặc object có cùng tên thuộc tính).
+
+        Nhờ vậy các tham số `normalize_*` trong config có tác dụng thật (P2.6 / G7).
+        """
+        if asr_cfg is None:
+            return cls()
+        return cls(
+            target_rms=getattr(asr_cfg, "normalize_target_rms", 0.10),
+            target_peak=getattr(asr_cfg, "normalize_target_peak", 0.95),
+            max_gain=getattr(asr_cfg, "normalize_max_gain", 3.0),
+            min_gain=getattr(asr_cfg, "normalize_min_gain", 0.3333),
+            knee_start=getattr(asr_cfg, "normalize_knee_start", 0.025),
+            knee_end=getattr(asr_cfg, "normalize_knee_end", 0.050),
+            log_stats=getattr(asr_cfg, "normalize_log_stats", False),
+        )
+
+    @staticmethod
+    def calculate_rms(audio: np.ndarray) -> float:
+        """Tính RMS không cấp phát mảng tạm (dùng np.dot thay vì mean(a*a))."""
         if audio is None or len(audio) == 0:
             return 0.0
-        return float(np.sqrt(np.mean(audio * audio)))
+        arr = np.asarray(audio, dtype=np.float32)
+        # np.dot trả về vô hướng; không tạo mảng trung gian như (a * a).
+        return float(np.sqrt(np.dot(arr, arr) / arr.size))
 
-    def calculate_peak(self, audio: np.ndarray) -> float:
-        """Tính giá trị đỉnh biên độ tuyệt đối."""
+    @staticmethod
+    def calculate_peak(audio: np.ndarray) -> float:
+        """Tính đỉnh biên độ không cấp phát mảng tạm (max/min của C thay vì np.abs)."""
         if audio is None or len(audio) == 0:
             return 0.0
-        return float(np.max(np.abs(audio)))
+        arr = np.asarray(audio, dtype=np.float32)
+        return float(max(arr.max(), -arr.min()))
 
     def normalize(self, audio: np.ndarray) -> NormalizationResult:
-        """Thực hiện chuẩn hóa âm lượng cho mảng âm thanh Float32.
-        
-        Args:
-            audio: Mảng float32 1D [-1.0, 1.0].
-            
-        Returns:
-            NormalizationResult chứa audio đã chuẩn hóa và các thông số đo lường.
-        """
+        """Chuẩn hóa âm lượng cho mảng float32 1D trong [-1.0, 1.0]."""
         if audio is None or len(audio) == 0:
             return NormalizationResult(
                 audio=np.zeros(0, dtype=np.float32),
                 applied_gain=1.0,
                 original_rms=0.0,
-                normalized_rms=0.0,
-                original_peak=0.0,
-                normalized_peak=0.0,
                 is_modified=False,
             )
 
-        orig_rms = self.calculate_rms(audio)
-        orig_peak = self.calculate_peak(audio)
+        arr = audio if audio.dtype == np.float32 else audio.astype(np.float32)
+        orig_rms = self.calculate_rms(arr)
 
-        # Nếu là đoạn im lặng tuyệt đối hoặc nhiễu nền dưới ngưỡng knee_start -> Giữ nguyên
-        if orig_rms < self.knee_start or orig_rms == 0.0:
+        # Im lặng / nhiễu nền dưới knee_start -> giữ nguyên, KHÔNG copy (tránh 1 alloc).
+        if orig_rms < self.knee_start:
             return NormalizationResult(
-                audio=audio.copy(),
+                audio=arr,
                 applied_gain=1.0,
                 original_rms=orig_rms,
-                normalized_rms=orig_rms,
-                original_peak=orig_peak,
-                normalized_peak=orig_peak,
                 is_modified=False,
             )
 
-        # Tính toán hệ số khuếch đại lý thuyết
+        orig_peak = self.calculate_peak(arr)
+
+        # Hệ số khuếch đại lý thuyết
         desired_gain = self.target_rms / orig_rms
 
-        # Áp dụng Soft Knee cho vùng âm lượng nhỏ sát nhiễu nền [knee_start, knee_end]
+        # Soft Knee cho vùng âm lượng nhỏ sát nhiễu nền [knee_start, knee_end]
         if orig_rms < self.knee_end:
-            alpha = (orig_rms - self.knee_start) / (self.knee_end - self.knee_start)
-            # Chuyển tiếp mượt từ gain 1.0 lên desired_gain
+            span = self.knee_end - self.knee_start
+            alpha = (orig_rms - self.knee_start) / span if span > 0 else 1.0
             desired_gain = 1.0 + alpha * (desired_gain - 1.0)
 
         # Giới hạn gain trong khoảng an toàn [min_gain, max_gain]
         clamped_gain = max(self.min_gain, min(self.max_gain, desired_gain))
 
-        # Kiểm tra giới hạn đỉnh (Peak Protection) để tránh clipping
-        if orig_peak * clamped_gain > self.target_peak and orig_peak > 0:
+        # Peak protection: không để vượt trần target_peak
+        if orig_peak > 0.0 and orig_peak * clamped_gain > self.target_peak:
             clamped_gain = self.target_peak / orig_peak
 
-        # Áp dụng gain
-        normalized_audio = (audio * clamped_gain).astype(np.float32)
-        
-        # Clip an toàn chống tràn số
-        np.clip(normalized_audio, -1.0, 1.0, out=normalized_audio)
-
-        norm_rms = self.calculate_rms(normalized_audio)
-        norm_peak = self.calculate_peak(normalized_audio)
+        # Một mảng đích duy nhất + hai phép biến đổi tại chỗ (không mảng tạm).
+        out = np.empty_like(arr)
+        np.multiply(arr, clamped_gain, out=out)
+        np.clip(out, -1.0, 1.0, out=out)
 
         return NormalizationResult(
-            audio=normalized_audio,
+            audio=out,
             applied_gain=clamped_gain,
             original_rms=orig_rms,
-            normalized_rms=norm_rms,
-            original_peak=orig_peak,
-            normalized_peak=norm_peak,
             is_modified=(abs(clamped_gain - 1.0) > 1e-4),
         )

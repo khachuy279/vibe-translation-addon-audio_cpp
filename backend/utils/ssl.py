@@ -25,7 +25,7 @@ def ensure_ssl_certificates() -> Tuple[str, str]:
     if cert_path.exists() and key_path.exists():
         return str(cert_path), str(key_path)
 
-    logger.info("🔑 Đang tạo chứng chỉ SSL tự ký cho localhost (WSS/HTTPS)...")
+    logger.info("Đang tạo chứng chỉ SSL tự ký cho localhost (WSS/HTTPS)...", extra={"module_tag": "CORE"})
 
     from cryptography import x509
     from cryptography.hazmat.primitives import hashes, serialization
@@ -79,5 +79,5 @@ def ensure_ssl_certificates() -> Tuple[str, str]:
     os.replace(tmp_key_path, key_path)
     os.replace(tmp_cert_path, cert_path)
 
-    logger.info(f"Đã tạo chứng chỉ SSL thành công: {cert_path}")
+    logger.info(f"Đã tạo chứng chỉ SSL thành công: {cert_path}", extra={"module_tag": "CORE"})
     return str(cert_path), str(key_path)

@@ -13,6 +13,29 @@
       this.originalVideoVolume = 1.0;
       this.isDucked = false;
       this.playedIds = new Set();
+      // P3.5a: TRẦN HÀNG ĐỢI. Trước đây `this.queue` không có giới hạn: backend sinh
+      // TTS nhanh hơn realtime (~13x) nên khi consumer tụt lại thì queue phình vô hạn
+      // => RAM tăng VÀ tiếng lồng trôi xa dần khỏi video mà không có cơ chế bắt kịp.
+      this.maxQueueLength = 3;
+      // Bỏ câu cũ hơn ngần này (ms) — thà mất lồng tiếng còn hơn lệch tiếng vĩnh viễn.
+      this.maxLagMs = 12000;
+      this.droppedCount = 0;
+      // Dùng CHUNG một AudioContext cho mọi câu để decodeAudioData chạy off-thread và
+      // audio lên lịch được (thay vì tạo HTMLAudioElement mới mỗi câu).
+      this._audioCtx = null;
+      this._activeSources = new Set();
+    }
+
+    _getAudioContext() {
+      if (this._audioCtx && this._audioCtx.state !== "closed") return this._audioCtx;
+      const Ctx = (typeof window !== "undefined") && (window.AudioContext || window.webkitAudioContext);
+      if (!Ctx) return null;
+      try {
+        this._audioCtx = new Ctx();
+      } catch (e) {
+        this._audioCtx = null;
+      }
+      return this._audioCtx;
     }
 
     setTargetVideo(video, autoDucking = true, duckingLevel = 0.25, ttsEnabled = false) {
@@ -74,9 +97,108 @@
           this.playedIds.delete(oldest);
         }
       }
+      item.enqueuedAt = performance.now();
       this.queue.push(item);
+      this._trimQueue();
       if (!this.isPlaying) {
         this._playNext();
+      }
+    }
+
+    /**
+     * P3.1: nạp audio TTS dạng BINARY (ArrayBuffer) — không base64, không atob, không
+     * vòng lặp per-byte trên main thread. Decode bằng decodeAudioData (chạy off-thread
+     * trong browser) rồi phát qua Web Audio graph.
+     */
+    enqueueBinary(header, arrayBuffer) {
+      if (!arrayBuffer || !arrayBuffer.byteLength) return;
+      // v3 (F-30): header khung nhị phân chỉ có `utterance_id` (không còn alias).
+      const id = header && header.utterance_id;
+      if (id) {
+        if (this.playedIds.has(id)) return;
+        this.playedIds.add(id);
+        if (this.playedIds.size > 300) {
+          const oldest = this.playedIds.values().next().value;
+          this.playedIds.delete(oldest);
+        }
+      }
+
+      const ctx = this._getAudioContext();
+      if (!ctx) {
+        // Không có Web Audio: quay về đường Blob URL (vẫn không dùng base64).
+        const url = URL.createObjectURL(new Blob([arrayBuffer], { type: "audio/wav" }));
+        this.enqueue({ id: id, audioUrl: url, durationSec: (header && header.duration_sec) || 0 });
+        return;
+      }
+
+      ctx.decodeAudioData(
+        arrayBuffer.slice(0),
+        (audioBuffer) => {
+          this.queue.push({
+            id: id,
+            audioBuffer: audioBuffer,
+            durationSec: audioBuffer.duration,
+            enqueuedAt: performance.now(),
+          });
+          this._trimQueue();
+          if (!this.isPlaying) this._playNextBuffer();
+        },
+        (err) => {
+          console.warn("[BS TTS] decodeAudioData lỗi:", err);
+        }
+      );
+    }
+
+    // P3.5a: giới hạn hàng đợi + bỏ câu quá cũ.
+    _trimQueue() {
+      const now = performance.now();
+      const before = this.queue.length;
+      this.queue = this.queue.filter(
+        (it) => now - (it.enqueuedAt || now) < this.maxLagMs
+      );
+      while (this.queue.length > this.maxQueueLength) {
+        this.queue.shift();
+      }
+      const dropped = before - this.queue.length;
+      if (dropped > 0) {
+        this.droppedCount += dropped;
+        console.warn(
+          `[BS TTS] Bỏ ${dropped} câu lồng tiếng (tổng ${this.droppedCount}) để không lệch tiếng.`
+        );
+      }
+    }
+
+    // Phát item dạng AudioBuffer (đường binary).
+    _playNextBuffer() {
+      if (this.queue.length === 0) {
+        this.isPlaying = false;
+        return;
+      }
+      const item = this.queue.shift();
+      const ctx = this._getAudioContext();
+      if (!ctx || !item.audioBuffer) {
+        this._playNext();
+        return;
+      }
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
+      try {
+        const src = ctx.createBufferSource();
+        src.buffer = item.audioBuffer;
+        src.connect(ctx.destination);
+        this.isPlaying = true;
+        this._activeSources.add(src);
+        src.onended = () => {
+          this._activeSources.delete(src);
+          try { src.disconnect(); } catch (e) {}
+          this._playNextBuffer();
+        };
+        src.start();
+      } catch (e) {
+        console.warn("[BS TTS] Phát audio lỗi:", e);
+        this.isPlaying = false;
+        this._playNextBuffer();
       }
     }
 
@@ -103,7 +225,7 @@
       const item = this.queue.shift();
 
       try {
-        const audioUrl = this._base64ToBlobUrl(item.audioBase64);
+        const audioUrl = item.audioUrl ? item.audioUrl : this._base64ToBlobUrl(item.audioBase64);
         const audio = new Audio(audioUrl);
         this.currentAudio = audio;
         this.currentBlobUrl = audioUrl;
@@ -145,6 +267,15 @@
 
     clear() {
       this.queue = [];
+      // Dừng mọi nguồn Web Audio đang phát (đường binary).
+      for (const src of Array.from(this._activeSources)) {
+        try {
+          src.onended = null;
+          src.stop();
+          src.disconnect();
+        } catch (e) {}
+      }
+      this._activeSources.clear();
       if (this.currentAudio) {
         try {
           this.currentAudio.onended = null;

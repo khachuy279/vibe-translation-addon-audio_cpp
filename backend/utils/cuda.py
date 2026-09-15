@@ -57,7 +57,7 @@ def setup_cuda_dll_paths() -> None:
                         if os.path.isdir(sub_lib):
                             dll_dirs.add(os.path.abspath(sub_lib))
         except Exception as e:
-            logger.debug(f"Lỗi khi quét site-packages cho CUDA DLLs: {e}")
+            logger.debug(f"Lỗi khi quét site-packages cho CUDA DLLs: {e}", extra={"module_tag": "CORE"})
 
         # 2. Tìm trong biến môi trường CUDA_PATH
         for env_key, env_val in os.environ.items():
@@ -93,4 +93,4 @@ def setup_cuda_dll_paths() -> None:
 
         os.environ["PATH"] = os.path.pathsep.join(path_list)
         _cuda_paths_initialized = True
-        logger.debug(f"Đã đăng ký các thư mục CUDA DLL: {list(dll_dirs)}")
+        logger.debug(f"Đã đăng ký các thư mục CUDA DLL: {list(dll_dirs)}", extra={"module_tag": "CORE"})

@@ -216,13 +216,19 @@ class SubtitleRenderer {
     if (settings.maxLines !== undefined) {
       this.setMaxLines(settings.maxLines);
     }
+    // "Tắt chạy chữ": chỉ hiện bản dịch MỘT LẦN khi đã có bản dịch hoàn chỉnh.
+    // Mặc định BẬT (người dùng đã yêu cầu tắt chạy chữ); đặt false để quay lại hành vi cũ.
+    if (settings.showTranslationOnce !== undefined) {
+      this.showTranslationOnce = !!settings.showTranslationOnce;
+    }
   }
 
   // ── Utterance Update (Realtime Live Stream & Finalization) ─────────────
 
   onUtteranceUpdate(payload) {
     if (!payload) return;
-    const utteranceId = payload.utterance_id || payload.utteranceId || payload.id;
+    // v3 (F-30): payload GỌN — chỉ đọc tên chuẩn snake_case, KHÔNG fallback sang alias.
+    const utteranceId = payload.utterance_id || payload.id;
 
     // Nếu bị lọc hoặc xóa
     if (payload.filtered || payload.is_deleted || payload.deleted) {
@@ -238,7 +244,7 @@ class SubtitleRenderer {
       return;
     }
 
-    const text = payload.ui_text || payload.original || payload.text || "";
+    const text = payload.text || "";
     if (!text || !text.trim()) {
       if (this.currentDraft && this.currentDraft.id === utteranceId) {
         this.currentDraft = null;
@@ -249,7 +255,7 @@ class SubtitleRenderer {
 
     this._resetAutoClearTimer();
 
-    const isFinal = payload.is_final || payload.isFinal || false;
+    const isFinal = payload.is_final || false;
 
     // Lưu vào utteranceStore để không bao giờ bị mất câu gốc khi dịch hoàn thành
     this.utteranceStore.set(utteranceId, {
@@ -301,14 +307,30 @@ class SubtitleRenderer {
     let id = sentenceId;
     let text = translatedText;
     let st = status || "ok";
+    let payload = null;
 
     if (typeof sentenceId === "object" && sentenceId !== null) {
-      id = sentenceId.sentence_id || sentenceId.sentenceId || sentenceId.utterance_id || sentenceId.utteranceId;
-      text = sentenceId.translated || sentenceId.text || (sentenceId.payload && (sentenceId.payload.text || sentenceId.payload.translated)) || translatedText;
-      st = sentenceId.status || (sentenceId.payload && sentenceId.payload.status) || status || "ok";
+      payload = sentenceId;
+      // v3 (F-30): chỉ đọc tên chuẩn snake_case.
+      id = sentenceId.sentence_id || sentenceId.utterance_id;
+      text = sentenceId.translated || translatedText;
+      st = sentenceId.status || status || "ok";
     }
 
     if (!id) return;
+
+    // "Tắt chạy chữ" (mặc định): BỎ QUA các mảnh dịch dở (`partial`) và chỉ hiện bản dịch
+    // MỘT LẦN khi backend gửi bản hoàn chỉnh. Có thể tắt bằng `showTranslationOnce=false`.
+    const policy = (typeof BSSubtitlePolicy !== "undefined" && BSSubtitlePolicy)
+      || (typeof globalThis !== "undefined" && globalThis.BSSubtitlePolicy)
+      || null;
+    const showOnce = this.showTranslationOnce !== undefined ? this.showTranslationOnce : true;
+    if (policy && typeof policy.shouldApplyTranslation === "function") {
+      const candidate = payload || { status: st, partial: false };
+      if (!policy.shouldApplyTranslation(candidate, { showOnce })) {
+        return;
+      }
+    }
 
     const cleanTranslation = (st === "ok" && text) ? text : null;
 
@@ -493,8 +515,21 @@ class SubtitleRenderer {
           origEl.textContent = item.originalText || "";
         }
         const transEl = existingEl.querySelector(".bs-translated");
-        if (transEl && transEl.textContent !== item.translatedText) {
-          transEl.textContent = item.translatedText || "";
+        if (item.translatedText) {
+          if (!transEl) {
+            // F-52: câu có thể vào TẦNG 1 khi CHƯA có bản dịch (bị câu mới đẩy lên từ
+            // TẦNG 2) ⇒ node `.bs-translated` chưa từng được tạo. Bản dịch tới muộn
+            // PHẢI được vẽ ra, không chỉ cập nhật node đã có.
+            const newTransEl = document.createElement("div");
+            newTransEl.className = "bs-translated";
+            newTransEl.textContent = item.translatedText;
+            existingEl.appendChild(newTransEl);
+          } else if (transEl.textContent !== item.translatedText) {
+            transEl.textContent = item.translatedText;
+          }
+        } else if (transEl) {
+          // Bản dịch bị rút (ví dụ backend gửi bản rỗng) ⇒ bỏ node để không hiện chữ cũ.
+          transEl.remove();
         }
         if (item.isFadingOut) {
           existingEl.classList.add("bs-fading-out");

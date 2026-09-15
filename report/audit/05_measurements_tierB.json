@@ -1,0 +1,178 @@
+{
+  "model": "qwen3-asr-0.6b",
+  "seconds": 20.0,
+  "speed": 1.0,
+  "poll_interval_ms": 300,
+  "wall_sec": 21.268280400021467,
+  "previews": 43,
+  "finals": 4,
+  "report": {
+    "uptime_sec": 31.69,
+    "counters": {
+      "asr.speech_start": 1,
+      "asr.preview_skipped": 48,
+      "asr.commit_reason.MAX_DURATION": 1,
+      "asr.commit_reason.STABLE_PREFIX": 2,
+      "asr.commit_reason.VAD_SILENCE": 1,
+      "asr.inference_cancelled": 1
+    },
+    "gauges": {
+      "vad.overflow_count": 0.0,
+      "asr.pending_commits": 0.0,
+      "asr.pending_commits_peak": 1.0
+    },
+    "stages": {
+      "asr.model_load_ms": {
+        "count": 2,
+        "avg_ms": 929.13,
+        "min_ms": 928.74,
+        "max_ms": 929.53,
+        "p50_ms": 929.13,
+        "p90_ms": 929.45,
+        "p95_ms": 929.49,
+        "p99_ms": 929.52
+      },
+      "asr.ensure_model_ms": {
+        "count": 50,
+        "avg_ms": 0.0,
+        "min_ms": 0.0,
+        "max_ms": 0.01,
+        "p50_ms": 0.0,
+        "p90_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_ms": 0.01
+      },
+      "asr.normalize_ms": {
+        "count": 50,
+        "avg_ms": 0.12,
+        "min_ms": 0.03,
+        "max_ms": 0.32,
+        "p50_ms": 0.11,
+        "p90_ms": 0.2,
+        "p95_ms": 0.22,
+        "p99_ms": 0.29
+      },
+      "asr.infer_core_ms": {
+        "count": 50,
+        "avg_ms": 366.34,
+        "min_ms": 43.71,
+        "max_ms": 6971.02,
+        "p50_ms": 90.35,
+        "p90_ms": 469.61,
+        "p95_ms": 1496.41,
+        "p99_ms": 4995.78
+      },
+      "asr.model_warmup_ms": {
+        "count": 2,
+        "avg_ms": 6998.72,
+        "min_ms": 6971.21,
+        "max_ms": 7026.23,
+        "p50_ms": 6998.72,
+        "p90_ms": 7020.72,
+        "p95_ms": 7023.47,
+        "p99_ms": 7025.68
+      },
+      "vad.chunk_ms": {
+        "count": 848,
+        "avg_ms": 3.27,
+        "min_ms": 2.4,
+        "max_ms": 8.34,
+        "p50_ms": 3.17,
+        "p90_ms": 4.04,
+        "p95_ms": 4.19,
+        "p99_ms": 4.58
+      },
+      "asr.idle_wait_ms": {
+        "count": 46,
+        "avg_ms": 204.58,
+        "min_ms": 0.0,
+        "max_ms": 491.62,
+        "p50_ms": 216.77,
+        "p90_ms": 251.44,
+        "p95_ms": 403.11,
+        "p99_ms": 472.47
+      },
+      "asr.slice_ms": {
+        "count": 44,
+        "avg_ms": 0.04,
+        "min_ms": 0.01,
+        "max_ms": 0.07,
+        "p50_ms": 0.04,
+        "p90_ms": 0.05,
+        "p95_ms": 0.05,
+        "p99_ms": 0.06
+      },
+      "asr.preview_ms": {
+        "count": 44,
+        "avg_ms": 246.73,
+        "min_ms": 45.44,
+        "max_ms": 2940.71,
+        "p50_ms": 87.17,
+        "p90_ms": 311.63,
+        "p95_ms": 1450.36,
+        "p99_ms": 2324.24
+      },
+      "asr.preview_audio_sec": {
+        "count": 44,
+        "avg_ms": 2.72,
+        "min_ms": 0.5,
+        "max_ms": 6.0,
+        "p50_ms": 2.81,
+        "p90_ms": 4.26,
+        "p95_ms": 4.83,
+        "p99_ms": 5.59
+      },
+      "ws.send_ms": {
+        "count": 47,
+        "avg_ms": 0.02,
+        "min_ms": 0.02,
+        "max_ms": 0.03,
+        "p50_ms": 0.02,
+        "p90_ms": 0.02,
+        "p95_ms": 0.02,
+        "p99_ms": 0.03
+      },
+      "ws.send_bytes": {
+        "count": 47,
+        "avg_ms": 431.3,
+        "min_ms": 261.0,
+        "max_ms": 666.0,
+        "p50_ms": 431.0,
+        "p90_ms": 561.0,
+        "p95_ms": 565.2,
+        "p99_ms": 659.1
+      },
+      "asr.commit_ms": {
+        "count": 4,
+        "avg_ms": 117.68,
+        "min_ms": 78.42,
+        "max_ms": 178.42,
+        "p50_ms": 106.94,
+        "p90_ms": 158.98,
+        "p95_ms": 168.7,
+        "p99_ms": 176.48
+      },
+      "asr.commit_audio_sec": {
+        "count": 4,
+        "avg_ms": 5.29,
+        "min_ms": 4.05,
+        "max_ms": 8.0,
+        "p50_ms": 4.55,
+        "p90_ms": 7.06,
+        "p95_ms": 7.53,
+        "p99_ms": 7.91
+      },
+      "session.cleanup_ms": {
+        "count": 1,
+        "avg_ms": 0.39,
+        "min_ms": 0.39,
+        "max_ms": 0.39,
+        "p50_ms": 0.39,
+        "p90_ms": 0.39,
+        "p95_ms": 0.39,
+        "p99_ms": 0.39
+      }
+    },
+    "checkpoints_retained": 0
+  }
+}

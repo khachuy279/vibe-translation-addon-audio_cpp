@@ -1,0 +1,454 @@
+{
+  "model": "qwen3-asr-0.6b",
+  "speed": 6.0,
+  "max_sec": 25.0,
+  "configs": {
+    "base": {
+      "label": "Mặc định hiện tại (silence=600, reuse=False)",
+      "silence_duration_ms": 600,
+      "reuse_preview_for_commit": false
+    },
+    "base_repeat": {
+      "label": "Đối chứng sàn nhiễu (y hệt base)",
+      "silence_duration_ms": 600,
+      "reuse_preview_for_commit": false
+    }
+  },
+  "reference_error_rate_full_coverage_only": 0.1619047619047619,
+  "files_fully_covered": [
+    "Chinese_fast_speed_11s.wav",
+    "Cross_lingual_English_French_Italian_Spanish_6s.wav",
+    "English_low_speech_quality_19s.wav",
+    "Japanese_5s.wav",
+    "Russian_4s.wav"
+  ],
+  "files_capped": [
+    "00_ingress_stream.wav",
+    "Chinese_noise_28s.wav",
+    "English_multiple_kinds_of_noise_88s.wav"
+  ],
+  "summary": {
+    "base": {
+      "vs_reference_error_rate": 0.19743161838447806,
+      "error_rate_full_coverage_only": 0.17142857142857143,
+      "empty_hypothesis_files": 0,
+      "total_commits": 23
+    },
+    "base_repeat": {
+      "vs_reference_error_rate": 0.12370320930998437,
+      "error_rate_full_coverage_only": 0.20476190476190476,
+      "empty_hypothesis_files": 0,
+      "total_commits": 24
+    }
+  },
+  "files": [
+    {
+      "file": "00_ingress_stream.wav",
+      "duration_sec": 25.0,
+      "full_duration_sec": 332.03,
+      "coverage": 0.0753,
+      "ground_truth_chars": 2678,
+      "reference": {
+        "text": "特異先への営業周りを絶え、夕食を済まし。その日、私たちは出張先の宿に向かっていた。このホテル初めてですよね。あ、トラベルダウで星3.9でさん。温泉がいいらしいよ。",
+        "infer_ms": 3939.7,
+        "metric": "cer",
+        "ref_units": 821,
+        "hyp_units": 72,
+        "substitutions": 7,
+        "deletions": 750,
+        "insertions": 1,
+        "error_rate": 0.9232643118148599,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "对。 得意先への営業周りを。 夕食を済まし、その日、私たちは出張先の宿に向かっていた。 このホテル初めてですよね。トラベルダウで星3.9でさ、温泉がいいらしいよ。",
+          "commits": 4,
+          "previews": 8,
+          "error_rate": 0.9220462850182704,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.09722222222222222,
+          "commit_reasons": {
+            "?": 4
+          },
+          "wall_sec": 4.6,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "对。 得意先への営業周りを。 夕食を済まし、その日、私たちは出張先の宿に向かっていた。 このホテル初めてですよね。トラベルダウで星3.9でさ、温泉がいいらしいよ。",
+          "commits": 4,
+          "previews": 7,
+          "error_rate": 0.9220462850182704,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.09722222222222222,
+          "commit_reasons": {
+            "?": 4
+          },
+          "wall_sec": 4.4,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "Chinese_fast_speed_11s.wav",
+      "duration_sec": 11.38,
+      "full_duration_sec": 11.38,
+      "coverage": 1.0,
+      "ground_truth_chars": 143,
+      "reference": {
+        "text": "放出来之后，左手、右手接一个慢动作，右边再直接拉到上面之后，直接拉到这个轮圈上面，再接过去之后，然后上面再直接拉到这个位置了之后，右边再直接这个位置接，倒不去了之后，再倒一下，然后右边再直接抓住这个上面了之后，直接从这边上面过去了之后，直接抓住这个轴叉，然后最后直接倒到这个轴叉。",
+        "infer_ms": 468.6,
+        "metric": "cer",
+        "ref_units": 130,
+        "hyp_units": 126,
+        "substitutions": 14,
+        "deletions": 4,
+        "insertions": 0,
+        "error_rate": 0.13846153846153847,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "放出来之后，左手、右手接一个慢动作，右边再直接拉到车上面之后，直接拉到这个轮车上上面，再截过去之后，然后上面再直接拉到这个位置之后，右边再直接这个位置截倒回去的时候，再倒一下。 一下，然后又被再直接抓住这个上面了。之后直接从这边上面过去了。之后直接抓住这个猪肠，然后这个直接到着这个猪肠。",
+          "commits": 2,
+          "previews": 4,
+          "error_rate": 0.19230769230769232,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.1746031746031746,
+          "commit_reasons": {
+            "?": 2
+          },
+          "wall_sec": 2.2,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "放出来之后，左手、右手接一个慢动作，右边再直接拉到车上面之后，直接拉到这个轮车上上面，再截过去之后，然后上面再直接拉到这个位置之后，右边再直接这个位置截倒回去的时候，再倒一下，然后。 一下，然后又被带直接抓住这个上面了。之后直接从这边上面过去了。之后直接抓住这个树杈，然后这个直接抓住这个树杈。",
+          "commits": 2,
+          "previews": 4,
+          "error_rate": 0.18461538461538463,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.1984126984126984,
+          "commit_reasons": {
+            "?": 2
+          },
+          "wall_sec": 2.3,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "Chinese_noise_28s.wav",
+      "duration_sec": 25.0,
+      "full_duration_sec": 28.26,
+      "coverage": 0.8847,
+      "ground_truth_chars": 202,
+      "reference": {
+        "text": "在他十一岁的时候，母亲因为发生交通事故，杀手人寰。桂兰的母亲敲了几下杯子，铁柱的手也不自觉地动了起来：“你这小子是烟瘾犯了吧？”被看穿的铁柱只能坦白自己正在戒烟。父亲一瞅，给铁柱提了一个建议：“嘎嘎好使，不信你可以尝试一下。”这个绝技就是母亲的催眠疗法，保证让你满意。铁柱听完觉得他们是在扯淡，这种催眠疗法我根本不需要尝试。不管咋说，几个人聊的还是其乐融融，他们非常。",
+        "infer_ms": 625.1,
+        "metric": "cer",
+        "ref_units": 183,
+        "hyp_units": 162,
+        "substitutions": 1,
+        "deletions": 21,
+        "insertions": 0,
+        "error_rate": 0.12021857923497267,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "在他十一岁的时候，母亲因为发生交通事故，撒手人寰。桂兰的母亲敲了几下杯子，铁柱的手也不自觉地动了起来。你。 这小子是烟瘾犯了吧？被看穿的铁柱只能坦白自己正在戒烟。父亲一瞅，给铁柱提了一个建议：“嘎嘎好使！”不信。 ，你可以尝试一下。这个绝技就是母亲的催眠疗法，保证让你满意。铁柱听完，觉得他们是在扯淡。这种催眠疗法，我跟。 我根本不需要尝试。不管咋说，几个人聊得还是其乐融融，他们非常。",
+          "commits": 4,
+          "previews": 11,
+          "error_rate": 0.13114754098360656,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.024691358024691357,
+          "commit_reasons": {
+            "?": 4
+          },
+          "wall_sec": 4.5,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "在他十一岁的时候，母亲因为发生交通事故，撒手人寰。桂兰的母亲敲了几下杯子，铁柱的手也不自觉地动了起来。你。 这小子是烟瘾犯了吧？被看穿的铁柱只能坦白自己正在戒烟。父亲一瞅，给铁柱提了一个建议：“嘎嘎好使。”不信。 ，你可以尝试一下。这个绝技就是母亲的催眠疗法，保证让你满意。铁柱听完，觉得他们是在扯淡。这种催眠疗法，我。 法，我根本不需要尝试。不管咋说，几个人聊的还是其乐融融，他们非常。",
+          "commits": 4,
+          "previews": 11,
+          "error_rate": 0.12568306010928962,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.018518518518518517,
+          "commit_reasons": {
+            "?": 4
+          },
+          "wall_sec": 4.5,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "Cross_lingual_English_French_Italian_Spanish_6s.wav",
+      "duration_sec": 6.23,
+      "full_duration_sec": 6.23,
+      "coverage": 1.0,
+      "ground_truth_chars": 68,
+      "reference": {
+        "text": "I'm alone, all by myself. Je suis tout seul, seul en tout. Et je suis solo.",
+        "infer_ms": 147.9,
+        "metric": "wer",
+        "ref_units": 14,
+        "hyp_units": 17,
+        "substitutions": 3,
+        "deletions": 0,
+        "insertions": 3,
+        "error_rate": 0.42857142857142855,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "I'm alone, all by myself. T tu seul, sono tutto, estoy solo.",
+          "commits": 1,
+          "previews": 3,
+          "error_rate": 0.21428571428571427,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.5294117647058824,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.4,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "I'm alone, all by myself. T tu seul, sono tutto, estoy solo.",
+          "commits": 1,
+          "previews": 3,
+          "error_rate": 0.21428571428571427,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.5294117647058824,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.4,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "English_low_speech_quality_19s.wav",
+      "duration_sec": 19.02,
+      "full_duration_sec": 19.02,
+      "coverage": 1.0,
+      "ground_truth_chars": 172,
+      "reference": {
+        "text": "Okay, Charles. It looks like we have a problem with the radio. What happened? Yeah, someone spilled water on their machine. I uh, yeah. Charles, can you hear us? I'm on me.",
+        "infer_ms": 273.4,
+        "metric": "wer",
+        "ref_units": 31,
+        "hyp_units": 33,
+        "substitutions": 2,
+        "deletions": 0,
+        "insertions": 2,
+        "error_rate": 0.12903225806451613,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "有。 Okay, Charles. It looks like we have a problem with the radio. What happened? Yeah, someone spilled water on their machine. I uh yeah, Charles, can you hear us? 妈妈喵。",
+          "commits": 5,
+          "previews": 1,
+          "error_rate": 0.0967741935483871,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.15151515151515152,
+          "commit_reasons": {
+            "?": 5
+          },
+          "wall_sec": 3.7,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "有。 Okay, Charles. It looks like we have a problem with the radio. What happened? Yeah, someone spilled water on their machine. I uh yeah, Charles, can you hear us? I uh yeah, Charles, can you hear us? 妈妈，别啊！",
+          "commits": 6,
+          "previews": 8,
+          "error_rate": 0.3548387096774194,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.30303030303030304,
+          "commit_reasons": {
+            "?": 6
+          },
+          "wall_sec": 3.4,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "English_multiple_kinds_of_noise_88s.wav",
+      "duration_sec": 25.0,
+      "full_duration_sec": 88.19,
+      "coverage": 0.2835,
+      "ground_truth_chars": 1980,
+      "reference": {
+        "text": "My girls, my girls, my girls, my girls. Ready? Hey babe. Hey babe, where are you? I'm actually crazy traffic right now. Oh really? Yeah. It's crazy. The freeway's completely stopped. Oh you're still coming to my parents' house right? Um, I can't really hear you, babe. What? Mariah Carey playing live music. Yeah. Babe, I can't. They're really loud, but I can't hear. Hey. Yeah, they're being really loud.",
+        "infer_ms": 567.2,
+        "metric": "wer",
+        "ref_units": 418,
+        "hyp_units": 79,
+        "substitutions": 5,
+        "deletions": 339,
+        "insertions": 0,
+        "error_rate": 0.8229665071770335,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "My girls. My girls. Ready. Hey babe. Hey babe, where are you? I'm actually crazy traffic right now. Oh really? Yeah, it's crazy. The freeway's completely stopped. Well, you're still coming to my parents' house, right? I can't really hear it, man. What? Mariah's band playing live music. Yeah. Dave. I can't. They're really loud, but I can't hear. Hey. I can't really hear it. What? Mariah's band playing live music. Yeah. Dave. I can't. They're really loud, but I can't hear. Yeah, they're being really loud.",
+          "commits": 5,
+          "previews": 4,
+          "error_rate": 0.8349282296650717,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.4810126582278481,
+          "commit_reasons": {
+            "?": 5
+          },
+          "wall_sec": 4.9,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "My girls. My girls. Ready. Hey babe. Hey babe, where are you? I'm actually crazy traffic right now. Oh really? Yeah, it's crazy. The freeways completely stop. Well, you're still coming to my parents' house, right? Um, I can't really hear you, bitch. What? Very odd. Playing live music. Yeah, Dave. I can't. They're really loud. I can't hear. Yeah, they're being really loud.",
+          "commits": 5,
+          "previews": 10,
+          "error_rate": 0.8444976076555024,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.17721518987341772,
+          "commit_reasons": {
+            "?": 5
+          },
+          "wall_sec": 4.6,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "Japanese_5s.wav",
+      "duration_sec": 5.08,
+      "full_duration_sec": 5.08,
+      "coverage": 1.0,
+      "ground_truth_chars": 27,
+      "reference": {
+        "text": "抜群の運動神経を用い合わせどんな要求にも応えてきた。",
+        "infer_ms": 131.3,
+        "metric": "cer",
+        "ref_units": 25,
+        "hyp_units": 25,
+        "substitutions": 2,
+        "deletions": 0,
+        "insertions": 0,
+        "error_rate": 0.08,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "抜群の運動神経を用い合わせどんな要求にも応えてきた。",
+          "commits": 1,
+          "previews": 2,
+          "error_rate": 0.08,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.0,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.1,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "抜群の運動神経を用い合わせどんな要求にも応えてきた。",
+          "commits": 1,
+          "previews": 2,
+          "error_rate": 0.08,
+          "metric": "cer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.0,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.1,
+          "commit_infer_ms": []
+        }
+      }
+    },
+    {
+      "file": "Russian_4s.wav",
+      "duration_sec": 4.76,
+      "full_duration_sec": 4.76,
+      "coverage": 1.0,
+      "ground_truth_chars": 70,
+      "reference": {
+        "text": "Борсук, живущий в Киевском запарке, совершил побег от своего валиера.",
+        "infer_ms": 157.0,
+        "metric": "wer",
+        "ref_units": 10,
+        "hyp_units": 10,
+        "substitutions": 4,
+        "deletions": 0,
+        "insertions": 0,
+        "error_rate": 0.4,
+        "empty_hypothesis": false
+      },
+      "configs": {
+        "base": {
+          "label": "Mặc định hiện tại (silence=600, reuse=False)",
+          "stream_text": "Борсу, живущий в Киевском запарке, совершил побег из своего валиера.",
+          "commits": 1,
+          "previews": 2,
+          "error_rate": 0.3,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.2,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.1,
+          "commit_infer_ms": []
+        },
+        "base_repeat": {
+          "label": "Đối chứng sàn nhiễu (y hệt base)",
+          "stream_text": "Борсу, живущий в Киевском запарке, совершил побег из своего валиера.",
+          "commits": 1,
+          "previews": 2,
+          "error_rate": 0.3,
+          "metric": "wer",
+          "empty_hypothesis": false,
+          "stream_vs_reference_error_rate": 0.2,
+          "commit_reasons": {
+            "?": 1
+          },
+          "wall_sec": 1.1,
+          "commit_infer_ms": []
+        }
+      }
+    }
+  ]
+}

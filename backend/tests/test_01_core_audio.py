@@ -152,35 +152,76 @@ def test_speech_normalizer_behavior():
         knee_start=0.025,
         knee_end=0.050,
     )
+    rms_of = SpeechNormalizer.calculate_rms
+    peak_of = SpeechNormalizer.calculate_peak
 
     # 1. Âm thanh nhỏ vượt qua vùng soft-knee (RMS ~ 0.055) -> Phải được tăng gain lên sát target_rms 0.10
     low_audio = np.sin(np.linspace(0, 100, 16000, dtype=np.float32)) * 0.08  # RMS ~ 0.056
     res_low = normalizer.normalize(low_audio)
     assert res_low.is_modified is True
     assert res_low.applied_gain > 1.0
-    assert abs(res_low.normalized_rms - 0.10) < 0.01
+    assert abs(rms_of(res_low.audio) - 0.10) < 0.01
 
     # 2. Âm thanh nhỏ trong vùng soft-knee (RMS ~ 0.035) -> Tăng gain mượt mà
     knee_audio = np.sin(np.linspace(0, 100, 16000, dtype=np.float32)) * 0.05  # RMS ~ 0.035
     res_knee = normalizer.normalize(knee_audio)
     assert res_knee.is_modified is True
     assert res_knee.applied_gain > 1.0
-    assert res_knee.normalized_rms > res_knee.original_rms
+    assert rms_of(res_knee.audio) > res_knee.original_rms
 
     # 3. Âm thanh quá to (Peak sát 1.0, RMS ~ 0.35) -> Phải nén gain xuống < 1.0
     loud_audio = np.sin(np.linspace(0, 100, 16000, dtype=np.float32)) * 0.90
     res_loud = normalizer.normalize(loud_audio)
     assert res_loud.is_modified is True
     assert res_loud.applied_gain < 1.0
-    assert res_loud.normalized_peak <= 0.95
+    assert peak_of(res_loud.audio) <= 0.95
 
     # 4. Âm thanh im lặng dưới knee_start -> Giữ nguyên (gain = 1.0) để không kéo nhiễu nền
     silence = np.zeros(16000, dtype=np.float32)
     res_silence = normalizer.normalize(silence)
     assert res_silence.is_modified is False
     assert res_silence.applied_gain == 1.0
+    # Không copy khi không cần biến đổi (tiết kiệm 1 cấp phát toàn mảng).
+    assert res_silence.audio is silence
 
 
+def test_speech_normalizer_from_config():
+    """P2.6: các tham số normalize_* trong ASRConfig phải có tác dụng thật.
+
+    Trước đây engine gọi `SpeechNormalizer()` không tham số nên toàn bộ config bị bỏ qua.
+    """
+    from backend.config import ASRConfig
+
+    cfg = ASRConfig(
+        normalize_target_rms=0.20,
+        normalize_target_peak=0.80,
+        normalize_max_gain=1.5,
+        normalize_min_gain=0.5,
+        normalize_knee_start=0.01,
+        normalize_knee_end=0.02,
+    )
+    normalizer = SpeechNormalizer.from_config(cfg)
+    assert normalizer.target_rms == 0.20
+    assert normalizer.target_peak == 0.80
+    assert normalizer.max_gain == 1.5
+    assert normalizer.min_gain == 0.5
+    assert normalizer.knee_start == 0.01
+    assert normalizer.knee_end == 0.02
+
+    # max_gain=1.5 phải chặn gain thực tế (clamp), khác hẳn mặc định 3.0
+    quiet = np.sin(np.linspace(0, 100, 16000, dtype=np.float32)) * 0.04
+    res = normalizer.normalize(quiet)
+    assert res.applied_gain == pytest.approx(1.5, abs=1e-6)
+
+    # Config khác -> kết quả khác (chứng minh config có tác dụng, không bị hardcode)
+    normalizer_default = SpeechNormalizer.from_config(ASRConfig())
+    res_default = normalizer_default.normalize(quiet)
+    assert res_default.applied_gain != pytest.approx(res.applied_gain), (
+        "hai cấu hình normalize khác nhau phải cho gain khác nhau"
+    )
+
+
+@pytest.mark.slow
 def test_performance_benchmark_and_generate_report(wav_test_dir, report_dir):
     """Benchmark tốc độ xử lý của Audio Buffer và Normalizer trên tập /wav_test và xuất Report."""
     wav_files = sorted(list(wav_test_dir.glob("*.wav")))

@@ -24,6 +24,7 @@ from backend.utils.logger import logger
 
 
 @pytest.mark.parametrize("engine_name", ["firered-vad", "silero-vad", "fsmn-vad"])
+@pytest.mark.slow
 def test_vad_engine_initialization_and_single_frame(engine_name):
     """Kiểm tra khởi tạo và phân tích 1 frame mẫu cho từng engine."""
     engine = VADEngineFactory.get_engine(engine_name)
@@ -43,6 +44,7 @@ def test_vad_engine_initialization_and_single_frame(engine_name):
     assert hasattr(res_silence, "is_speech")
 
 
+@pytest.mark.slow
 def test_vad_processor_stream_callbacks(wav_test_dir):
     """Kiểm tra VADStreamProcessor kích hoạt chính xác các callbacks (start, chunk, end) trên audio thật."""
     starts = []
@@ -81,6 +83,7 @@ def test_vad_processor_stream_callbacks(wav_test_dir):
     assert len(ends) >= 1
 
 
+@pytest.mark.slow
 def test_vad_benchmark_all_engines_on_wav_test(wav_test_dir, report_dir):
     """Chạy Benchmark toàn diện cả 3 engine VAD trên 8 file trong /wav_test và xuất Report."""
     wav_files = sorted(list(wav_test_dir.glob("*.wav")))

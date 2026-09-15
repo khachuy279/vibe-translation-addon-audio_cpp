@@ -6,14 +6,28 @@
 const api = typeof browser !== "undefined" ? browser : chrome;
 const textEncoder = new TextEncoder();
 
+// P3.2: NGƯỠNG BACKPRESSURE. Trước đây `bufferedAmount` không được đọc ở đâu cả
+// (0 lần trong toàn bộ extension), nên khi backend nghẽn thì client vẫn bơm
+// 32 KB/s audio vào buffer gửi của WebSocket mà không có giới hạn => RAM tăng và
+// độ trễ KHÔNG BAO GIỜ hồi phục (audio được gửi là audio của hàng chục giây trước).
+//   - vượt SOFT: bỏ frame audio cũ đang xếp (chỉ giữ audio mới nhất) + báo content script
+//   - vượt HARD: ngừng gửi audio, báo content script tạm dừng capture
+const SEND_BUFFER_SOFT_LIMIT = 128 * 1024;   // 128 KB ~ 4 giây audio 16kHz PCM16
+const SEND_BUFFER_HARD_LIMIT = 512 * 1024;   // 512 KB ~ 16 giây
+
 api.runtime.onConnect.addListener((port) => {
   if (port.name !== "bs-ws-bridge") return;
 
   let ws = null;
   let isClosed = false;
+  let droppedFrames = 0;
+  let pausedByBackpressure = false;
+  // Chỉ giữ frame audio MỚI NHẤT khi socket nghẽn: audio cũ đã vô dụng cho phụ đề realtime.
+  let pendingAudio = null;
 
   function cleanup() {
     isClosed = true;
+    pendingAudio = null;
     if (ws) {
       try {
         ws.onopen = null;
@@ -23,6 +37,56 @@ api.runtime.onConnect.addListener((port) => {
         ws.close();
       } catch (e) {}
       ws = null;
+    }
+  }
+
+  function notifyBackpressure(state) {
+    try {
+      port.postMessage({
+        type: "backpressure",
+        state: state,                 // "ok" | "dropping" | "paused"
+        bufferedAmount: ws ? ws.bufferedAmount : 0,
+        droppedFrames: droppedFrames
+      });
+    } catch (e) {}
+  }
+
+  function sendOrQueue(buffer) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      pendingAudio = null;
+      return;
+    }
+    const buffered = ws.bufferedAmount || 0;
+
+    if (buffered >= SEND_BUFFER_HARD_LIMIT) {
+      // Quá tải nặng: bỏ frame, tạm dừng capture cho tới khi rút hết hàng đợi.
+      droppedFrames++;
+      pendingAudio = null;
+      if (!pausedByBackpressure) {
+        pausedByBackpressure = true;
+        console.warn("[BS Background] Backpressure HARD: tạm dừng gửi audio.");
+        notifyBackpressure("paused");
+      }
+      return;
+    }
+
+    if (buffered >= SEND_BUFFER_SOFT_LIMIT) {
+      // Đang tắc: chỉ giữ frame mới nhất, bỏ frame đang chờ.
+      droppedFrames++;
+      pendingAudio = buffer;
+      notifyBackpressure("dropping");
+      return;
+    }
+
+    if (pausedByBackpressure) {
+      pausedByBackpressure = false;
+      notifyBackpressure("ok");
+    }
+    pendingAudio = null;
+    try {
+      ws.send(buffer);
+    } catch (e) {
+      console.error("[BS Background] Send binary error:", e);
     }
   }
 
@@ -53,6 +117,7 @@ api.runtime.onConnect.addListener((port) => {
               port.postMessage({ type: "ws_json_raw", data: event.data });
             }
           } else {
+            // P3.1: audio TTS có thể tới dưới dạng binary frame (không base64).
             port.postMessage({ type: "ws_binary", data: event.data });
           }
         };
@@ -86,26 +151,29 @@ api.runtime.onConnect.addListener((port) => {
         }
       }
     } else if (msg.action === "SEND_BINARY") {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        try {
-          const buffer = (typeof buildBinaryAudioPacket === "function")
-            ? buildBinaryAudioPacket(msg.header, msg.pcmBuffer, textEncoder)
-            : (() => {
-                const headerBytes = textEncoder.encode(JSON.stringify(msg.header));
-                const pcmBytes = new Uint8Array(msg.pcmBuffer);
-                const totalSize = 4 + headerBytes.length + pcmBytes.byteLength;
-                const buf = new ArrayBuffer(totalSize);
-                const view = new DataView(buf);
-                view.setUint32(0, headerBytes.length, true);
-                new Uint8Array(buf, 4, headerBytes.length).set(headerBytes);
-                new Uint8Array(buf, 4 + headerBytes.length).set(pcmBytes);
-                return buf;
-              })();
+      const buffer = (typeof buildBinaryAudioPacket === "function")
+        ? buildBinaryAudioPacket(msg.header, msg.pcmBuffer, textEncoder)
+        : (() => {
+            const headerBytes = textEncoder.encode(JSON.stringify(msg.header));
+            const pcmBytes = new Uint8Array(msg.pcmBuffer);
+            const totalSize = 4 + headerBytes.length + pcmBytes.byteLength;
+            const buf = new ArrayBuffer(totalSize);
+            const view = new DataView(buf);
+            view.setUint32(0, headerBytes.length, true);
+            new Uint8Array(buf, 4, headerBytes.length).set(headerBytes);
+            new Uint8Array(buf, 4 + headerBytes.length).set(pcmBytes);
+            return buf;
+          })();
 
-          ws.send(buffer);
-        } catch (e) {
-          console.error("[BS Background] Send binary error:", e);
-        }
+      sendOrQueue(buffer);
+    } else if (msg.action === "FLUSH_PENDING") {
+      // Được gọi khi socket đã rút hết hàng đợi.
+      if (pendingAudio && ws && ws.readyState === WebSocket.OPEN
+          && (ws.bufferedAmount || 0) < SEND_BUFFER_SOFT_LIMIT) {
+        const buf = pendingAudio;
+        pendingAudio = null;
+        try { ws.send(buf); } catch (e) {}
+        notifyBackpressure("ok");
       }
     } else if (msg.action === "DISCONNECT") {
       cleanup();

@@ -52,7 +52,7 @@ class OmniVoiceTTS(BaseTTSEngine):
                 try:
                     cls._instance.unload_model()
                 except Exception as e:
-                    logger.debug(f"TTS unload_model notice: {e}")
+                    logger.debug(f"TTS unload_model notice: {e}", extra={"module_tag": "TTS"})
                 cls._instance = None
 
     def __init__(self):
@@ -103,8 +103,8 @@ class OmniVoiceTTS(BaseTTSEngine):
             except RuntimeError as e:
                 if "CUDNN" in str(e):
                     logger.warning(
-                        f"⚠️ Phát hiện xung đột cuDNN ({e}). "
-                        f"Tự động tắt cuDNN cho TTS để duy trì độ ổn định tối đa."
+                        f"Phát hiện xung đột cuDNN ({e}). "
+                            f"Tự động tắt cuDNN cho TTS để duy trì độ ổn định tối đa.", extra={"module_tag": "TTS"}
                     )
                     self._cudnn_disabled = True
                     with torch.backends.cudnn.flags(enabled=False):
@@ -132,11 +132,11 @@ class OmniVoiceTTS(BaseTTSEngine):
             # LRU eviction: xoa entry cu nhat neu vuot maxsize
             if len(self._voice_prompt_cache) > self._voice_prompt_cache_max:
                 evicted_key, _ = self._voice_prompt_cache.popitem(last=False)
-                logger.debug(f"Evicted voice cache: {Path(evicted_key[0]).name}")
-            logger.debug(f"Da luu cache VoiceClonePrompt cho: {Path(ref_audio_path).name} (cache={len(self._voice_prompt_cache)})")
+                logger.debug(f"Đã xoá cache giọng cũ: {Path(evicted_key).name}", extra={"module_tag": "TTS"})
+            logger.debug(f"Đã lưu cache VoiceClonePrompt cho: {Path(ref_audio_path).name} (cache={len(self._voice_prompt_cache)})", extra={"module_tag": "TTS"})
             return prompt
         except Exception as e:
-            logger.debug(f"Khong the tao VoiceClonePrompt cache ({e}), fallback sang raw ref_audio.")
+            logger.debug(f"Không tạo được cache VoiceClonePrompt ({e}), dùng thẳng ref_audio.", extra={"module_tag": "TTS"})
             return None
 
     def load_model(self) -> None:
@@ -148,11 +148,11 @@ class OmniVoiceTTS(BaseTTSEngine):
             try:
                 from omnivoice import OmniVoice
             except ImportError:
-                logger.error("Chưa cài đặt thư viện 'omnivoice'.")
+                logger.error("Chưa cài đặt thư viện 'omnivoice'.", extra={"module_tag": "TTS"})
                 raise RuntimeError("Thư viện omnivoice chưa được cài đặt")
 
             model_path = self._resolve_model_path()
-            logger.info(f"🔄 Đang nạp PyTorch OmniVoice model từ: '{model_path}' trên thiết bị {self.device}...")
+            logger.info(f"Đang nạp PyTorch OmniVoice model từ: '{model_path}' trên thiết bị {self.device}...", extra={"module_tag": "TTS"})
             t0 = time.perf_counter()
 
             torch_dtype = torch.float16 if self.device != "cpu" and "cuda" in str(self.device) else torch.float32
@@ -192,7 +192,7 @@ class OmniVoiceTTS(BaseTTSEngine):
                         if torch.cuda.is_available() and "cuda" in str(self.device):
                             torch.cuda.synchronize()
             except Exception as e:
-                logger.debug(f"Warmup notice: {e}")
+                logger.debug(f"Warmup notice: {e}", extra={"module_tag": "TTS"})
 
             # Thu hồi bộ nhớ đệm sau nạp và warmup
             gc.collect()
@@ -201,7 +201,7 @@ class OmniVoiceTTS(BaseTTSEngine):
 
             self._is_loaded = True
             elapsed = time.perf_counter() - t0
-            logger.info(f"PyTorch OmniVoice đã nạp và warm-up hoàn tất trong {elapsed:.2f}s!")
+            logger.info(f"PyTorch OmniVoice đã nạp và warm-up hoàn tất trong {elapsed:.2f}s!", extra={"module_tag": "TTS"})
 
     async def prewarm(self) -> bool:
         """Khởi động và nạp sẵn mô hình trong tiến trình nền."""
@@ -209,13 +209,8 @@ class OmniVoiceTTS(BaseTTSEngine):
             await asyncio.to_thread(self.load_model)
         return self._is_loaded
 
-    def synthesize_sync(
-        self,
-        text: str,
-        voice_id: Optional[str] = None,
-        speed: float = 1.0,
-    ) -> Tuple[Optional[str], float]:
-        """Tổng hợp giọng nói đồng bộ qua cơ chế Voice Cloning."""
+    def _synthesize_audio(self, text: str, voice_id: Optional[str], speed: float) -> Tuple[Optional[np.ndarray], float]:
+        """Sinh audio float32 (bỏ qua bước mã hóa). Trả (audio, duration_sec)."""
         if not text or not text.strip():
             return None, 0.0
 
@@ -224,7 +219,7 @@ class OmniVoiceTTS(BaseTTSEngine):
 
         ref_audio_path, ref_text = VoiceManager.resolve_voice(voice_id or config.tts.default_voice)
         if not os.path.exists(ref_audio_path):
-            logger.warning(f"Không tìm thấy file mẫu giọng: {ref_audio_path}")
+            logger.warning(f"Không tìm thấy file mẫu giọng: {ref_audio_path}", extra={"module_tag": "TTS"})
             return None, 0.0
 
         clean_text = text.strip()
@@ -270,19 +265,51 @@ class OmniVoiceTTS(BaseTTSEngine):
         vol = float(getattr(config.tts, "volume", 1.0) or 1.0)
         audio_np = AudioProcessor.normalize_audio(audio_np, volume=vol, target_peak=0.95)
 
-        num_samples = len(audio_np)
-        duration_sec = num_samples / self.sample_rate if self.sample_rate > 0 else 0.0
-
-        # 4. Mã hóa Base64 WAV PCM 16-bit
-        audio_b64 = AudioProcessor.encode_wav_to_base64(audio_np, self.sample_rate)
-
+        duration_sec = len(audio_np) / self.sample_rate if self.sample_rate > 0 else 0.0
         elapsed_ms = int(infer_time * 1000)
         rtf = (infer_time / duration_sec) if duration_sec > 0 else 0.0
-
         logger.info(
-            f"🔊 [TTS CLONE] ({voice_name} in {elapsed_ms}ms, {duration_sec:.2f}s, speed={effective_speed:.2f}x, RTF: {rtf:.3f}): '{clean_text}'"
+            f"({voice_name} in {elapsed_ms}ms, {duration_sec:.2f}s, "
+                f"speed={effective_speed:.2f}x, RTF: {rtf:.3f}): '{clean_text}'", extra={"module_tag": "TTS"}
         )
-        return audio_b64, duration_sec
+        return audio_np, duration_sec
+
+    def synthesize_sync(
+        self,
+        text: str,
+        voice_id: Optional[str] = None,
+        speed: float = 1.0,
+    ) -> Tuple[Optional[str], float]:
+        """Tổng hợp giọng nói đồng bộ, trả về (audio_base64_wav, duration_sec)."""
+        audio_np, duration_sec = self._synthesize_audio(text, voice_id, speed)
+        if audio_np is None:
+            return None, 0.0
+        return AudioProcessor.encode_wav_to_base64(audio_np, self.sample_rate), duration_sec
+
+    def synthesize_wav_bytes(
+        self,
+        text: str,
+        voice_id: Optional[str] = None,
+        speed: float = 1.0,
+    ) -> Tuple[Optional[bytes], float]:
+        """P3.1: như `synthesize_sync` nhưng trả WAV thô (bytes).
+
+        Dùng cho đường gửi binary frame: bỏ base64 (+33% kích thước) và bỏ vòng lặp
+        per-byte `atob` trên main thread của client.
+        """
+        audio_np, duration_sec = self._synthesize_audio(text, voice_id, speed)
+        if audio_np is None:
+            return None, 0.0
+        return AudioProcessor.encode_wav_bytes(audio_np, self.sample_rate), duration_sec
+
+    async def synthesize_clone_bytes(
+        self,
+        text: str,
+        voice_id: Optional[str] = None,
+        speed: float = 1.0,
+    ) -> Tuple[Optional[bytes], float]:
+        """Bản async của `synthesize_wav_bytes` (không block event loop)."""
+        return await asyncio.to_thread(self.synthesize_wav_bytes, text, voice_id, speed)
 
     async def synthesize_clone(
         self,
@@ -312,4 +339,4 @@ class OmniVoiceTTS(BaseTTSEngine):
                         torch.cuda.ipc_collect()
                     except Exception:
                         pass
-        logger.info("🗑️ [TTS] Đã giải phóng OmniVoice model và dọn sạch VRAM.")
+        logger.info("Đã giải phóng OmniVoice model và dọn sạch VRAM.", extra={"module_tag": "TTS"})

@@ -36,7 +36,7 @@ class FsmnVADEngine(BaseVADEngine):
         self.model.model.vad_opts.speech_to_sil_time_thres = int(cfg.speech_to_sil_time_thres)
         self.model.model.vad_opts.sil_to_speech_time_thres = int(cfg.sil_to_speech_time_thres)
 
-        logger.info(f"Loaded FSMN-VAD Engine from: {self.model_dir}", extra={"module_tag": "VAD"})
+        logger.info(f"Đã nạp engine FSMN-VAD từ: {self.model_dir}", extra={"module_tag": "VAD"})
 
     def _resolve_model_dir(self, explicit_dir: Optional[Union[str, Path]]) -> Path:
         if explicit_dir and Path(explicit_dir).exists():

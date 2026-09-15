@@ -1,0 +1,24 @@
+[
+  {
+    "label": "A: pytest (bo test mac dinh)",
+    "base_vram_mb": 1685.0,
+    "peak_total_mb": 6492.0,
+    "delta_total_mb": 4807.0,
+    "peak_own_cuda_mb": 0.0,
+    "peak_other_cuda_mb": 0.0,
+    "peak_util_pct": 23.0,
+    "seconds": 12.0,
+    "exit": 0
+  },
+  {
+    "label": "B: tier-B (model that, transcribe.cpp tren Vulkan)",
+    "base_vram_mb": 1697.0,
+    "peak_total_mb": 3060.0,
+    "delta_total_mb": 1363.0,
+    "peak_own_cuda_mb": 0.0,
+    "peak_other_cuda_mb": 0.0,
+    "peak_util_pct": 68.0,
+    "seconds": 23.2,
+    "exit": 0
+  }
+]

@@ -34,7 +34,7 @@ class FireRedVADEngine(BaseVADEngine):
         if torch.get_num_threads() > 2:
             torch.set_num_threads(2)
 
-        logger.info(f"Loaded FireRed Stream-VAD Model from: {self.model_dir}", extra={"module_tag": "VAD"})
+        logger.info(f"Đã nạp model FireRed Stream-VAD từ: {self.model_dir}", extra={"module_tag": "VAD"})
 
     def _resolve_model_dir(self, explicit_dir: Optional[Union[str, Path]]) -> Path:
         if explicit_dir and Path(explicit_dir).exists():

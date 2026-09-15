@@ -1,0 +1,98 @@
+[
+  {
+    "step": "numpy",
+    "module": "numpy",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1708.0,
+    "error": ""
+  },
+  {
+    "step": "torch",
+    "module": "torch",
+    "d_vram_mb": -2.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1706.0,
+    "error": ""
+  },
+  {
+    "step": "transcribe_cpp",
+    "module": "transcribe_cpp",
+    "d_vram_mb": -8.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "llama_cpp",
+    "module": "llama_cpp",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "soundfile/scipy",
+    "module": "scipy.signal",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "backend.core.normalizer",
+    "module": "backend.core.normalizer",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "backend.core.metrics",
+    "module": "backend.core.metrics",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "backend.vad.engines (funasr/silero/firered)",
+    "module": "backend.vad.engines",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "backend.tts (omnivoice)",
+    "module": "backend.tts",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1698.0,
+    "error": ""
+  },
+  {
+    "step": "backend.translation.engine",
+    "module": "backend.translation.engine",
+    "d_vram_mb": -1.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1697.0,
+    "error": ""
+  },
+  {
+    "step": "backend.asr.engine",
+    "module": "backend.asr.engine",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1697.0,
+    "error": ""
+  },
+  {
+    "step": "backend.main (server wiring)",
+    "module": "backend.main",
+    "d_vram_mb": 0.0,
+    "d_rss_mb": 0.0,
+    "vram_total_mb": 1697.0,
+    "error": ""
+  }
+]

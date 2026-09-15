@@ -287,10 +287,9 @@ class OverlayManager {
 
   onTranslation(payload) {
     if (!this.renderer) return;
-    const sentenceId = payload.sentenceId || payload.sentence_id || payload.utteranceId || payload.utterance_id;
-    const text = payload.text || payload.translated;
-    const status = payload.status || "ok";
-    this.renderer.onTranslation(sentenceId, text, status);
+    // Chuyển NGUYÊN payload để renderer còn biết đây là mảnh dịch dở (`partial`) hay bản
+    // hoàn chỉnh — cần cho tính năng "tắt chạy chữ" (chỉ hiện bản dịch 1 lần).
+    this.renderer.onTranslation(payload);
   }
 
   clear() {

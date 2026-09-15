@@ -1,0 +1,22 @@
+[
+  {
+    "label": "pytest (tầng A) — MẶC ĐỊNH",
+    "exit": 0,
+    "seconds": 9.2,
+    "vram_base_mb": 1658.0,
+    "vram_peak_total_mb": 1665.0,
+    "vram_peak_of_test_pid_mb": 0.0,
+    "vram_after_mb": 1665.0,
+    "gpu_util_peak_pct": 0.0
+  },
+  {
+    "label": "tier-B (qwen3-asr-0.6b, transcribe.cpp trên Vulkan)",
+    "exit": 0,
+    "seconds": 24.1,
+    "vram_base_mb": 1665.0,
+    "vram_peak_total_mb": 3020.0,
+    "vram_peak_of_test_pid_mb": 1365.0,
+    "vram_after_mb": 1656.0,
+    "gpu_util_peak_pct": 90.0
+  }
+]

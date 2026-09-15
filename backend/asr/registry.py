@@ -33,7 +33,7 @@ class ModelRegistry:
     def _load_yaml(self) -> None:
         """Đọc file models.yaml."""
         if not self._yaml_path.exists():
-            logger.warning(f"models.yaml không tồn tại tại: {self._yaml_path}")
+            logger.warning(f"Không tìm thấy models.yaml tại: {self._yaml_path}", extra={"module_tag": "ASR"})
             return
 
         with open(self._yaml_path, "r", encoding="utf-8") as f:
@@ -46,6 +46,20 @@ class ModelRegistry:
 
     def get_active_model_key(self) -> str:
         return self._active_model_key
+
+    @property
+    def models(self) -> Dict[str, Dict[str, Any]]:
+        """Catalog model (read-only).
+
+        Được thêm vào vì `ws/session.py` từng truy cập `registry.models` — thuộc tính
+        này KHÔNG tồn tại (chỉ có `_models`), khiến mỗi lần đổi ASR model qua popup
+        ném AttributeError và làm sập cả phiên WebSocket.
+        """
+        return self._models
+
+    def has_model(self, model_key: Optional[str]) -> bool:
+        """Kiểm tra model key có trong catalog (không nạp gì)."""
+        return (model_key or "").strip().lower() in self._models
 
     def set_active_model_key(self, model_key: str) -> None:
         clean = (model_key or "").strip().lower()
@@ -60,14 +74,22 @@ class ModelRegistry:
         return self._models.get(key)
 
     def list_models(self) -> List[Dict[str, Any]]:
-        """Trả về danh sách tất cả các mô hình ASR khả dụng."""
+        """Trả về danh sách tất cả các mô hình ASR khả dụng (kèm cờ `is_downloaded`)."""
         result = []
         for k, v in self._models.items():
             item = dict(v)
             item["id"] = k
             item["is_active"] = (k == self._active_model_key)
+            item["is_downloaded"] = self.is_downloaded(k)
             result.append(item)
         return result
+
+    def is_downloaded(self, model_key: Optional[str] = None) -> bool:
+        """True nếu file GGUF của model ASR đã có sẵn trong `backend/models` (không chạm mạng)."""
+        try:
+            return os.path.isfile(self.resolve_model_path(model_key))
+        except Exception:  # noqa: BLE001
+            return False
 
     def is_streaming_model(self, model_key: Optional[str] = None) -> bool:
         """Kiểm tra xem model có phải là kiến trúc streaming (session.stream) không."""

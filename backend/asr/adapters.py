@@ -101,6 +101,6 @@ def build_family_options(
             return opt
 
     except Exception as e:
-        logger.debug(f"Không thể khởi tạo FamilyExtension cho {family}: {e}")
+        logger.debug(f"Không thể khởi tạo FamilyExtension cho {family}: {e}", extra={"module_tag": "ASR"})
 
     return None

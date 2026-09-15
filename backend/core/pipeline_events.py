@@ -20,6 +20,8 @@ class CommitReason(str, Enum):
     STABLE_PREFIX = "STABLE_PREFIX"
     TIMEOUT_FORCE = "TIMEOUT_FORCE"
     MANUAL = "MANUAL"
+    # P4.5: hàng đợi commit đầy -> câu cũ nhất được GỘP thay vì bị vứt bỏ.
+    MERGED_BACKLOG = "MERGED_BACKLOG"
 
 
 @dataclass

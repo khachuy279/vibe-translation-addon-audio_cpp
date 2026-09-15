@@ -1,0 +1,57 @@
+{
+  "provider": "transcribe-cpp-native",
+  "backends": [
+    {
+      "name": "Vulkan0",
+      "kind": "vulkan",
+      "memory_total": 17055088640
+    },
+    {
+      "name": "CPU",
+      "kind": "cpu",
+      "memory_total": 68616728576
+    }
+  ],
+  "model_backend": "Vulkan0",
+  "snapshots": [
+    {
+      "tag": "baseline (chua nap)",
+      "smi_used_mb": 1886.0,
+      "smi_total_mb": 16311.0,
+      "torch_free_mb": 15173.0,
+      "torch_total_mb": 16310.4,
+      "rss_mb": 636.8
+    },
+    {
+      "tag": "engine tao (chua nap model)",
+      "smi_used_mb": 1992.0,
+      "smi_total_mb": 16311.0,
+      "torch_free_mb": 15173.0,
+      "torch_total_mb": 16310.4,
+      "rss_mb": 637.4
+    },
+    {
+      "tag": "sau khi nap+warmup",
+      "smi_used_mb": 3230.0,
+      "smi_total_mb": 16311.0,
+      "torch_free_mb": 13938.3,
+      "torch_total_mb": 16310.4,
+      "rss_mb": 947.1
+    },
+    {
+      "tag": "sau inference",
+      "smi_used_mb": 3239.0,
+      "smi_total_mb": 16311.0,
+      "torch_free_mb": 13930.0,
+      "torch_total_mb": 16310.4,
+      "rss_mb": 954.6
+    }
+  ],
+  "inference_ms": 4218.463499972131,
+  "peak": {
+    "smi": 3350.0,
+    "torch_free_min": 13819.45703125,
+    "rss": 1074.91796875
+  },
+  "audio_sec": 6.0
+}

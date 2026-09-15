@@ -16,7 +16,7 @@ from typing import Optional, Dict, Any
 
 from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
@@ -48,12 +48,13 @@ except ImportError:
 from backend.utils.cuda import setup_cuda_dll_paths
 setup_cuda_dll_paths()
 
-from backend.config import config, SUPPORTED_LANGUAGES, TranslationConfig
+from backend.config import config, SUPPORTED_LANGUAGES
 from backend.vad import SUPPORTED_VAD_ENGINES, VADProcessor
 from backend.asr.registry import ModelRegistry
 from backend.asr.engine import TranscribeEngine
 from backend.translation.engine import GGUFTranslationEngine, get_translation_engine, reset_translation_engine
 from backend.translation.registry import TranslationModelRegistry
+from backend.translation import hotswap as translation_hotswap
 from backend.tts import VoiceManager, OmniVoiceTTS, get_tts_engine
 from backend.core.metrics import metrics_collector
 from backend.ws.handler import handle_ws
@@ -64,6 +65,73 @@ logger = get_logger("main")
 _background_tasks: set = set()
 
 
+def _warn_if_cuda_provider_missing() -> None:
+    """P1.1 — KẾT LUẬN: KHÔNG dùng được CUDA cho ASR trên Windows; cảnh báo nay chỉ để ghi nhận.
+
+    Bằng chứng (kiểm tra trên chính máy này):
+    - `transcribe_cpp_native/_native/contract.json` → `"backends": ["vulkan", "cpu"]`,
+      `"lane": "cpu-vulkan"`; thư mục `_native` có `ggml-vulkan.dll` + các `ggml-cpu-*.dll`
+      nhưng **KHÔNG có `ggml-cuda.dll`**.
+    - Metadata wheel `transcribe-cpp-native 0.2.3`: *"Planned wheels will bundle CPU plus
+      platform accelerators"* ⇒ bản CUDA CHƯA phát hành.
+    - Trên PyPI, `transcribe-cpp-native-cu12` chỉ có **duy nhất phiên bản 0.0.0** (đặt tên
+      trước, không có nội dung) ⇒ lời khuyên cũ "cài gói CUDA kia" là SAI và đã bị gỡ hoàn toàn
+      khỏi mã (có test tầng A canh việc này).
+
+    Vì vậy ASR chạy **Vulkan** (đã có tăng tốc GPU: +1,4 GB VRAM, ~90 % util khi suy luận) —
+    đây là đường được hỗ trợ. Hàm này chỉ ghi log ngắn gọn, KHÔNG hướng dẫn cài gì thêm.
+    """
+    try:
+        import transcribe_cpp
+        try:
+            if bool(transcribe_cpp.backend_available("cuda")):
+                return
+        except Exception:
+            pass
+
+        torch_cuda = False
+        try:
+            import torch
+            torch_cuda = bool(torch.cuda.is_available())
+        except Exception:
+            torch_cuda = False
+
+        if torch_cuda:
+            # INFO (không còn WARNING): đây là trạng thái BÌNH THƯỜNG của bản dựng này,
+            # không phải sự cố cần người dùng khắc phục.
+            logger.info(
+                "[STARTUP] ASR dùng backend Vulkan (bản dựng transcribe-cpp hiện chỉ có ""— chưa có CUDA cho Windows). Translation/TTS vẫn dùng CUDA. ""Đây là cấu hình được hỗ trợ, không cần cài thêm gì.",
+                extra={"module_tag": "ASR"},
+            )
+    except Exception as exc:  # noqa: BLE001
+        logger.debug(f"Bỏ qua kiểm tra CUDA provider: {exc}", extra={"module_tag": "MAIN"})
+
+
+def _asr_runtime_info() -> Dict[str, Any]:
+    """Thông tin backend ASR thực tế đang dùng (để /health xác nhận bằng mắt)."""
+    info: Dict[str, Any] = {"model": None, "backend": None, "provider": None, "cuda_backend_available": None}
+    try:
+        import transcribe_cpp
+        info["provider"] = transcribe_cpp.native_provider()
+        try:
+            info["cuda_backend_available"] = bool(transcribe_cpp.backend_available("cuda"))
+        except Exception:
+            info["cuda_backend_available"] = False
+    except Exception:
+        pass
+    try:
+        model = TranscribeEngine._shared_model
+        if model is not None:
+            info["model"] = TranscribeEngine._shared_model_key
+            info["backend"] = getattr(model, "backend", "unknown")
+            info["supports_streaming"] = bool(
+                getattr(getattr(model, "capabilities", None), "supports_streaming", False)
+            )
+    except Exception:
+        pass
+    return info
+
+
 def track_background_task(coro, name: str = "background_task") -> asyncio.Task:
     """Tạo và theo dõi tác vụ bất đồng bộ trong background tránh bị Garbage Collector thu hồi sớm."""
     task = asyncio.create_task(coro, name=name)
@@ -71,12 +139,35 @@ def track_background_task(coro, name: str = "background_task") -> asyncio.Task:
     task.add_done_callback(
         lambda t: (
             _background_tasks.discard(t),
-            logger.error(f"Task '{name}' gặp lỗi: {t.exception()}", exc_info=t.exception())
+            logger.error(f"Task '{name}' gặp lỗi: {t.exception()}", exc_info=t.exception(), extra={"module_tag": "MAIN"})
             if not t.cancelled() and t.exception()
             else None,
         )
     )
     return task
+
+
+async def _activate_translation_model_bg(canonical_key: str, allow_download: bool = True) -> None:
+    """Tác vụ nền: tải (nếu cần) + nạp model dịch rồi thông báo cho các phiên đang chạy.
+
+    Trạng thái được `translation.hotswap` giữ lại để popup hỏi tiến độ qua `/api/config`.
+    """
+    from backend.ws.handler import get_active_sessions
+
+    try:
+        await translation_hotswap.run_reserved(canonical_key, allow_download=allow_download)
+    except Exception:
+        # hotswap đã log + lưu trạng thái "error" (kèm thông báo) cho popup đọc.
+        return
+
+    for sess in get_active_sessions():
+        try:
+            sess.config["translation_model"] = canonical_key
+        except Exception as e:  # noqa: BLE001
+            logger.debug(
+                f"Không cập nhật được translation_model cho session {getattr(sess, 'session_id', '?')}: {e}",
+                extra={"module_tag": "MAIN"},
+            )
 
 
 class SwitchModelRequest(BaseModel):
@@ -95,46 +186,103 @@ class SwitchModelRequest(BaseModel):
     tts_speed: Optional[float] = None
 
 
+def _prewarm_asr() -> None:
+    """Nạp + pre-warm ASR (blocking; gọi qua asyncio.to_thread)."""
+    try:
+        TranscribeEngine().prewarm()
+        logger.info("[STARTUP] ASR model đã được nạp & pre-warm thành công!", extra={"module_tag": "ASR"})
+    except Exception as e:
+        logger.warning(f"[STARTUP] Cảnh báo pre-warm ASR: {e}", exc_info=True, extra={"module_tag": "ASR"})
+
+
+def _prewarm_translation() -> None:
+    """Nạp model dịch (blocking; gọi qua asyncio.to_thread)."""
+    try:
+        get_translation_engine().load_model()
+        logger.info("[STARTUP] Translation model đã được nạp & pre-warm thành công!", extra={"module_tag": "TRANSLATE"})
+    except Exception as e:
+        logger.warning(f"[STARTUP] Cảnh báo pre-warm Translation: {e}", exc_info=True, extra={"module_tag": "TRANSLATE"})
+
+
+def _prewarm_vad_default() -> None:
+    """P1.9: nạp engine VAD đang dùng NGAY (cần cho audio đầu tiên)."""
+    try:
+        vad = VADProcessor(vad_engine=config.vad.vad_engine)
+        vad.feed_chunk(bytes(800))
+        logger.info(
+            f"[STARTUP] VAD engine mặc định '{config.vad.vad_engine}' đã sẵn sàng!",
+            extra={"module_tag": "VAD"},
+        )
+    except Exception as e:
+        logger.warning(f"[STARTUP] Cảnh báo pre-warm VAD: {e}", exc_info=True, extra={"module_tag": "VAD"})
+
+
+def _prewarm_vad_others() -> None:
+    """P1.9/G10: nạp NỀN các engine VAD khác để đổi trong popup là áp dụng ngay.
+
+    Đặc biệt quan trọng vì extension từng mặc định gửi một VAD engine khác engine mặc
+    định của backend — nếu chưa nạp sẵn thì lần đổi đó sẽ phải nạp model (có thể tải từ
+    HuggingFace) ngay trên đường hot, làm backend ngừng nhận audio.
+
+    Hàm này BLOCKING và được gọi ở NỀN để không làm chậm khởi động.
+    Trả về dict {engine: status} để test/log kiểm chứng được.
+    """
+    statuses: Dict[str, str] = {}
+    try:
+        from backend.vad import SUPPORTED_VAD_ENGINES
+        from backend.vad.engines import VADEngineFactory
+        others = [e for e in SUPPORTED_VAD_ENGINES if e != config.vad.vad_engine]
+        statuses = VADEngineFactory.prewarm_engines(others, threshold=config.vad.threshold)
+        for name, status in statuses.items():
+            if status == "ok":
+                logger.info(f"[STARTUP] VAD engine '{name}' nạp nền xong.",
+                            extra={"module_tag": "VAD"})
+            else:
+                logger.warning(f"[STARTUP] VAD engine '{name}' nạp nền thất bại: {status}",
+                               extra={"module_tag": "VAD"})
+    except Exception as e:
+        logger.warning(f"[STARTUP] Cảnh báo nạp nền VAD engines: {e}", extra={"module_tag": "VAD"})
+    return statuses
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Khởi tạo và làm ấm trước (Pre-warm) song song toàn bộ các mô hình khi máy chủ khởi động."""
-    logger.info("[STARTUP] Đang nạp và làm ấm (Pre-warm) song song ASR, Translation & VAD...")
+    """Khởi tạo và pre-warm trước (Pre-warm) song song toàn bộ các mô hình khi máy chủ khởi động."""
+    logger.info("[STARTUP] Đang nạp và pre-warm song song ASR, Translation & VAD...", extra={"module_tag": "MAIN"})
 
-    def _prewarm_asr():
-        try:
-            TranscribeEngine().prewarm()
-            logger.info("[STARTUP] ASR model đã được nạp & làm ấm thành công!", extra={"module_tag": "ASR"})
-        except Exception as e:
-            logger.warning(f"[STARTUP] Cảnh báo làm ấm ASR: {e}", exc_info=True, extra={"module_tag": "ASR"})
-
-    def _prewarm_translation():
-        try:
-            get_translation_engine().load_model()
-            logger.info("[STARTUP] Translation model đã được nạp & làm ấm thành công!", extra={"module_tag": "TRANSLATE"})
-        except Exception as e:
-            logger.warning(f"[STARTUP] Cảnh báo làm ấm Translation: {e}", exc_info=True, extra={"module_tag": "TRANSLATE"})
-
-    def _prewarm_vad():
-        try:
-            vad = VADProcessor(vad_engine=config.vad.vad_engine)
-            vad.feed_chunk(bytes(800))
-            logger.info("[STARTUP] VAD engine đã được làm ấm thành công!", extra={"module_tag": "VAD"})
-        except Exception as e:
-            logger.warning(f"[STARTUP] Cảnh báo làm ấm VAD: {e}", exc_info=True, extra={"module_tag": "VAD"})
+    _warn_if_cuda_provider_missing()
 
     results = await asyncio.gather(
         asyncio.to_thread(_prewarm_asr),
         asyncio.to_thread(_prewarm_translation),
-        asyncio.to_thread(_prewarm_vad),
+        asyncio.to_thread(_prewarm_vad_default),
         return_exceptions=True,
     )
     for res in results:
         if isinstance(res, Exception):
             logger.warning(f"[STARTUP] Lỗi thành phần trong quá trình prewarm: {res}", extra={"module_tag": "MAIN"})
 
-    logger.info("[STARTUP] Toàn bộ mô hình đã được làm ấm song song và sẵn sàng phục vụ!", extra={"module_tag": "MAIN"})
+    # Các engine VAD khác nạp ở nền để không làm chậm khởi động.
+    track_background_task(asyncio.to_thread(_prewarm_vad_others), name="vad_prewarm_others")
+
+    # F-40: nhịp tim event loop — để `/health` phát hiện được loop bị chặn đứng (treo im lặng).
+    from backend.core import heartbeat
+
+    heartbeat.reset()
+    track_background_task(heartbeat.heartbeat_loop(), name="heartbeat")
+
+    # F-46: watchdog LUỒNG THẬT — event loop đứng quá lâu thì dump stack MỌI thread ra stderr
+    # (kiểu treo do native chặn GIL không thể phát hiện bằng coroutine).
+    try:
+        from backend.utils import stall_watchdog
+
+        stall_watchdog.start()
+    except Exception as exc:  # noqa: BLE001
+        logger.debug(f"Không bật được stall watchdog: {exc}", extra={"module_tag": "MAIN"})
+
+    logger.info("[STARTUP] Toàn bộ mô hình đã được pre-warm song song và sẵn sàng phục vụ!", extra={"module_tag": "MAIN"})
     yield
-    logger.info("[SHUTDOWN] Đang giải phóng toàn bộ tài nguyên GPU & RAM...")
+    logger.info("[SHUTDOWN] Đang giải phóng toàn bộ tài nguyên GPU & RAM...", extra={"module_tag": "MAIN"})
     for t in list(_background_tasks):
         if not t.done():
             t.cancel()
@@ -143,27 +291,27 @@ async def lifespan(app: FastAPI):
         TranscribeEngine.shutdown_executors(wait=False)
         TranscribeEngine.unload_shared_model()
     except Exception as e:
-        logger.debug(f"ASR cleanup notice: {e}")
+        logger.debug(f"ASR cleanup notice: {e}", extra={"module_tag": "MAIN"})
 
     try:
         from backend.translation.engine import GGUFTranslator
         GGUFTranslator.shutdown_executors(wait=False)
         reset_translation_engine()
     except Exception as e:
-        logger.debug(f"Translation cleanup notice: {e}")
+        logger.debug(f"Translation cleanup notice: {e}", extra={"module_tag": "MAIN"})
 
     try:
         OmniVoiceTTS.reset_instance()
     except Exception as e:
-        logger.debug(f"TTS cleanup notice: {e}")
+        logger.debug(f"TTS cleanup notice: {e}", extra={"module_tag": "MAIN"})
 
     try:
         from backend.ws.handler import shutdown_vad_executor
         shutdown_vad_executor(wait=False)
     except Exception as e:
-        logger.debug(f"VAD cleanup notice: {e}")
+        logger.debug(f"VAD cleanup notice: {e}", extra={"module_tag": "MAIN"})
 
-    logger.info("[SHUTDOWN] Hoàn tất tắt máy chủ an toàn.")
+    logger.info("[SHUTDOWN] Hoàn tất tắt máy chủ an toàn.", extra={"module_tag": "MAIN"})
 
 
 
@@ -195,13 +343,22 @@ app.add_middleware(
 @app.get("/health")
 async def health_check():
     """Endpoint kiểm tra sức khỏe hệ thống."""
+    from backend.core import heartbeat
+    from backend.ws.handler import count_active_sessions
+
     return {
         "status": "ok",
         "service": "backend_modular",
+        "protocol_version": config.ws.protocol_version,
         "asr_model": ModelRegistry.get_instance().get_active_model_key(),
+        "asr_runtime": _asr_runtime_info(),
         "vad_engine": config.vad.vad_engine,
         "translation_model": config.translation.base,
         "tts_model": config.tts.model,
+        "active_sessions": count_active_sessions(),
+        # F-40: nếu event loop bị chặn, giá trị này tăng đều dù /health vẫn trả lời được
+        # (FastAPI chạy trong loop nên thực tế nó chỉ nhảy vọt khi loop vừa thoát ra).
+        "loop_stall_ms": round(heartbeat.stall_sec() * 1000.0, 1),
     }
 
 
@@ -231,6 +388,7 @@ def _build_config_response(include_catalog: bool = True) -> Dict[str, Any]:
 
     resp: Dict[str, Any] = {
         "status": "ok",
+        "protocol_version": config.ws.protocol_version,
         "engine": active_key,
         "asr_engine": active_key,
         "active_model": active_key,
@@ -240,10 +398,23 @@ def _build_config_response(include_catalog: bool = True) -> Dict[str, Any]:
         "available_vad_engines": list(SUPPORTED_VAD_ENGINES),
         "vad_silence_duration_ms": config.vad.silence_duration_ms,
         "silence_duration_ms": config.vad.silence_duration_ms,
+        "hangover_ms": config.vad.hangover_ms,
         "vad_threshold": config.vad.threshold,
         "min_words_to_commit": config.sentence.min_words_to_commit,
         "source_lang": config.asr.language,
         "supported_languages": SUPPORTED_LANGUAGES,
+        # P2.x: thông số streaming để popup hiển thị/chỉnh được và client biết backend đang làm gì
+        "streaming": {
+            "preview_window_sec": config.asr.preview_window_sec,
+            "poll_interval_ms": config.asr.poll_interval_ms,
+            "min_transcribe_sec": config.asr.min_transcribe_sec,
+            "max_duration_sec": config.sentence.max_duration_sec,
+            "stability_duration_sec": config.sentence.stability_duration_sec,
+            "enable_tier234": config.sentence.enable_tier234,
+            "reuse_preview_for_commit": config.asr.preview_reuse_for_commit,
+            "stream_translation": config.translation.stream_tokens,
+            "native_backend": config.asr.backend,
+        },
         "translation": {
             "model": config.translation.model,
             "gguf_file": config.translation.gguf_file,
@@ -251,6 +422,10 @@ def _build_config_response(include_catalog: bool = True) -> Dict[str, Any]:
             "source_lang": config.translation.source_lang,
             "base": config.translation.base,
             "translation_model": config.translation.base,
+            # Model nào đã có file GGUF cục bộ (cờ `is_downloaded` trong available_models).
+            "auto_download": config.translation.auto_download,
+            # Tiến trình tải/nạp model dịch: idle | downloading | loading | ready | error.
+            "download": translation_hotswap.status(),
             "available_models": TranslationModelRegistry.get_instance().list_models(),
         },
         "tts": {
@@ -286,17 +461,23 @@ async def get_voices_list():
 @app.post("/api/config")
 @app.post("/api/switch-engine")
 async def update_backend_config(req: SwitchModelRequest):
-    """Cập nhật cấu hình runtime động hoặc hot-swap mô hình."""
+    """Cập nhật cấu hình runtime động hoặc hot-swap mô hình.
+
+    P1.8/P1.10: đổi ASR model dùng đường "nạp trước rồi swap" (không giải phóng model
+    cũ trước khi model mới sẵn sàng => không có khoảng trống phụ đề và không còn cửa
+    sổ use-after-free). Các thay đổi còn lại được ĐẨY vào phiên đang chạy qua
+    `SessionState.apply_config()` thay vì chỉ ghi vào config toàn cục.
+    """
     registry = ModelRegistry.get_instance()
     target_model = req.model_id or req.asr_engine
 
     if target_model:
         try:
             registry.set_active_model_key(target_model)
-            TranscribeEngine.unload_shared_model()
             engine = TranscribeEngine(target_model)
-            await asyncio.to_thread(engine.prewarm)
-            logger.info(f"Đã chuyển đổi ASR Model sang: '{target_model}'")
+            # prepare_model nạp model mới NGOÀI lock rồi swap nguyên tử dưới _infer_lock.
+            await asyncio.to_thread(engine.prepare_model, target_model)
+            logger.info(f"Đã chuyển đổi ASR Model sang: '{target_model}'(nạp trước + swap)", extra={"module_tag": "MAIN"})
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -304,7 +485,7 @@ async def update_backend_config(req: SwitchModelRequest):
         ve = req.vad_engine.lower().strip()
         if ve in SUPPORTED_VAD_ENGINES:
             config.vad.vad_engine = ve
-            logger.info(f"Đã chuyển VAD engine sang: '{ve}'")
+            logger.info(f"Đã chuyển VAD engine sang: '{ve}'", extra={"module_tag": "MAIN"})
 
     if req.vad_threshold is not None:
         config.vad.threshold = req.vad_threshold
@@ -320,22 +501,67 @@ async def update_backend_config(req: SwitchModelRequest):
     if req.translation_model is not None:
         tm = req.translation_model.lower().strip()
         trans_registry = TranslationModelRegistry.get_instance()
+        # F-50: `resolve_key` fallback về `default_model` nên phải kiểm tra key có thật trước,
+        # nếu không một tên sai sẽ âm thầm đổi sang model mặc định.
+        if not trans_registry.is_known(tm):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Model dịch '{tm}' không có trong translation_models.yaml",
+            )
         canonical_key = trans_registry.resolve_key(tm)
-        model_info = trans_registry.get_model(canonical_key)
-        if model_info is not None:
-            try:
-                config.translation.base = canonical_key
-                new_trans_cfg = TranslationConfig(
-                    base=canonical_key,
-                    target_lang=config.translation.target_lang,
-                    source_lang=config.translation.source_lang,
+
+        if translation_hotswap.needs_download(canonical_key):
+            if not translation_hotswap.auto_download_enabled():
+                gguf_path = trans_registry.resolve_gguf_path(canonical_key)
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"Chưa có file GGUF cục bộ: {gguf_path}. Hãy copy file vào backend/models "
+                        f"hoặc bật TranslationConfig.auto_download để backend tự tải."
+                    ),
                 )
-                translator = get_translation_engine(new_trans_cfg)
-                await asyncio.to_thread(translator.load_model)
-                logger.info(f"Đã chuyển mô hình dịch sang: '{canonical_key}'")
-            except Exception as e:
-                logger.error(f"Lỗi chuyển mô hình dịch sang '{canonical_key}': {e}", exc_info=True)
-                raise HTTPException(status_code=500, detail=str(e))
+            if translation_hotswap.is_busy() and not translation_hotswap.is_busy(canonical_key):
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Đang tải/nạp model dịch '{translation_hotswap.status().get('model')}', vui lòng đợi.",
+                )
+            snapshot = translation_hotswap.reserve(canonical_key)
+            if snapshot.get("started"):
+                track_background_task(
+                    _activate_translation_model_bg(canonical_key, bool(snapshot.get("allow_download"))),
+                    name=f"translation_activate_{canonical_key}",
+                )
+            payload = _build_config_response(include_catalog=False)
+            payload.update({
+                # Giữ `status: ok` để client cũ không hiểu nhầm thành lỗi; trạng thái tải nằm
+                # ở `download_state`/`download` (HTTP code 202 mới là tín hiệu "đang tải nền").
+                "download_state": "downloading",
+                "detail": (
+                    f"Đang tải model dịch '{canonical_key}' về backend/models (chạy nền). "
+                    f"Model '{config.translation.base}' hiện tại vẫn hoạt động bình thường."
+                ),
+                "translation_model": canonical_key,
+                "download": translation_hotswap.status(),
+            })
+            logger.info(
+                f"Model dịch '{canonical_key}' chưa có file — đã xếp lịch tải nền; "
+                    f"giữ nguyên model đang chạy '{config.translation.base}'.",
+                extra={"module_tag": "MAIN"},
+            )
+            return JSONResponse(status_code=202, content=payload)
+
+        if translation_hotswap.is_busy():
+            raise HTTPException(
+                status_code=409,
+                detail=f"Đang tải/nạp model dịch '{translation_hotswap.status().get('model')}', vui lòng đợi.",
+            )
+        try:
+            # F-50: tải (nếu cần) + nạp model mới TRƯỚC, chỉ ghi config sau khi thành công.
+            await translation_hotswap.activate_model(canonical_key, allow_download=True)
+            logger.info(f"Đã chuyển mô hình dịch sang: '{canonical_key}'", extra={"module_tag": "MAIN"})
+        except Exception as e:
+            logger.error(f"Lỗi chuyển mô hình dịch sang '{canonical_key}': {e}", exc_info=True, extra={"module_tag": "MAIN"})
+            raise HTTPException(status_code=500, detail=str(e))
 
     if req.tts_enabled is not None:
         config.tts.enabled = req.tts_enabled
@@ -345,6 +571,48 @@ async def update_backend_config(req: SwitchModelRequest):
         config.tts.default_voice = req.tts_voice
     if req.tts_speed is not None:
         config.tts.speed = req.tts_speed
+
+    # P1.10: đẩy các thay đổi vào phiên ĐANG CHẠY (trước đây REST chỉ đổi config toàn
+    # cục, còn SessionState giữ snapshot cũ nên thay đổi không có hiệu lực).
+    session_payload: Dict[str, Any] = {}
+    if req.vad_engine is not None:
+        session_payload["vad_engine"] = req.vad_engine
+    if req.vad_threshold is not None:
+        session_payload["vad_threshold"] = req.vad_threshold
+    if req.silence_duration_ms is not None:
+        session_payload["silence_duration_ms"] = req.silence_duration_ms
+    if req.min_words_to_commit is not None:
+        session_payload["min_words_to_commit"] = req.min_words_to_commit
+    if req.target_lang is not None:
+        session_payload["target_lang"] = req.target_lang
+    if req.source_lang is not None:
+        session_payload["source_lang"] = req.source_lang
+    if req.tts_enabled is not None:
+        session_payload["tts_enabled"] = req.tts_enabled
+    if req.tts_voice is not None:
+        session_payload["tts_voice"] = req.tts_voice
+    if req.tts_speed is not None:
+        session_payload["tts_speed"] = req.tts_speed
+
+    from backend.ws.handler import get_active_sessions
+    applied_to_sessions = 0
+    for sess in get_active_sessions():
+        try:
+            if session_payload:
+                sess.apply_config(session_payload)
+                applied_to_sessions += 1
+            # ASR model: nạp nền + thông báo trạng thái cho phiên đang chạy
+            if target_model and sess.asr_engine is not None:
+                sess.config["asr_engine"] = target_model
+                sess.asr_engine.model_key = target_model
+                sess.asr_engine.model_info = registry.get_model_info(target_model) or {}
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Không áp dụng được cấu hình REST cho session {sess.session_id}: {e}", extra={"module_tag": "MAIN"})
+    if applied_to_sessions:
+        logger.info(
+            f"Cấu hình từ popup đã áp dụng ngay cho {applied_to_sessions} phiên đang chạy.",
+            extra={"module_tag": "MAIN"},
+        )
 
     # Thông báo rõ ràng trên console khi popup cập nhật giá trị
     updated_items = []
@@ -373,8 +641,8 @@ async def update_backend_config(req: SwitchModelRequest):
 
     if updated_items:
         logger.info(
-            f"[POPUP CONFIG UPDATE] Thay đổi từ Extension Popup: {', '.join(updated_items)}",
-            extra={"module_tag": "CONFIG"},
+            f"Thay đổi từ Extension Popup: {', '.join(updated_items)}",
+            extra={"module_tag": "WS"},
         )
 
     return _build_config_response(include_catalog=True)
@@ -382,7 +650,7 @@ async def update_backend_config(req: SwitchModelRequest):
 
 @app.post("/api/tts/prewarm")
 async def prewarm_tts_endpoint():
-    """Làm ấm mô hình TTS trên GPU."""
+    """pre-warm mô hình TTS trên GPU."""
     success = await get_tts_engine().prewarm()
     if success:
         config.tts.enabled = True
@@ -392,7 +660,15 @@ async def prewarm_tts_endpoint():
 @app.get("/api/metrics")
 async def get_metrics():
     """Lấy báo cáo đo lường hiệu năng và cảnh báo điểm nghẽn thời gian thực."""
+    from backend.ws.handler import count_active_sessions
+    metrics_collector.record_gauge("ws", "active_sessions", count_active_sessions())
     return metrics_collector.generate_report()
+
+
+@app.get("/api/metrics/pipeline")
+async def get_pipeline_metrics():
+    """P0.1: ảnh chụp gọn các stage hot path (asr/vad/queue) để chẩn đoán nghẽn."""
+    return metrics_collector.snapshot_pipeline()
 
 
 @app.websocket("/ws")
@@ -411,7 +687,7 @@ def main():
         "ssl_certfile": cert_path,
         "ssl_keyfile": key_path,
     }
-    logger.info(f"Chế độ WSS (SSL) kích hoạt với cert: {cert_path}")
+    logger.info(f"Chế độ WSS (SSL) kích hoạt với cert: {cert_path}", extra={"module_tag": "MAIN"})
 
     try:
         uvicorn.run(
@@ -424,7 +700,7 @@ def main():
             **ssl_kwargs,
         )
     except KeyboardInterrupt:
-        logger.info("👋 Nhận tín hiệu ngắt (Ctrl+C). Đã dừng máy chủ an toàn.")
+        logger.info("Nhận tín hiệu ngắt (Ctrl+C). Đã dừng máy chủ an toàn.", extra={"module_tag": "MAIN"})
 
 
 

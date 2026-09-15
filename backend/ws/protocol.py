@@ -23,7 +23,7 @@ def parse_audio_frame(data: bytes) -> Tuple[Optional[bytes], float, Optional[int
         Nếu khung không hợp lệ hoặc lỗi định dạng, trả về (None, 0.0, None).
     """
     if not data or len(data) < 4:
-        logger.debug(f"Bỏ qua khung nhị phân rỗng hoặc quá ngắn: {len(data) if data else 0} bytes")
+        logger.debug(f"Bỏ qua khung nhị phân rỗng hoặc quá ngắn: {len(data) if data else 0} bytes", extra={"module_tag": "WS"})
         return None, 0.0, None
 
     # Thử Format A: 4-byte uint32 header length
@@ -39,12 +39,12 @@ def parse_audio_frame(data: bytes) -> Tuple[Optional[bytes], float, Optional[int
                     capture_ts = float(header.get("captureTimestamp", 0.0))
                     chunk_idx = header.get("chunkIndex")
                     return pcm, capture_ts, chunk_idx
-                logger.debug(f"Độ dài PCM không căn chỉnh 16-bit: {len(pcm)} bytes")
+                logger.debug(f"Độ dài PCM không căn chỉnh 16-bit: {len(pcm)} bytes", extra={"module_tag": "WS"})
             else:
-                logger.debug(f"Loại header không mong đợi: '{header.get('type')}'")
+                logger.debug(f"Loại header không mong đợi: '{header.get('type')}'", extra={"module_tag": "WS"})
             return None, 0.0, None
         except Exception as e:
-            logger.debug(f"Lỗi phân tích JSON header Format A: {e}")
+            logger.debug(f"Lỗi phân tích JSON header Format A: {e}", extra={"module_tag": "WS"})
             return None, 0.0, None
 
     # Thử Format B: 8-byte float64 timestamp

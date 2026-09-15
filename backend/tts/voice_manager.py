@@ -68,7 +68,7 @@ class VoiceManager:
                                         })
                                         registered_files.add(full_path.name.lower())
                 except Exception as e:
-                    logger.warning(f"Không thể đọc voices.json: {e}")
+                    logger.warning(f"Không thể đọc voices.json: {e}", extra={"module_tag": "TTS"})
 
             # 2. Tự động phát hiện các file .wav trong thư mục chưa được đăng ký
             try:
@@ -91,7 +91,7 @@ class VoiceManager:
                         })
                         registered_files.add(file_path.name.lower())
             except Exception as e:
-                logger.warning(f"Lỗi khi quét thư mục giọng mẫu: {e}")
+                logger.warning(f"Lỗi khi quét thư mục giọng mẫu: {e}", extra={"module_tag": "TTS"})
 
             cls._cached_voices = voices
             return voices
@@ -101,7 +101,7 @@ class VoiceManager:
         """Phân giải voice_id hoặc đường dẫn tệp âm thanh thành (abs_audio_path, ref_text)."""
         voices = cls.get_available_voices()
         if not voices:
-            logger.warning("Không tìm thấy mẫu giọng nào trong hệ thống.")
+            logger.warning("Không tìm thấy mẫu giọng nào trong hệ thống.", extra={"module_tag": "TTS"})
             return "", ""
 
         if not voice_id_or_path:

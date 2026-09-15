@@ -141,6 +141,16 @@ async def run_e2e_pipeline_on_file(wav_path: Path) -> Dict[str, Any]:
     chunk_bytes_len = chunk_samples * 2
     chunk_count = len(pcm_bytes) // chunk_bytes_len
 
+    # QUAN TRỌNG (T0.2 / §7.6): phải PACING theo thời gian thực và phải `await` để
+    # nhường event loop. Bản cũ đẩy toàn bộ audio trong một vòng `for` không có `await`,
+    # nên coroutine `_stream_asr_tokens` KHÔNG có cơ hội chạy => đường preview chưa bao
+    # giờ được test, và vấn đề O(N²) hoàn toàn vô hình.
+    # Đặt E2E_SPEED=4 để chạy nhanh hơn 4 lần khi cần.
+    speed = float(os.environ.get("E2E_SPEED", "1.0") or "1.0")
+    speed = max(0.01, speed)
+    step = (chunk_samples / 16000.0) / speed
+    next_deadline = time.perf_counter()
+
     t_stream_start = time.perf_counter()
 
     for idx in range(chunk_count):
@@ -152,6 +162,14 @@ async def run_e2e_pipeline_on_file(wav_path: Path) -> Dict[str, Any]:
         pcm_data, c_ts, c_idx = parse_audio_frame(frame_bytes)
         if pcm_data and session.vad_processor:
             session.vad_processor.feed_chunk(pcm_data, capture_timestamp=c_ts)
+
+        next_deadline += step
+        delay = next_deadline - time.perf_counter()
+        if delay > 0:
+            await asyncio.sleep(delay)
+        else:
+            # Tụt hạn: vẫn nhường event loop để pipeline bắt kịp
+            await asyncio.sleep(0)
 
     # Đợi để ASR, Translation & TTS hoàn tất toàn bộ các câu
     t_wait_start = time.perf_counter()
@@ -182,6 +200,13 @@ async def run_e2e_pipeline_on_file(wav_path: Path) -> Dict[str, Any]:
     await session.cleanup()
     cleanup_ms = (time.perf_counter() - t_cleanup_start) * 1000.0
 
+    # P0.1: lấy số đo hot path để báo cáo (trước đây ASR/VAD hoàn toàn không được đo)
+    try:
+        from backend.core.metrics import metrics_collector
+        pipeline_metrics = metrics_collector.snapshot_pipeline()
+    except Exception:
+        pipeline_metrics = {}
+
     # Phân tích kết quả tin nhắn nhận được
     asr_commits = [m for m in mock_ws.sent_messages if m.get("type") == "utterance_update" and m.get("is_final")]
     translations = [m for m in mock_ws.sent_messages if m.get("type") == "translation"]
@@ -198,6 +223,9 @@ async def run_e2e_pipeline_on_file(wav_path: Path) -> Dict[str, Any]:
         "last_asr_text": asr_commits[-1]["text"] if asr_commits else "",
         "last_translated_text": translations[-1]["translated"] if translations else "",
         "tts_duration_total": sum(t.get("duration_sec", 0.0) for t in tts_audios),
+        "pipeline_metrics": pipeline_metrics,
+        "preview_count": len([m for m in mock_ws.sent_messages
+                              if m.get("type") == "utterance_update" and not m.get("is_final")]),
     }
 
 
@@ -206,9 +234,9 @@ async def main():
     print("🚀 BẮT ĐẦU BENCHMARK ĐỐI ĐẦU TOÀN DIỆN E2E (PHASE 7)")
     print("=" * 80)
 
-    # 1. Khởi động và làm ấm trước các mô hình
+    # 1. Khởi động và pre-warm trước các mô hình
     t0 = time.perf_counter()
-    print("🔄 Đang làm ấm các mô hình ASR, VAD, Translation, TTS...")
+    print("🔄 Đang pre-warm các mô hình ASR, VAD, Translation, TTS...")
     asr_eng = TranscribeEngine()
     asr_eng.prewarm()
     trans_eng = GGUFTranslationEngine.get_instance()
@@ -263,34 +291,87 @@ async def main():
     report_md += f"""
 ---
 
-## 2. Bảng So Sánh Đối Đầu Trực Tiếp Giữa Backend Mới (`/backend`) và Cũ (`/backend_cpp`)
+## 2. Chỉ Số Hot Path (P0.1 — trước đây không được đo)
+
+| Chỉ số | p50 | p95 | p99 | max | count |
+|---|---|---|---|---|---|
+"""
+    stage_keys = ["asr.preview_ms", "asr.commit_ms", "asr.preview_audio_sec",
+                  "vad.chunk_ms", "translation.queue_wait_ms", "translation.infer_ms",
+                  "tts.synthesis_ms", "ws.send_ms", "session.cleanup_ms"]
+    agg: Dict[str, Dict[str, float]] = {}
+    for r in results:
+        for k in stage_keys:
+            st = (r.get("pipeline_metrics") or {}).get("stages", {}).get(k)
+            if st and st.get("count"):
+                agg.setdefault(k, []).append(st)
+    for k in stage_keys:
+        rows = agg.get(k)
+        if not rows:
+            report_md += f"| `{k}` | – | – | – | – | 0 |\n"
+            continue
+        p50 = max(x["p50_ms"] for x in rows)
+        p95 = max(x["p95_ms"] for x in rows)
+        p99 = max(x["p99_ms"] for x in rows)
+        mx = max(x["max_ms"] for x in rows)
+        cnt = sum(int(x["count"]) for x in rows)
+        report_md += f"| `{k}` | {p50} | {p95} | {p99} | {mx} | {cnt} |\n"
+
+    report_md += f"""
+---
+
+## 3. Bảng So Sánh Đối Đầu Trực Tiếp Giữa Backend Mới (`/backend`) và Cũ (`/backend_cpp`)
+
+> ⚠️ Các dòng mô tả kiến trúc dưới đây đã được sửa cho KHỚP VỚI CODE (T0.7). Bản cũ
+> tuyên bố "Lock-Free", "4 Bậc Ưu Tiên", "3 Lớp Dedup" trong khi thực tế không đúng.
 
 | Tiêu Chí So Sánh | Hệ Thống Cũ (`/backend_cpp`) | Hệ Thống Mới (`/backend`) | Cải Thiện / Đánh Giá |
 |---|---|---|---|
 | **Cấu Trúc Mã Nguồn** | Ghép chung nhiều module, khó unit-test độc lập | **Module hóa 100%** (VAD, ASR, Commit, Translation, TTS, WS) | Dễ bảo trì, mở rộng và debug từng phần |
-| **Bảo Toàn Tín Hiệu Audio** | List slice thông thường | **Zero-Drop Circular Ring Buffer 60s** (Single-Writer, Lock-Free) | 100% Bit-Exact, không bao giờ mất mẫu âm thanh |
-| **Commit & Phân Câu** | Dựa trên VAD thô | **Commit 4 Bậc Ưu Tiên** + Lọc từ CJK/Latin + 3 Lớp Dedup | Triệt tiêu 100% câu trùng lặp, phản hồi mượt mà |
-| **Độ Trễ Fast Cleanup** | ~450ms - 800ms (dễ treo tác vụ nền) | **{avg_cleanup:.2f} ms** (< 200ms tiêu chuẩn) | **Nhanh hơn gấp 3 - 4 lần**, ngắt kết nối an toàn tuyệt đối |
-| **Tốc Độ ASR (RTF)** | 0.0245 (Nhanh gấp 40x realtime) | **0.0232** (Nhanh gấp 43x realtime) | Ổn định tối đa với binding C++ tự động |
-| **Tốc Độ Translation** | ~65 tokens/s | **67.4 - 69.1 tokens/s** | Tối ưu hóa prompt context và GPU offload |
-| **Tốc Độ Voice Cloning TTS** | ~550ms / câu | **421.0 ms / câu** (RTF: 0.077) | Tiết kiệm ~70ms nhờ cache VoiceClonePrompt |
-| **Thread-Safe WebSocket** | Cơ bản | **SafeWebSocketConnection với Async Lock** | Ngăn 100% lỗi xung đột đồng thời khi ghi socket |
-| **Tài Liệu & Ghi Chú Code** | Tiếng Anh rải rác | **100% Chú thích Tiếng Việt chi tiết, chuẩn xác** | Đạt chuẩn bàn giao chuyên nghiệp |
+| **Bảo Toàn Tín Hiệu Audio** | List slice thông thường | **Zero-Drop Circular Ring Buffer 60s** (Single-Writer, **Mutex-guarded** cho multi-reader) | 100% Bit-Exact, không bao giờ mất mẫu âm thanh |
+| **Commit & Phân Câu** | Dựa trên VAD thô | **Commit Manager 4 bậc** (VAD_SILENCE > MAX_DURATION > STABLE_PREFIX > TIMEOUT_FORCE) + lọc từ CJK/Latin + trim trùng ở ranh giới | Chốt câu ở ranh giới từ, không mất chữ ở ranh giới cắt |
+| **Cửa Sổ Preview** | Transcribe lại toàn bộ câu mỗi lần (O(N²)) | **Cửa sổ = độ dài câu tối đa** (commit vẫn toàn ngữ cảnh) | Chi phí preview bị chặn trên, không tăng theo độ dài video |
+| **Độ Trễ Fast Cleanup** | ~450ms - 800ms (dễ treo tác vụ nền) | **{avg_cleanup:.2f} ms** (< 200ms tiêu chuẩn) | Nhanh hơn gấp 3 - 4 lần, ngắt kết nối an toàn tuyệt đối |
+| **Tốc Độ Translation** | ~65 tokens/s | **67.4 - 69.1 tokens/s** + streaming token | Bản dịch hiện dần thay vì chờ hết câu |
+| **Thread-Safe WebSocket** | Cơ bản | **SafeWebSocketConnection với Async Lock** | Ngăn xung đột đồng thời khi ghi socket |
+| **An Toàn Model Switch** | Chưa rõ | **Nạp trước + swap nguyên tử dưới `_infer_lock`** | Không còn cửa sổ use-after-free khi đổi model lúc đang stream |
+| **Popup Áp Dụng Ngay** | Chưa rõ | **REST và WS đi cùng một đường `apply_config`** | Thay đổi có hiệu lực trên phiên đang chạy, không cần restart |
 
 ---
 
-## 3. Tổng Kết & Nghiệm Thu Toàn Diện Dự Án
+## 4. Hạn Chế Đã Biết (bắt buộc đọc trước khi dùng số liệu)
 
-1. **Hoàn thành 100% các Phase theo đúng lộ trình kế hoạch**:
+1. **Chỉ hỗ trợ 1 phiên/1 video.** Mọi tài nguyên GPU (ASR model+session, translation,
+   TTS) là singleton dùng chung; không có model pool. Thư viện `transcribe.cpp` 0.x ghi
+   rõ chỉ **một** `run()`/stream được in-flight trên toàn bộ session của một model.
+2. **Backend ASR phụ thuộc provider đã cài.** Wheel mặc định (`transcribe-cpp-native`)
+   là **CPU + Vulkan**; muốn dùng CUDA phải cài `transcribe-cpp-native-cu12`. Kiểm tra
+   `GET /health` → `asr_runtime.backend`.
+3. **Số RTF/độ trễ trong bảng so sánh là đo trên FILE TĨNH**, không phải pipeline
+   streaming có vòng lặp preview. Muốn số thật cho streaming, xem mục 2 (hot path) và
+   bật `TRANSCRIBE_PERF_DEBUG=1`.
+4. **`reuse_preview_for_commit` mặc định TẮT** vì có thể mất từ cuối câu; chỉ bật sau
+   khi đo WER đạt chênh ≤ 0.3%.
+5. **Cấu hình phân câu là cấu hình TOÀN CỤC** (dùng chung object với `config.sentence`),
+   nên ở chế độ nhiều phiên nó sẽ ảnh hưởng lẫn nhau.
+6. **`vad_enabled=False` không được hỗ trợ thực sự**: VAD là bắt buộc để phân câu, backend
+   sẽ tự bật lại và ghi cảnh báo (nếu tắt sẽ không có phụ đề nào).
+
+---
+
+## 5. Tổng Kết & Nghiệm Thu Toàn Diện Dự Án
+
+1. **Hoàn thành các Phase theo lộ trình kế hoạch**:
    - ✅ **Phase 1**: Core Framework, Config Pydantic v2 & Audio Ring Buffer (Bit-Exact 100%).
-   - ✅ **Phase 2**: Module VAD Streaming độc lập (Hỗ trợ Silero, FireRed, FSMN).
-   - ✅ **Phase 3**: Module ASR Streaming (`transcribe.cpp` Qwen3-ASR Vulkan/CUDA).
-   - ✅ **Phase 4**: Module Commit Manager & Phân Câu 4 bậc ưu tiên + Triple Deduplicator.
-   - ✅ **Phase 5**: Module Dịch Thuật Local GGUF (Hunyuan-MT2 7B qua Llama.cpp).
-   - ✅ **Phase 6**: Module OmniVoice Clone TTS (PyTorch Native Sub-0.5s Voice Cloning).
-   - ✅ **Phase 7**: WebSocket Server WSS, Fast Cleanup (<200ms) & Đối Đầu E2E.
+   - ✅ **Phase 2**: Module VAD Streaming độc lập (Hỗ trợ Silero, FireRed, FSMN) + pre-warm đổi tức thì.
+   - ✅ **Phase 3**: Module ASR Streaming (`transcribe.cpp`) + nhịp preview cố định + cửa sổ preview.
+   - ✅ **Phase 4**: Module Commit Manager 4 bậc (đã WIRE vào runtime) + trim trùng ranh giới.
+   - ✅ **Phase 5**: Module Dịch Thuật Local GGUF (Hunyuan-MT2 7B qua Llama.cpp) + streaming token.
+   - ✅ **Phase 6**: Module OmniVoice Clone TTS (PyTorch Native Voice Cloning).
+   - ✅ **Phase 7**: WebSocket Server WSS, Fast Cleanup (<200ms) & Đối Đầu E2E **có pacing**.
 
-2. Toàn bộ mã nguồn mới nằm gọn trong `/backend` hoàn toàn sạch sẽ, độc lập, sẵn sàng đưa vào vận hành production thay thế hoàn toàn `/backend_cpp`.
+2. Mã nguồn nằm gọn trong `/backend`, sẵn sàng vận hành cho **sử dụng cá nhân 1 phiên**.
+   Xem `report/audit/03_KE_HOACH_TRIEN_KHAI.md` để biết các hạng mục còn lại.
 """
 
     with open(REPORT_FILE, "w", encoding="utf-8") as f:

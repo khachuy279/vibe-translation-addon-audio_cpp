@@ -52,19 +52,6 @@ models:
     languages: auto
     vram_estimate_mb: 750
     description: NVIDIA Multilingual streaming ASR model ported to transcribe.cpp
-  kotoba-whisper-v2.2-bf16:
-    name: kotoba whisper v2.2 (BF16)
-    family: whisper
-    architecture_type: offline_llm
-    hf_repo: kotoba-tech/kotoba-whisper-v2.2
-    default_quant: BF16
-    file: kotoba-whisper-v2.2-BF16.gguf
-    sample_rate: 16000
-    languages:
-    - ja
-    vram_estimate_mb: 1500
-    context_window_sec: 30
-    description: kotoba whisper v2.2 (BF16) converted via transcribe.cpp pipeline
   cohere-transcribe:
     name: Cohere Transcribe 03-2026 (Q8_0)
     family: cohere_transcribe

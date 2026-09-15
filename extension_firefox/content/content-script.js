@@ -5,15 +5,25 @@
   const api = typeof browser !== "undefined" ? browser : chrome;
 
   // ── Unified WebSocket Configuration Builder ─────────────────────────────
+  // G9/G10: KHÔNG gửi giá trị mặc định cứng cho `translationModel` / `vadEngine` nữa.
+  // Trước đây client luôn gửi "xiaomi" và "fsmn-vad":
+  //   - "xiaomi" (MiLMMT) không có file GGUF cục bộ -> khi backend xử lý thật sẽ lỗi.
+  //   - "fsmn-vad" khác engine mặc định của backend (fired-vad) -> mỗi lần content
+  //     script khởi động lại ghi đè VAD engine và kích hoạt đường nạp model trên hot path.
+  // Nay chỉ gửi khi người dùng THỰC SỰ chọn; bỏ trống thì backend giữ mặc định của nó.
+  // F-30: extension này khai báo giao thức v3 ⇒ backend gửi payload GỌN (một tên cho mỗi
+  // giá trị, không còn `original`/`ui_text`/`utteranceId`/`stableText`…).
+  const PROTOCOL_VERSION = 3;
+
   function buildWsConfig(cfg) {
     const silence = cfg.silenceDurationMs || cfg.vadSilenceDurationMs || cfg.silence_duration_ms || 300;
-    return {
+    const out = {
       type: "set_config",
       action: "configure",
+      // P3.0: khai báo phiên bản giao thức để backend biết có được dùng binary frame.
+      protocolVersion: PROTOCOL_VERSION,
       targetLang: cfg.targetLang || "vi",
       sourceLang: cfg.sourceLanguage || cfg.sourceLang || "auto",
-      translationModel: cfg.translationModel || "xiaomi",
-      vadEngine: cfg.vadEngine || "fsmn-vad",
       vadThreshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.5)),
       threshold: cfg.vadThreshold !== undefined ? cfg.vadThreshold : (cfg.vad_threshold !== undefined ? cfg.vad_threshold : (cfg.threshold !== undefined ? cfg.threshold : 0.5)),
       silenceDurationMs: silence,
@@ -25,6 +35,9 @@
       ttsRefAudio: cfg.ttsRefAudio || "",
       ttsRefText: cfg.ttsRefText || "",
     };
+    if (cfg.translationModel) out.translationModel = cfg.translationModel;
+    if (cfg.vadEngine) out.vadEngine = cfg.vadEngine;
+    return out;
   }
 
   const ttsPlayer = new TTSAudioPlayer();
@@ -34,12 +47,26 @@
   let isCapturing = false;
   let settings = { targetLang: "vi", subPosY: 10, subWidth: 80 };
   let cachedVideo = null;
+  // P3.5e: cache cả KẾT QUẢ ÂM của findVideo(). Trước đây nếu không tìm thấy video thì
+  // `cachedVideo = null` và mọi sự kiện sau lại quét toàn DOM (`querySelectorAll("*")`)
+  // — trên trang nhiều frame / DOM lớn đây là mục CPU chiếm ưu thế.
+  let videoScanMissUntil = 0;
+  const VIDEO_SCAN_MISS_TTL_MS = 2000;
 
   function getVideo(forceRefresh = false) {
     if (!forceRefresh && cachedVideo && cachedVideo.isConnected && !cachedVideo.ended) {
       return cachedVideo;
     }
+    const now = Date.now();
+    if (!forceRefresh && now < videoScanMissUntil) {
+      return null; // vừa quét không thấy -> không quét lại ngay
+    }
     cachedVideo = findVideo();
+    if (!cachedVideo) {
+      videoScanMissUntil = now + VIDEO_SCAN_MISS_TTL_MS;
+    } else {
+      videoScanMissUntil = 0;
+    }
     return cachedVideo;
   }
 
@@ -57,15 +84,22 @@
 
   function handleSubtitleEvent(eventType, payload) {
     if (eventType === "tts_audio") {
-      // Only Top frame or active capturing frame should play audio
-      if (window === window.top || isCapturing) {
-        const audioB64 = payload?.audio || payload?.audio_base64 || (typeof payload === "string" ? payload : null);
+      // P3.5b/F-28: CHỈ MỘT frame được phát.
+      // Trước đây điều kiện là `window === window.top || isCapturing`: khi player nằm
+      // trong iframe thì iframe (isCapturing) VÀ top frame (broadcast echo) cùng phát
+      // => tiếng lồng bị phát 2 lần lệch nhau (playedIds là per-frame nên không chặn được).
+      // Quy tắc đúng: frame SỞ HỮU video phát; nếu không frame nào có video thì frame
+      // đang capture phát.
+      const ownerVideo = cachedVideo && cachedVideo.isConnected;
+      const shouldPlay = ownerVideo ? (window !== window.top || isCapturing) : isCapturing;
+      if (shouldPlay) {
+        // v3 (F-30): payload gọn — chỉ `audio`, `utterance_id`, `duration_sec`.
+        const audioB64 = payload?.audio || (typeof payload === "string" ? payload : null);
         if (audioB64) {
-          console.log("[BS TTS] 🔊 Received synthesized audio chunk:", payload?.utterance_id, payload?.text, `(${payload?.duration_sec}s)`);
           ttsPlayer.enqueue({
-            id: payload?.utterance_id || payload?.sentence_id || payload?.utteranceId,
+            id: payload?.utterance_id,
             audioBase64: audioB64,
-            durationSec: payload?.duration_sec || payload?.durationSec,
+            durationSec: payload?.duration_sec,
             text: payload?.text
           });
         }
@@ -148,6 +182,14 @@
   });
 
   async function startCapture(msg) {
+    // F-45: nếu cờ `isCapturing` còn kẹt từ phiên trước nhưng WS đã đóng thì dọn trước,
+    // để bấm Start không bị "Already capturing" (trước đây phải tải lại trang).
+    if (isCapturing && (!wsClient || !wsClient.isConnected)) {
+      console.warn("[BS] Trạng thái capture cũ đã kẹt — dọn dẹp rồi Start lại.");
+      try {
+        await cleanup();
+      } catch (e) {}
+    }
     if (isCapturing) return { success: false, error: "Already capturing" };
     try {
       if (msg.settings) Object.assign(settings, msg.settings);
@@ -173,7 +215,37 @@
         !!settings.ttsEnabled
       );
       ttsPlayer.clear();
-      video.addEventListener("seeked", () => ttsPlayer.clear(), { signal });
+
+      // F-44: TUA VIDEO => phải reset pipeline, nếu không audio trước/sau khi tua bị trộn
+      // vào cùng một câu (đã gặp phụ đề lặp nội dung cũ, mảnh commit dài cả phút).
+      const handleSeek = (event) => {
+        const reason = event && event.type === "seeking" ? "seeking" : "seek";
+        try {
+          ttsPlayer.clear();
+        } catch (e) {}
+        // 1. Xoá phụ đề đang hiển thị (đã thuộc đoạn cũ)
+        if (overlayManager) {
+          try {
+            overlayManager.clear();
+          } catch (e) {}
+        }
+        // 2. Bỏ audio còn đệm trong worklet/ScriptProcessor
+        if (audioCapture && typeof audioCapture.reset === "function") {
+          try {
+            audioCapture.reset();
+          } catch (e) {}
+        }
+        // 3. Báo backend xoá audio/commit/hàng đợi cũ
+        if (wsClient) {
+          try {
+            wsClient.sendJSON({ type: "reset_stream", reason });
+          } catch (e) {}
+        }
+      };
+      // `seeking` bắt ngay khi người dùng kéo thanh thời gian (audio cũ dừng sớm nhất);
+      // `seeked` là chốt cuối sau khi trình duyệt nhảy xong.
+      video.addEventListener("seeking", handleSeek, { signal });
+      video.addEventListener("seeked", handleSeek, { signal });
 
       // Connect to WebSocket Backend
       wsClient = new WSClient("wss://localhost:8765/ws");
@@ -199,10 +271,62 @@
 
       wsClient.on("partial_transcript", p => emitSubtitleEvent("partial_transcript", p));
       wsClient.on("utterance_update", p => emitSubtitleEvent("utterance_update", p));
-      wsClient.on("sentence_complete", p => { console.log("[BS] Sentence:", p); emitSubtitleEvent("sentence_complete", p); });
-      wsClient.on("translation", p => { console.log("[BS] Translation:", p); emitSubtitleEvent("translation", p); });
+      wsClient.on("translation", p => emitSubtitleEvent("translation", p));
       wsClient.on("tts_audio", p => emitSubtitleEvent("tts_audio", p));
       wsClient.on("error", p => console.error("[BS] Backend:", p));
+
+      // P1.7/P1.8: trạng thái nạp model — hiển thị rõ thay vì "im lặng vài giây".
+      wsClient.on("model_status", p => {
+        const msg = `[BS] Model ${p?.stage || "?"}: ${p?.model || ""} -> ${p?.state || "?"}`;
+        if (p?.state === "error") console.warn(msg, p?.message || "");
+        else console.log(msg);
+      });
+
+      // P3.1: audio TTS dạng binary (không base64) — decode off-thread.
+      wsClient.on("tts_binary", (data) => {
+        try {
+          const buf = data instanceof ArrayBuffer ? data : (data && data.buffer) || null;
+          if (!buf || buf.byteLength < 9) return;
+          // Header nhỏ: magic "BTTS" + uint8 version + uint16 jsonLen + JSON header
+          const view = new DataView(buf);
+          const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+          if (magic !== "BTTS") return;
+          const jsonLen = view.getUint16(5, true);
+          const headerJson = new TextDecoder().decode(new Uint8Array(buf, 7, jsonLen));
+          const header = JSON.parse(headerJson);
+          const ownerVideo = cachedVideo && cachedVideo.isConnected;
+          const shouldPlay = ownerVideo ? (window !== window.top || isCapturing) : isCapturing;
+          if (shouldPlay) ttsPlayer.enqueueBinary(header, buf.slice(7 + jsonLen));
+        } catch (e) {
+          console.warn("[BS TTS] Không xử lý được binary TTS:", e);
+        }
+      });
+
+      // F-45: WebSocket ĐÓNG (backend restart / phiên bị đóng) ⇒ dừng capture NGAY để
+      // trạng thái không kẹt ở "đang capture". Trước đây cờ `isCapturing` vẫn true nên
+      // popup báo Disconnected mà bấm Start lại bị "Already capturing", buộc phải tải lại trang.
+      wsClient.on("disconnected", () => {
+        if (!isCapturing) return;
+        console.warn("[BS] Mất kết nối backend — dừng capture để có thể Start lại.");
+        try {
+          stopCapture();
+        } catch (e) {}
+      });
+
+      wsClient.on("backpressure", (bp) => {
+        if (bp.state === "paused") {
+          if (audioCapture && audioCapture.isCapturing) {
+            console.warn("[BS] Backend chậm: tạm dừng gửi audio để tránh trôi độ trễ.");
+            audioCapture.isCapturing = false;
+          }
+        } else if (bp.state === "ok") {
+          if (audioCapture && !audioCapture.isCapturing) {
+            audioCapture.isCapturing = true;
+            console.log("[BS] Backend đã bắt kịp: tiếp tục gửi audio.");
+          }
+        }
+      });
+
       await wsClient.connect();
 
       isCapturing = true;
