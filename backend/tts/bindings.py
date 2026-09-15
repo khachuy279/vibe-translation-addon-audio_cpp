@@ -23,6 +23,7 @@ import io
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import threading
 from typing import Optional, Tuple, Union, List
@@ -394,11 +395,16 @@ class OmniVoiceCppEngine:
                     temp_txt_to_clean = txt_p
 
         try:
+            popen_kwargs = {}
+            if sys.platform == "win32":
+                popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
             p = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                **popen_kwargs,
             )
             input_bytes = (text.strip() + "\n").encode("utf-8")
             stdout_bytes, stderr_bytes = p.communicate(input=input_bytes)
