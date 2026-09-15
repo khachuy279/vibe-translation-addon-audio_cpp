@@ -21,14 +21,6 @@ models/
 *.engine
 *.blob
 
-# 2b. Native Binaries & Large CUDA DLLs
-backend/bin/
-*.dll
-*.exe
-*.so
-*.dylib
-*.lib
-
 # 3. Security & Certificates
 *.pem
 *.key

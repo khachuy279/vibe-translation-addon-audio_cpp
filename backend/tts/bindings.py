@@ -19,11 +19,15 @@ from ctypes import (
     Structure,
     CFUNCTYPE,
 )
+import io
 import os
 from pathlib import Path
+import subprocess
+import tempfile
 import threading
 from typing import Optional, Tuple, Union, List
 import numpy as np
+import soundfile as sf
 
 from backend.utils.logger import get_logger
 
@@ -107,6 +111,24 @@ def _find_omnivoice_dll() -> Optional[str]:
     return None
 
 
+def _find_omnivoice_cli() -> Optional[str]:
+    """Tìm đường dẫn tệp thực thi omnivoice-tts.exe trên hệ thống."""
+    here = Path(__file__).resolve().parent
+    root = here.parent.parent
+
+    candidate_paths = [
+        root / "backend" / "bin" / "omnivoice-tts.exe",
+        root / "external" / "omnivoice.cpp" / "build" / "Release" / "omnivoice-tts.exe",
+        root / "external" / "omnivoice.cpp" / "build" / "omnivoice-tts.exe",
+        root / "backend" / "omnivoice-tts.exe",
+    ]
+
+    for p in candidate_paths:
+        if p.exists():
+            return str(p)
+    return None
+
+
 def unpack_rvq_file(path: Union[str, Path], k: int = 8, code_bits: int = 11) -> Tuple[np.ndarray, int]:
     """Giải nén tệp .rvq thành mảng int32 [K * T] và số frames T."""
     p = Path(path)
@@ -144,29 +166,66 @@ def unpack_rvq_file(path: Union[str, Path], k: int = 8, code_bits: int = 11) -> 
 
 
 class OmniVoiceCppEngine:
-    """Wrapper Python gọi C-ABI omnivoice.dll (Thread-safe)."""
+    """Engine gọi C++ omnivoice (hỗ trợ cả Native C-ABI ctypes và CLI Subprocess)."""
 
-    def __init__(self, dll_path: Optional[str] = None):
+    def __init__(self, dll_path: Optional[str] = None, cli_path: Optional[str] = None):
         self.dll_path = dll_path or _find_omnivoice_dll()
-        if not self.dll_path or not os.path.exists(self.dll_path):
-            raise FileNotFoundError(f"Không tìm thấy omnivoice.dll! Vui lòng biên dịch trước.")
-
-        # Thêm thư mục DLL vào path tìm kiếm
-        dll_dir = os.path.dirname(os.path.abspath(self.dll_path))
-        if hasattr(os, "add_dll_directory"):
-            try:
-                os.add_dll_directory(dll_dir)
-            except Exception:
-                pass
-
-        self._lib = ctypes.CDLL(self.dll_path)
-        self._setup_function_signatures()
+        self.cli_path = cli_path or _find_omnivoice_cli()
+        self._mode = "none"
+        self._lib = None
         self._ctx = None
         self._lock = threading.RLock()
         self._is_initialized = False
 
+        # Model configs for CLI mode
+        self._model_path: Optional[str] = None
+        self._codec_path: Optional[str] = None
+        self._use_fa: bool = True
+        self._clamp_fp16: bool = False
+
+        # 1. Thử nạp qua ctypes C-ABI DLL
+        if self.dll_path and os.path.exists(self.dll_path):
+            dll_dir = os.path.dirname(os.path.abspath(self.dll_path))
+            if hasattr(os, "add_dll_directory"):
+                try:
+                    os.add_dll_directory(dll_dir)
+                except Exception:
+                    pass
+
+            # Nạp trước các DLL phụ thuộc trong cùng thư mục để tránh xung đột
+            for dep in ["ggml-base.dll", "ggml-cpu.dll", "ggml.dll"]:
+                dep_p = os.path.join(dll_dir, dep)
+                if os.path.exists(dep_p):
+                    try:
+                        ctypes.CDLL(dep_p)
+                    except Exception:
+                        pass
+
+            try:
+                self._lib = ctypes.CDLL(self.dll_path)
+                self._setup_function_signatures()
+                self._mode = "dll"
+                logger.info("⚡ Đã nạp thành công OmniVoice C-ABI DLL.")
+            except Exception as e:
+                logger.warning(
+                    f"⚠️ Không thể nạp trực tiếp omnivoice.dll ({e}). Sẽ sử dụng CLI Subprocess Engine."
+                )
+                self._lib = None
+
+        # 2. Nếu DLL không khả dụng, sử dụng CLI Subprocess
+        if self._mode == "none":
+            if self.cli_path and os.path.exists(self.cli_path):
+                self._mode = "cli"
+                logger.info(f"🚀 Khởi động omnivoice.cpp ở chế độ CLI Subprocess Engine ({Path(self.cli_path).name})")
+            else:
+                raise FileNotFoundError(
+                    "Không tìm thấy cả omnivoice.dll lẫn omnivoice-tts.exe! Vui lòng kiểm tra thư mục backend/bin."
+                )
+
     def _setup_function_signatures(self) -> None:
         """Khai báo kiểu tham số và kiểu trả về cho C functions."""
+        if not self._lib:
+            return
         # const char * ov_version(void);
         self._lib.ov_version.argtypes = []
         self._lib.ov_version.restype = c_char_p
@@ -201,8 +260,13 @@ class OmniVoiceCppEngine:
 
     def get_version(self) -> str:
         """Lấy phiên bản build của omnivoice.cpp."""
-        v = self._lib.ov_version()
-        return v.decode("utf-8") if v else "unknown"
+        if self._mode == "dll" and self._lib:
+            try:
+                v = self._lib.ov_version()
+                return v.decode("utf-8") if v else "native-dll"
+            except Exception:
+                pass
+        return "native-cli"
 
     def init_context(
         self,
@@ -213,7 +277,7 @@ class OmniVoiceCppEngine:
     ) -> bool:
         """Khởi tạo context mô hình OmniVoice C++."""
         with self._lock:
-            if self._is_initialized and self._ctx is not None:
+            if self._is_initialized:
                 return True
 
             if not os.path.exists(model_path):
@@ -221,26 +285,142 @@ class OmniVoiceCppEngine:
             if not os.path.exists(codec_path):
                 raise FileNotFoundError(f"Không tìm thấy codec GGUF: {codec_path}")
 
-            iparams = OVInitParams()
-            self._lib.ov_init_default_params(ctypes.byref(iparams))
-            iparams.abi_version = OV_ABI_VERSION
-            iparams.model_path = model_path.encode("utf-8")
-            iparams.codec_path = codec_path.encode("utf-8")
-            iparams.use_fa = use_fa
-            iparams.clamp_fp16 = clamp_fp16
+            self._model_path = os.path.abspath(model_path)
+            self._codec_path = os.path.abspath(codec_path)
+            self._use_fa = use_fa
+            self._clamp_fp16 = clamp_fp16
 
-            logger.info(f"Đang nạp omnivoice.cpp context từ: {model_path}")
-            ctx = self._lib.ov_init(ctypes.byref(iparams))
-            if not ctx:
-                err = self._lib.ov_last_error()
-                err_msg = err.decode("utf-8") if err else "Lỗi không xác định khi gọi ov_init"
-                logger.error(f"ov_init thất bại: {err_msg}")
-                raise RuntimeError(f"ov_init thất bại: {err_msg}")
+            if self._mode == "dll" and self._lib:
+                iparams = OVInitParams()
+                self._lib.ov_init_default_params(ctypes.byref(iparams))
+                iparams.abi_version = OV_ABI_VERSION
+                iparams.model_path = self._model_path.encode("utf-8")
+                iparams.codec_path = self._codec_path.encode("utf-8")
+                iparams.use_fa = use_fa
+                iparams.clamp_fp16 = clamp_fp16
 
-            self._ctx = ctx
+                logger.info(f"Đang nạp omnivoice.cpp DLL context từ: {model_path}")
+                ctx = self._lib.ov_init(ctypes.byref(iparams))
+                if not ctx:
+                    err = self._lib.ov_last_error()
+                    err_msg = err.decode("utf-8") if err else "Lỗi không xác định khi gọi ov_init"
+                    logger.warning(f"ov_init DLL thất bại: {err_msg}. Chuyển sang chế độ CLI fallback.")
+                    self._mode = "cli"
+                else:
+                    self._ctx = ctx
+                    self._is_initialized = True
+                    logger.info(f"✅ Nạp thành công omnivoice.cpp C-ABI DLL engine (v{self.get_version()})")
+                    return True
+
+            # CLI Mode
             self._is_initialized = True
-            logger.info(f"✅ Nạp thành công omnivoice.cpp C-ABI engine (v{self.get_version()})")
+            logger.info(f"✅ Đã khởi tạo omnivoice.cpp CLI engine (Model: {Path(model_path).name})")
             return True
+
+    def _resolve_ref_text_file(self, ref_text: Optional[str], ref_file_path: Optional[str]) -> Optional[str]:
+        """Xác định đường dẫn file text transcript cho reference sample."""
+        if not ref_text and not ref_file_path:
+            return None
+        # 1. Nếu ref_text là file path tồn tại
+        if ref_text and os.path.isfile(ref_text):
+            return str(Path(ref_text).resolve())
+        # 2. Nếu ref_file_path có file sibling .txt
+        if ref_file_path:
+            sibling_txt = Path(ref_file_path).with_suffix(".txt")
+            if sibling_txt.exists():
+                return str(sibling_txt.resolve())
+        # 3. Nếu ref_text là chuỗi nội dung
+        if ref_text and ref_text.strip():
+            tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8")
+            tmp.write(ref_text.strip())
+            tmp.close()
+            return tmp.name
+        return None
+
+    def _synthesize_cli(
+        self,
+        text: str,
+        ref_rvq_path: Optional[str] = None,
+        ref_text: Optional[str] = None,
+        ref_wav_path: Optional[str] = None,
+        lang: str = "",
+        instruct: str = "",
+        num_steps: int = 8,
+        guidance_scale: float = 2.0,
+        seed: int = 42,
+    ) -> Tuple[np.ndarray, int]:
+        """Tổng hợp giọng nói qua subprocess CLI omnivoice-tts.exe."""
+        if not self.cli_path or not os.path.exists(self.cli_path):
+            raise FileNotFoundError(f"Không tìm thấy CLI binary: {self.cli_path}")
+        if not self._model_path or not self._codec_path:
+            raise RuntimeError("Mô hình chưa được khởi tạo với init_context!")
+
+        cmd = [
+            self.cli_path,
+            "--model", self._model_path,
+            "--codec", self._codec_path,
+            "--steps", str(max(1, int(num_steps))),
+            "-o", "-",
+        ]
+        if seed and seed > 0:
+            cmd.extend(["--seed", str(seed)])
+        if lang:
+            cmd.extend(["--lang", str(lang)])
+        if instruct:
+            cmd.extend(["--instruct", str(instruct)])
+        if not self._use_fa:
+            cmd.append("--no-fa")
+        if self._clamp_fp16:
+            cmd.append("--clamp-fp16")
+
+        temp_txt_to_clean = None
+        if ref_rvq_path and os.path.exists(ref_rvq_path):
+            cmd.extend(["--ref-rvq", os.path.abspath(ref_rvq_path)])
+            txt_p = self._resolve_ref_text_file(ref_text, ref_rvq_path)
+            if txt_p:
+                cmd.extend(["--ref-text", txt_p])
+                if not (ref_text and os.path.isfile(ref_text)) and (
+                    txt_p != str(Path(ref_rvq_path).with_suffix(".txt").resolve())
+                ):
+                    temp_txt_to_clean = txt_p
+        elif ref_wav_path and os.path.exists(ref_wav_path):
+            cmd.extend(["--ref-wav", os.path.abspath(ref_wav_path)])
+            txt_p = self._resolve_ref_text_file(ref_text, ref_wav_path)
+            if txt_p:
+                cmd.extend(["--ref-text", txt_p])
+                if not (ref_text and os.path.isfile(ref_text)) and (
+                    txt_p != str(Path(ref_wav_path).with_suffix(".txt").resolve())
+                ):
+                    temp_txt_to_clean = txt_p
+
+        try:
+            p = subprocess.Popen(
+                cmd,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            input_bytes = (text.strip() + "\n").encode("utf-8")
+            stdout_bytes, stderr_bytes = p.communicate(input=input_bytes)
+
+            if p.returncode != 0:
+                err_msg = stderr_bytes.decode("utf-8", errors="replace").strip()
+                logger.error(f"omnivoice-tts CLI thất bại (code {p.returncode}): {err_msg}")
+                raise RuntimeError(f"omnivoice-tts CLI thất bại: {err_msg}")
+
+            if not stdout_bytes:
+                return np.zeros((0,), dtype=np.float32), 24000
+
+            audio_data, sr = sf.read(io.BytesIO(stdout_bytes), dtype="float32")
+            if audio_data.ndim > 1:
+                audio_data = audio_data.mean(axis=1)
+            return audio_data, sr
+        finally:
+            if temp_txt_to_clean and os.path.exists(temp_txt_to_clean):
+                try:
+                    os.remove(temp_txt_to_clean)
+                except Exception:
+                    pass
 
     def synthesize(
         self,
@@ -263,8 +443,26 @@ class OmniVoiceCppEngine:
             return np.zeros((0,), dtype=np.float32), 24000
 
         with self._lock:
-            if not self._is_initialized or self._ctx is None:
+            if not self._is_initialized:
                 raise RuntimeError("OmniVoiceCppEngine chưa được khởi tạo qua init_context!")
+
+            # 1. Chế độ CLI Subprocess
+            if self._mode == "cli":
+                return self._synthesize_cli(
+                    text=text,
+                    ref_rvq_path=ref_rvq_path,
+                    ref_text=ref_text,
+                    ref_wav_path=ref_wav_path,
+                    lang=lang,
+                    instruct=instruct,
+                    num_steps=num_steps,
+                    guidance_scale=guidance_scale,
+                    seed=seed,
+                )
+
+            # 2. Chế độ C-ABI DLL
+            if not self._ctx:
+                raise RuntimeError("OmniVoiceCppEngine DLL context chưa được khởi tạo!")
 
             tparams = OVTTSParams()
             self._lib.ov_tts_default_params(ctypes.byref(tparams))
@@ -290,7 +488,6 @@ class OmniVoiceCppEngine:
 
             elif ref_wav_path and os.path.exists(ref_wav_path):
                 # Fallback qua file WAV nếu cần
-                import soundfile as sf
                 audio_data, sr = sf.read(ref_wav_path, dtype="float32")
                 if audio_data.ndim > 1:
                     audio_data = audio_data.mean(axis=1)
@@ -314,7 +511,6 @@ class OmniVoiceCppEngine:
                 n_samples = out_audio.n_samples
                 sr = out_audio.sample_rate or 24000
                 if n_samples > 0 and bool(out_audio.samples):
-                    # Zero-copy hoặc copy mảng float32 vào numpy
                     buf = np.ctypeslib.as_array(out_audio.samples, shape=(n_samples,))
                     result_np = buf.copy()
                 else:
@@ -327,7 +523,7 @@ class OmniVoiceCppEngine:
     def close(self) -> None:
         """Giải phóng hoàn toàn context và bộ nhớ."""
         with self._lock:
-            if self._ctx is not None:
+            if self._ctx is not None and self._lib:
                 try:
                     self._lib.ov_free(self._ctx)
                 except Exception as e:
@@ -335,3 +531,4 @@ class OmniVoiceCppEngine:
                 self._ctx = None
             self._is_initialized = False
             logger.info("🗑️ Đã giải phóng OmniVoiceCppEngine context.")
+
