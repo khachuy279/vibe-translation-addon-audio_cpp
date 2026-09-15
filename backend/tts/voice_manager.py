@@ -116,6 +116,18 @@ class VoiceManager:
             return voices
 
     @classmethod
+    def resolve_voice_extended(cls, voice_id_or_path: Optional[str]) -> Tuple[str, str, Optional[str]]:
+        """Phân giải voice_id thành (abs_audio_path, ref_text, ref_rvq_path)."""
+        audio_path, ref_text = cls.resolve_voice(voice_id_or_path)
+        if not audio_path:
+            return "", "", None
+
+        p = Path(audio_path)
+        rvq_candidate = p.with_suffix(".rvq")
+        rvq_path = str(rvq_candidate) if rvq_candidate.exists() else None
+        return audio_path, ref_text, rvq_path
+
+    @classmethod
     def resolve_voice(cls, voice_id_or_path: Optional[str]) -> Tuple[str, str]:
         """Phân giải voice_id hoặc đường dẫn tệp âm thanh thành (abs_audio_path, ref_text)."""
         voices = cls.get_available_voices()
