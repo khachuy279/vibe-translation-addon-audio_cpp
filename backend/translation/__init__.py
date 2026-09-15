@@ -1,0 +1,37 @@
+"""Package Translation cho Backend."""
+
+from backend.translation.base import BaseTranslator
+from backend.translation.registry import TranslationModelRegistry
+from backend.translation.prompts import PromptStrategy, get_prompt_strategy
+from backend.translation.context import ContextManager
+from backend.translation.dedup import TranslationDedupState
+from backend.translation.engine import (
+    GGUFTranslator,
+    get_translator,
+    reset_translator,
+    GGUFTranslationEngine,
+    get_translation_engine,
+    reset_translation_engine,
+)
+
+# Alias tương thích ngược
+TranslationContextTracker = ContextManager
+TranslationDeduplicator = TranslationDedupState
+
+__all__ = [
+    "BaseTranslator",
+    "TranslationModelRegistry",
+    "PromptStrategy",
+    "get_prompt_strategy",
+    "ContextManager",
+    "TranslationContextTracker",
+    "TranslationDedupState",
+    "TranslationDeduplicator",
+    "GGUFTranslator",
+    "GGUFTranslationEngine",
+    "get_translator",
+    "get_translation_engine",
+    "reset_translator",
+    "reset_translation_engine",
+]
+

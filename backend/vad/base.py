@@ -1,0 +1,108 @@
+"""Base Classes và Data Structures cho Module Voice Activity Detection (VAD)."""
+
+from abc import ABC, abstractmethod
+from collections import deque
+from dataclasses import dataclass, field
+from typing import Any, Deque, Dict, List, Optional, Tuple
+import numpy as np
+
+
+SUPPORTED_VAD_ENGINES = ("firered-vad", "silero-vad", "fsmn-vad")
+
+
+@dataclass(slots=True)
+class VADResult:
+    """Kết quả phân tích VAD của 1 frame âm thanh."""
+    is_speech: bool
+    probability: float
+    event: Optional[str] = None  # 'START', 'END', hoặc None
+
+    def __iter__(self):
+        yield self.is_speech
+        yield self.probability
+        yield self.event
+
+    def __len__(self):
+        return 3
+
+    def __getitem__(self, idx):
+        if idx == 0:
+            return self.is_speech
+        elif idx == 1:
+            return self.probability
+        elif idx == 2:
+            return self.event
+        raise IndexError("VADResult index out of range")
+
+
+@dataclass
+class VADStreamState:
+    """Trạng thái nội bộ cách ly theo từng session âm thanh."""
+    is_speech: bool = False
+    silence_samples: int = 0
+    total_samples_processed: int = 0
+
+    # Buffer đệm thô cho việc cắt frame
+    raw_buffer: bytearray = field(default_factory=bytearray)
+
+    # Ring buffer chứa các frame trước khi nói (pre-speech buffer)
+    pre_speech_ring: Deque[Tuple[bytes, float]] = field(default_factory=deque)
+
+    # State riêng cho FireRed-VAD
+    firered_postprocessor: Optional[Any] = None
+    firered_caches: Optional[Any] = None
+
+    # State riêng cho Silero VAD
+    silero_iterator: Optional[Any] = None
+    silero_model: Optional[Any] = None
+    silero_probe: Optional[Any] = None
+
+    # State riêng cho FSMN-VAD
+    fsmn_cache: Optional[Dict[str, Any]] = None
+    fsmn_in_speech: bool = False
+
+    def reset(self) -> None:
+        """Reset toàn bộ bộ đệm và trạng thái."""
+        self.is_speech = False
+        self.silence_samples = 0
+        self.total_samples_processed = 0
+
+        self.raw_buffer.clear()
+        self.pre_speech_ring.clear()
+
+        if self.firered_postprocessor is not None:
+            self.firered_postprocessor.reset()
+        self.firered_caches = None
+
+        if self.silero_iterator is not None:
+            self.silero_iterator.reset_states()
+        if self.silero_probe is not None:
+            self.silero_probe.last_prob = 0.0
+
+        if self.fsmn_cache is not None:
+            self.fsmn_cache.clear()
+        self.fsmn_cache = None
+        self.fsmn_in_speech = False
+
+
+class BaseVADEngine(ABC):
+    """Abstract Base Class cho các Engine VAD."""
+
+    name: str = ""
+    default_threshold: float = 0.45
+    native_frame_samples: int = 400  # Số sample cho 1 bước tính (mặc định 25ms @ 16kHz)
+
+    @abstractmethod
+    def create_initial_state(self, threshold: Optional[float] = None) -> VADStreamState:
+        """Tạo trạng thái ban đầu cho 1 session stream mới."""
+        pass
+
+    @abstractmethod
+    def is_speech(
+        self,
+        chunk_float32: np.ndarray,
+        state: VADStreamState,
+        threshold: float,
+    ) -> VADResult:
+        """Xử lý 1 frame float32 [-1.0, 1.0] và cập nhật state."""
+        pass

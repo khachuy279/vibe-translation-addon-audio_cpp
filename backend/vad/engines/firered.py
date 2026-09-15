@@ -1,0 +1,119 @@
+"""Engine FireRed-VAD (DFSMN SOTA Streaming VAD - Xiaohongshu / FireRedTeam)."""
+
+from pathlib import Path
+from typing import Optional, Union
+import numpy as np
+import torch
+
+from backend.config import config, MODELS_DIR
+from backend.vad.base import BaseVADEngine, VADResult, VADStreamState
+from backend.utils.logger import logger
+
+
+class FireRedVADEngine(BaseVADEngine):
+    """Engine VAD FireRed chính thức sử dụng gói fireredvad."""
+
+    name = "firered-vad"
+    default_threshold = config.vad.firered.threshold or config.vad.threshold
+    native_frame_samples = 400  # 25ms @ 16kHz
+
+    def __init__(self, model_dir: Optional[Union[str, Path]] = None):
+        self.model_dir = self._resolve_model_dir(model_dir)
+        self._ensure_model_files()
+
+        from fireredvad.core.audio_feat import AudioFeat
+        from fireredvad.core.detect_model import DetectModel
+
+        cmvn_path = str(self.model_dir / "cmvn.ark")
+        self.audio_feat = AudioFeat(cmvn_path)
+        self.vad_model = DetectModel.from_pretrained(str(self.model_dir))
+        self.vad_model.eval()
+        self.vad_model.cpu()
+        logger.info(f"Loaded FireRed Stream-VAD Model from: {self.model_dir}", extra={"module_tag": "VAD"})
+
+    def _resolve_model_dir(self, explicit_dir: Optional[Union[str, Path]]) -> Path:
+        if explicit_dir and Path(explicit_dir).exists():
+            return Path(explicit_dir)
+        return MODELS_DIR / "firered_stream" / "Stream-VAD"
+
+    def _ensure_model_files(self) -> None:
+        """Tự động tải model từ HuggingFace nếu chưa tồn tại cục bộ."""
+        self.model_dir.mkdir(parents=True, exist_ok=True)
+        cmvn_file = self.model_dir / "cmvn.ark"
+        model_file = self.model_dir / "model.pth.tar"
+
+        if not cmvn_file.exists() or not model_file.exists():
+            from huggingface_hub import hf_hub_download
+            logger.info("Đang tải model FireRed Stream-VAD từ HuggingFace...", extra={"module_tag": "VAD"})
+            parent_dir = self.model_dir.parent
+            hf_hub_download("FireRedTeam/FireRedVAD", "Stream-VAD/cmvn.ark", local_dir=str(parent_dir))
+            hf_hub_download("FireRedTeam/FireRedVAD", "Stream-VAD/model.pth.tar", local_dir=str(parent_dir))
+
+    def create_initial_state(self, threshold: Optional[float] = None) -> VADStreamState:
+        from fireredvad.core.stream_vad_postprocessor import StreamVadPostprocessor
+
+        cfg = config.vad.firered
+        active_thresh = threshold if threshold is not None else (cfg.threshold or config.vad.threshold)
+
+        state = VADStreamState()
+        state.firered_postprocessor = StreamVadPostprocessor(
+            smooth_window_size=cfg.smooth_window_size,
+            speech_threshold=active_thresh,
+            pad_start_frame=cfg.pad_start_frame,
+            min_speech_frame=cfg.min_speech_frame,
+            max_speech_frame=2000,
+            min_silence_frame=cfg.min_silence_frame,
+        )
+        state.firered_caches = None
+        return state
+
+    def is_speech(
+        self,
+        chunk_float32: np.ndarray,
+        state: VADStreamState,
+        threshold: float,
+    ) -> VADResult:
+        if state.firered_postprocessor is None:
+            init_s = self.create_initial_state(threshold)
+            state.firered_postprocessor = init_s.firered_postprocessor
+            state.firered_caches = init_s.firered_caches
+
+        # Cập nhật threshold động nếu có thay đổi
+        if threshold is not None and state.firered_postprocessor.speech_threshold != threshold:
+            state.firered_postprocessor.speech_threshold = float(threshold)
+
+        # Chuẩn hóa độ dài frame 400 samples
+        if len(chunk_float32) != self.native_frame_samples:
+            if len(chunk_float32) < self.native_frame_samples:
+                chunk_float32 = np.pad(chunk_float32, (0, self.native_frame_samples - len(chunk_float32)))
+            else:
+                chunk_float32 = chunk_float32[: self.native_frame_samples]
+
+        # Chuyển đổi sang int16 theo yêu cầu của AudioFeat
+        chunk_int16 = (np.clip(chunk_float32, -1.0, 1.0) * 32767.0).astype(np.int16)
+
+        feat, _ = self.audio_feat.extract(chunk_int16)
+        with torch.no_grad():
+            probs, state.firered_caches = self.vad_model.forward(
+                feat.unsqueeze(0), caches=state.firered_caches
+            )
+
+        raw_prob = probs.squeeze().tolist()
+        if isinstance(raw_prob, list):
+            prob_val = float(raw_prob[-1]) if raw_prob else 0.0
+        else:
+            prob_val = float(raw_prob)
+
+        frame_result = state.firered_postprocessor.process_one_frame(prob_val)
+
+        event = None
+        if frame_result.is_speech_start:
+            event = "START"
+        elif frame_result.is_speech_end:
+            event = "END"
+
+        return VADResult(
+            is_speech=bool(frame_result.is_speech),
+            probability=float(frame_result.smoothed_prob),
+            event=event,
+        )

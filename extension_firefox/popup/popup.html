@@ -59,15 +59,20 @@
           <label for="selAsrEngine">🤖 ASR Engine</label>
           <select id="selAsrEngine">
             <option value="qwen3-asr-1.7b" selected>Qwen3 ASR 1.7B ⚡</option>
-            <option value="nemotron-3.5-streaming">Nemotron 3.5 Streaming (0.6B)</option>
-            <option value="voxtral-mini-4b-realtime">Voxtral Mini 4B Realtime</option>
+            <option value="qwen3-asr-0.6b">Qwen3 ASR 0.6B</option>
+            <option value="sensevoice-small">SenseVoice Small</option>
+            <option value="cohere-transcribe">Cohere Transcribe (03-2026)</option>
+            <option value="voxtral-mini-4b">Voxtral Mini 4B Realtime</option>
+            <option value="whisper-large-v3-turbo">Whisper Large V3 Turbo</option>
+            <option value="nemotron-3.5-streaming">Nemotron 3.5 Streaming</option>
           </select>
         </div>
         <div class="setting-group flex-1">
           <label for="selVadEngine">🎙️ VAD Engine</label>
           <select id="selVadEngine">
-            <option value="fsmn-vad" selected>FSMN-VAD (ASMR / Thì thầm 🎙️)</option>
-            <option value="silero-vad">Silero VAD v5 (Tiêu chuẩn ⚡)</option>
+            <option value="firered-vad" selected>FireRed VAD</option>
+            <option value="fsmn-vad">FSMN-VAD</option>
+            <option value="silero-vad">Silero VAD</option>
           </select>
         </div>
       </div>
@@ -83,9 +88,9 @@
         <div class="setting-group flex-1">
           <div class="label-with-value">
             <label>🎯 Threshold</label>
-            <span class="val-badge"><span id="valVadThreshold">0.50</span></span>
+            <span class="val-badge"><span id="valVadThreshold">0.35</span></span>
           </div>
-          <input type="range" id="rangeVadThreshold" min="0.10" max="0.90" step="0.05" value="0.50">
+          <input type="range" id="rangeVadThreshold" min="0.10" max="0.90" step="0.05" value="0.35">
         </div>
       </div>
 
@@ -105,7 +110,10 @@
       <div class="setting-group">
         <label for="selTranslationModel">🌐 Translation Model</label>
         <select id="selTranslationModel">
-          <option value="tencent" selected>Hunyuan-MT2 7B (Tencent) 🎯 Chuẩn (~4.78GB)</option>
+          <option value="tencent-1.8b">Hunyuan-MT2 1.8B (Tencent) ⚡ Siêu nhanh (~2.0GB)</option>
+          <option value="tencent" selected>Hunyuan-MT2 7B (Tencent) 🎯 Chuẩn (~4.6GB)</option>
+          <option value="xiaomi">MiLM-MT 4.6B (Xiaomi) ⚡ Nhanh (~2.5GB)</option>
+          <option value="gemmax">GemmaX2 28-9B v0.2 (Xiaomi) 🌟 Cao cấp (~5.8GB)</option>
         </select>
       </div>
 

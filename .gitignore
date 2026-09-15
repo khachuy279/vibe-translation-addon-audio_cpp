@@ -10,7 +10,7 @@ external/
 debug/
 
 # 2. Models & Model Weights (large files > 50MB)
-backend_audio_cpp/models/
+backend/models/
 models/
 *.gguf
 *.bin
@@ -22,7 +22,7 @@ models/
 *.blob
 
 # 2b. Native Binaries & Large CUDA DLLs
-backend_audio_cpp/bin/
+backend/bin/
 *.dll
 *.exe
 *.so
@@ -32,8 +32,8 @@ backend_audio_cpp/bin/
 # 3. Security & Certificates
 *.pem
 *.key
-backend_audio_cpp/cert.pem
-backend_audio_cpp/key.pem
+backend/cert.pem
+backend/key.pem
 
 # 4. Audio Dumps & Large Test Artifacts
 debug_audio/
