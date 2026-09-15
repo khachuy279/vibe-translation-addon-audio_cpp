@@ -102,7 +102,7 @@ vibe-translation-addon-transcribe_cpp/
 ## 🛠️ Hướng Dẫn Cài Đặt & Sử Dụng
 
 ### 1. Yêu Cầu Hệ Thống
-- **Hệ Điều Hành**: Windows 10/11 64-bit hoặc Linux x86_64.
+- **Hệ Điều Hành**: Windows 10/11 64-bit.
 - **Python**: Phiên bản 3.10, 3.11, 3.12 hoặc 3.13.
 - **GPU**: NVIDIA RTX (khuyên dùng $\ge 8\text{GB}$ VRAM, tối ưu nhất trên 12–16GB VRAM như RTX 4060Ti / 5060Ti / 4070 / 4080 / 5080).
 - **CUDA Toolkit / Drivers**: NVIDIA Driver $\ge 535$ (hỗ trợ CUDA 12.x).
