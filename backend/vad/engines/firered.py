@@ -29,6 +29,11 @@ class FireRedVADEngine(BaseVADEngine):
         self.vad_model = DetectModel.from_pretrained(str(self.model_dir))
         self.vad_model.eval()
         self.vad_model.cpu()
+
+        # Giới hạn PyTorch CPU threads xuống 2 để tránh đánh thức toàn bộ nhân CPU 40 lần/giây
+        if torch.get_num_threads() > 2:
+            torch.set_num_threads(2)
+
         logger.info(f"Loaded FireRed Stream-VAD Model from: {self.model_dir}", extra={"module_tag": "VAD"})
 
     def _resolve_model_dir(self, explicit_dir: Optional[Union[str, Path]]) -> Path:
@@ -69,9 +74,10 @@ class FireRedVADEngine(BaseVADEngine):
 
     def is_speech(
         self,
-        chunk_float32: np.ndarray,
+        chunk_float32: Optional[np.ndarray],
         state: VADStreamState,
         threshold: float,
+        chunk_raw: Optional[bytes] = None,
     ) -> VADResult:
         if state.firered_postprocessor is None:
             init_s = self.create_initial_state(threshold)
@@ -82,15 +88,24 @@ class FireRedVADEngine(BaseVADEngine):
         if threshold is not None and state.firered_postprocessor.speech_threshold != threshold:
             state.firered_postprocessor.speech_threshold = float(threshold)
 
-        # Chuẩn hóa độ dài frame 400 samples
-        if len(chunk_float32) != self.native_frame_samples:
-            if len(chunk_float32) < self.native_frame_samples:
-                chunk_float32 = np.pad(chunk_float32, (0, self.native_frame_samples - len(chunk_float32)))
-            else:
-                chunk_float32 = chunk_float32[: self.native_frame_samples]
-
-        # Chuyển đổi sang int16 theo yêu cầu của AudioFeat
-        chunk_int16 = (np.clip(chunk_float32, -1.0, 1.0) * 32767.0).astype(np.int16)
+        # Tránh roundtrip F32 -> I16: ưu tiên dùng trực tiếp chunk_raw Int16 nếu có
+        if chunk_raw is not None:
+            chunk_int16 = np.frombuffer(chunk_raw, dtype=np.int16)
+            if len(chunk_int16) != self.native_frame_samples:
+                if len(chunk_int16) < self.native_frame_samples:
+                    chunk_int16 = np.pad(chunk_int16, (0, self.native_frame_samples - len(chunk_int16)))
+                else:
+                    chunk_int16 = chunk_int16[: self.native_frame_samples]
+        elif chunk_float32 is not None:
+            # Chuẩn hóa độ dài frame 400 samples
+            if len(chunk_float32) != self.native_frame_samples:
+                if len(chunk_float32) < self.native_frame_samples:
+                    chunk_float32 = np.pad(chunk_float32, (0, self.native_frame_samples - len(chunk_float32)))
+                else:
+                    chunk_float32 = chunk_float32[: self.native_frame_samples]
+            chunk_int16 = (np.clip(chunk_float32, -1.0, 1.0) * 32767.0).astype(np.int16)
+        else:
+            raise ValueError("Cần cung cấp ít nhất chunk_raw hoặc chunk_float32 cho FireRed VAD")
 
         feat, _ = self.audio_feat.extract(chunk_int16)
         with torch.no_grad():

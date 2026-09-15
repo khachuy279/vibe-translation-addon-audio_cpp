@@ -85,9 +85,11 @@ class VADStreamProcessor:
     ) -> None:
         """Cập nhật cấu hình runtime nhanh chóng."""
         with self._lock:
+            changes = []
             if vad_engine is not None:
                 eng = vad_engine.lower().strip()
                 if eng in SUPPORTED_VAD_ENGINES and eng != self.vad_engine:
+                    old_eng = self.vad_engine
                     self.vad_engine = eng
                     self._engine = VADEngineFactory.get_engine(eng)
                     self._frame_samples = getattr(self._engine, "native_frame_samples", 400)
@@ -95,15 +97,26 @@ class VADStreamProcessor:
                     self._state = self._engine.create_initial_state(threshold=threshold)
                     max_pre_frames = max(1, int((self.pre_speech_buffer_ms / 1000.0) * self.sample_rate / self._frame_samples))
                     self._state.pre_speech_ring = deque(maxlen=max_pre_frames)
+                    changes.append(f"engine: '{old_eng}' -> '{eng}'")
 
-            if threshold is not None:
-                self.threshold = threshold
-            if silence_duration_ms is not None:
-                self.silence_duration_ms = silence_duration_ms
-            if hangover_ms is not None:
-                self.hangover_ms = hangover_ms
-            if enabled is not None:
-                self.enabled = enabled
+            if threshold is not None and float(threshold) != self.threshold:
+                changes.append(f"threshold: {self.threshold:.2f} -> {float(threshold):.2f}")
+                self.threshold = float(threshold)
+            if silence_duration_ms is not None and int(silence_duration_ms) != self.silence_duration_ms:
+                changes.append(f"silence: {self.silence_duration_ms}ms -> {int(silence_duration_ms)}ms")
+                self.silence_duration_ms = int(silence_duration_ms)
+            if hangover_ms is not None and int(hangover_ms) != self.hangover_ms:
+                changes.append(f"hangover: {self.hangover_ms}ms -> {int(hangover_ms)}ms")
+                self.hangover_ms = int(hangover_ms)
+            if enabled is not None and bool(enabled) != self.enabled:
+                changes.append(f"enabled: {self.enabled} -> {bool(enabled)}")
+                self.enabled = bool(enabled)
+
+            if changes:
+                logger.info(
+                    f"[VAD CONFIG] Đồng bộ cấu hình: {', '.join(changes)} (silence_duration_ms={self.silence_duration_ms}ms, threshold={self.threshold:.2f})",
+                    extra={"module_tag": "VAD"},
+                )
 
     def feed_chunk(self, audio_data: Union[bytes, np.ndarray], capture_timestamp: float = 0.0) -> None:
         """Xử lý nạp chunk âm thanh thô (bytes Int16/Float32 hoặc np.ndarray)."""
@@ -149,11 +162,20 @@ class VADStreamProcessor:
                 frame_ts = capture_timestamp + (offset / (self.sample_rate * 2.0))
                 frame_bytes = bytes(raw_buf[offset:frame_end])
 
-                # Chuyển đổi sang float32 [-1.0, 1.0] cho VAD engine
-                samples_int16 = np.frombuffer(frame_bytes, dtype=np.int16)
-                samples_float32 = samples_int16.astype(np.float32) / 32768.0
+                # Với FireRed-VAD, truyền chunk_raw (Int16 PCM) trực tiếp
+                # để triệt tiêu chi phí cấp phát và chuyển đổi Float32 -> Int16
+                if getattr(self._engine, "name", "") == "firered-vad":
+                    samples_float32 = None
+                else:
+                    samples_int16 = np.frombuffer(frame_bytes, dtype=np.int16)
+                    samples_float32 = samples_int16.astype(np.float32) / 32768.0
 
-                res = self._engine.is_speech(samples_float32, state, self.threshold)
+                res = self._engine.is_speech(
+                    samples_float32,
+                    state,
+                    self.threshold,
+                    chunk_raw=frame_bytes,
+                )
                 is_speech_frame = res.is_speech
                 prob = res.probability
                 vad_event = res.event
@@ -166,8 +188,10 @@ class VADStreamProcessor:
                         state.is_speech = True
                         state.silence_samples = 0
                         logger.info(
-                            f"Speech START detected (sample={state.total_samples_processed}, "
-                            f"t={state.total_samples_processed/self.sample_rate:.2f}s, prob={prob:.2f})",
+                            f"Speech START detected (prob={prob:.3f} >= threshold={self.threshold:.3f}, "
+                            f"silence_limit={self.silence_duration_ms}ms, "
+                            f"sample={state.total_samples_processed}, "
+                            f"t={state.total_samples_processed/self.sample_rate:.2f}s)",
                             extra={"module_tag": "VAD"},
                         )
                         if self.on_speech_start:
@@ -181,7 +205,6 @@ class VADStreamProcessor:
                                     (self.on_speech_chunk, (pre_bytes, pre_ts, VADState.PRE_ROLL.value))
                                 )
 
-                    frame_bytes = bytes(raw_buf[offset:frame_end])
                     if self.on_speech_chunk:
                         callbacks_to_fire.append(
                             (self.on_speech_chunk, (frame_bytes, frame_ts, VADState.SPEECH.value))
@@ -192,14 +215,14 @@ class VADStreamProcessor:
                         state.is_speech = False
                         state.silence_samples = 0
                         logger.info(
-                            f"Speech END detected by engine event (sample={state.total_samples_processed})",
+                            f"Speech END detected by engine event (prob={prob:.3f} < threshold={self.threshold:.3f}, "
+                            f"silence_limit={self.silence_duration_ms}ms, sample={state.total_samples_processed})",
                             extra={"module_tag": "VAD"},
                         )
                         if self.on_speech_end:
                             callbacks_to_fire.append((self.on_speech_end, ()))
                     elif is_speech_frame:
                         state.silence_samples = 0
-                        frame_bytes = bytes(raw_buf[offset:frame_end])
                         if self.on_speech_chunk:
                             callbacks_to_fire.append(
                                 (self.on_speech_chunk, (frame_bytes, frame_ts, VADState.SPEECH.value))
@@ -211,7 +234,6 @@ class VADStreamProcessor:
                         total_silence_limit_ms = float(self.silence_duration_ms)
                         grace_hangover_ms = min(float(self.hangover_ms), total_silence_limit_ms * 0.5)
 
-                        frame_bytes = bytes(raw_buf[offset:frame_end])
                         if silence_elapsed_ms <= grace_hangover_ms:
                             # Vẫn nằm trong vùng ân hạn Hangover -> Tiếp tục gửi cho ASR
                             if self.on_speech_chunk:
@@ -224,14 +246,15 @@ class VADStreamProcessor:
                             state.is_speech = False
                             state.silence_samples = 0
                             logger.info(
-                                f"Speech END detected by silence timeout ({silence_elapsed_ms:.0f}ms >= {total_silence_limit_ms:.0f}ms)",
+                                f"Speech END detected by silence timeout ({silence_elapsed_ms:.0f}ms >= "
+                                f"silence_limit={total_silence_limit_ms:.0f}ms, "
+                                f"prob={prob:.3f} < threshold={self.threshold:.3f})",
                                 extra={"module_tag": "VAD"},
                             )
                             if self.on_speech_end:
                                 callbacks_to_fire.append((self.on_speech_end, ()))
                 else:
                     # SILENCE state -> Lưu frame vào Pre-speech ring buffer
-                    frame_bytes = bytes(raw_buf[offset:frame_end])
                     state.pre_speech_ring.append((frame_bytes, frame_ts))
 
                 offset = frame_end

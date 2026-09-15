@@ -10,6 +10,7 @@ Hỗ trợ:
 import logging
 import os
 import sys
+import threading
 import time
 from typing import Optional
 
@@ -96,10 +97,10 @@ class ColoredFormatter(logging.Formatter):
             header = (
                 f"{LogColors.DIM}{time_str}{LogColors.RESET} "
                 f"{level_color}[{levelname:<5}]{LogColors.RESET} "
-                f"{tag_color}[{module_tag}]{LogColors.RESET} {icon} "
+                f"{tag_color}[{module_tag}]{LogColors.RESET} "
             )
         else:
-            header = f"{time_str} [{levelname:<5}] [{module_tag}] {icon} "
+            header = f"{time_str} [{levelname:<5}] [{module_tag}] "
             
         message = record.getMessage()
         
@@ -112,16 +113,60 @@ class ColoredFormatter(logging.Formatter):
         return f"{header}{message}"
 
 
+class SafeStreamHandler(logging.StreamHandler):
+    """StreamHandler an toàn chống WinError 1 và UnicodeEncodeError trên Windows."""
+
+    _lock = threading.RLock()
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            msg = self.format(record)
+            stream = self.stream
+            with self._lock:
+                written = False
+                try:
+                    stream.write(msg + self.terminator)
+                    written = True
+                except (UnicodeEncodeError, OSError):
+                    # Fallback mã hóa an toàn nếu stream.write gặp lỗi encoding/handle
+                    enc = getattr(stream, "encoding", "utf-8") or "utf-8"
+                    safe_msg = msg.encode(enc, errors="backslashreplace").decode(enc, errors="replace")
+                    try:
+                        stream.write(safe_msg + self.terminator)
+                        written = True
+                    except Exception:
+                        pass
+
+                if written:
+                    try:
+                        self.flush()
+                    except Exception:
+                        pass
+        except Exception:
+            self.handleError(record)
+
+    def handleError(self, record: logging.LogRecord) -> None:
+        try:
+            super().handleError(record)
+        except Exception:
+            # Triệt tiêu exception trong handleError để không sập luồng ứng dụng
+            pass
+
+
 def get_logger(name: str = "backend", level: int = logging.INFO) -> logging.Logger:
     """Khởi tạo hoặc lấy logger cấu hình chuẩn cho Backend."""
     logger_instance = logging.getLogger(name)
+    logger_instance.propagate = False
     
+    # Giữ tối đa 1 SafeStreamHandler duy nhất, xóa bỏ các handler thừa
+    while len(logger_instance.handlers) > 1:
+        logger_instance.removeHandler(logger_instance.handlers[-1])
+
     if not logger_instance.handlers:
-        handler = logging.StreamHandler(sys.stdout)
+        handler = SafeStreamHandler(sys.stdout)
         handler.setFormatter(ColoredFormatter(use_color=True))
         logger_instance.addHandler(handler)
         logger_instance.setLevel(level)
-        logger_instance.propagate = False
         
     return logger_instance
 

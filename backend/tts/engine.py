@@ -14,6 +14,7 @@ import gc
 import os
 import threading
 import time
+from collections import OrderedDict
 from pathlib import Path
 from typing import Optional, Tuple, Any, Dict
 
@@ -60,7 +61,8 @@ class OmniVoiceTTS(BaseTTSEngine):
         self.model = None
         self._is_loaded = False
         self._cudnn_disabled = False
-        self._voice_prompt_cache: Dict[Tuple[str, str], Any] = {}
+        self._voice_prompt_cache: "OrderedDict[Tuple[str, str], Any]" = OrderedDict()  # LRU, max 8 entries
+        self._voice_prompt_cache_max: int = 8
         self._init_lock = threading.RLock()
         self._infer_lock = threading.RLock()
 
@@ -120,15 +122,21 @@ class OmniVoiceTTS(BaseTTSEngine):
 
         cache_key = (ref_audio_path, ref_text)
         if cache_key in self._voice_prompt_cache:
+            # LRU: promote to most-recently-used position
+            self._voice_prompt_cache.move_to_end(cache_key)
             return self._voice_prompt_cache[cache_key]
 
         try:
             prompt = self.model.create_voice_clone_prompt(ref_audio=ref_audio_path, ref_text=ref_text)
             self._voice_prompt_cache[cache_key] = prompt
-            logger.debug(f"🎙️ Đã lưu cache VoiceClonePrompt cho: {Path(ref_audio_path).name}")
+            # LRU eviction: xoa entry cu nhat neu vuot maxsize
+            if len(self._voice_prompt_cache) > self._voice_prompt_cache_max:
+                evicted_key, _ = self._voice_prompt_cache.popitem(last=False)
+                logger.debug(f"Evicted voice cache: {Path(evicted_key[0]).name}")
+            logger.debug(f"Da luu cache VoiceClonePrompt cho: {Path(ref_audio_path).name} (cache={len(self._voice_prompt_cache)})")
             return prompt
         except Exception as e:
-            logger.debug(f"Không thể tạo VoiceClonePrompt cache ({e}), fallback sang raw ref_audio.")
+            logger.debug(f"Khong the tao VoiceClonePrompt cache ({e}), fallback sang raw ref_audio.")
             return None
 
     def load_model(self) -> None:
@@ -193,7 +201,7 @@ class OmniVoiceTTS(BaseTTSEngine):
 
             self._is_loaded = True
             elapsed = time.perf_counter() - t0
-            logger.info(f"✅ PyTorch OmniVoice đã nạp và warm-up hoàn tất trong {elapsed:.2f}s!")
+            logger.info(f"PyTorch OmniVoice đã nạp và warm-up hoàn tất trong {elapsed:.2f}s!")
 
     async def prewarm(self) -> bool:
         """Khởi động và nạp sẵn mô hình trong tiến trình nền."""

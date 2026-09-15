@@ -602,7 +602,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       }
 
       updateRangeLabels();
-    } catch (e) {}
+    } catch (e) { }
 
     await fetchBackendEngineConfig();
 
@@ -700,7 +700,7 @@ const api = typeof browser !== "undefined" ? browser : chrome;
           silence_duration_ms: cfg.silenceDurationMs,
           vad_threshold: cfg.vadThreshold,
         }),
-      }).catch(() => {});
+      }).catch(() => { });
     };
 
     if (immediate) {
@@ -765,12 +765,12 @@ const api = typeof browser !== "undefined" ? browser : chrome;
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   function prewarmTTS() {
     syncTtsConfig(true);
-    fetchBackend("/api/tts/prewarm", { method: "POST" }).catch(() => {});
+    fetchBackend("/api/tts/prewarm", { method: "POST" }).catch(() => { });
   }
 
   if (chkEnableTts) {

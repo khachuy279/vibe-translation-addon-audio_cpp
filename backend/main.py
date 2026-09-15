@@ -26,8 +26,23 @@ _PROJECT_ROOT = _HERE.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
+# Tối ưu hóa Intel OpenMP / PyTorch / MKL để triệt tiêu hiện tượng busy-spin gây 100% CPU trên đa nhân
+os.environ["KMP_BLOCKTIME"] = "0"
+os.environ["OMP_WAIT_POLICY"] = "PASSIVE"
+os.environ["OMP_NUM_THREADS"] = "2"
+os.environ["MKL_NUM_THREADS"] = "2"
+
 # Tắt thanh tiến trình tqdm của HuggingFace để không làm rác log console
 os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+
+# Thiết lập giới hạn luồng PyTorch CPU sớm nhất có thể
+try:
+    import torch
+    torch.set_num_threads(2)
+    if hasattr(torch, "set_num_interop_threads"):
+        torch.set_num_interop_threads(2)
+except ImportError:
+    pass
 
 # Windows CUDA DLL setup
 from backend.utils.cuda import setup_cuda_dll_paths
@@ -82,31 +97,44 @@ class SwitchModelRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Khởi tạo và làm ấm trước (Pre-warm) toàn bộ các mô hình khi máy chủ khởi động."""
-    logger.info("🔥 [STARTUP] Đang nạp và làm ấm (Pre-warm) ASR, VAD & Local Translation Models...")
+    """Khởi tạo và làm ấm trước (Pre-warm) song song toàn bộ các mô hình khi máy chủ khởi động."""
+    logger.info("[STARTUP] Đang nạp và làm ấm (Pre-warm) song song ASR, Translation & VAD...")
 
-    def _warmup():
+    def _prewarm_asr():
         try:
-            # 1. Prewarm ASR model trên GPU
-            engine = TranscribeEngine()
-            engine.prewarm()
+            TranscribeEngine().prewarm()
+            logger.info("[STARTUP] ASR model đã được nạp & làm ấm thành công!", extra={"module_tag": "ASR"})
+        except Exception as e:
+            logger.warning(f"[STARTUP] Cảnh báo làm ấm ASR: {e}", exc_info=True, extra={"module_tag": "ASR"})
 
-            # 2. Prewarm Translation model trên GPU
-            translator = get_translation_engine()
-            translator.load_model()
+    def _prewarm_translation():
+        try:
+            get_translation_engine().load_model()
+            logger.info("[STARTUP] Translation model đã được nạp & làm ấm thành công!", extra={"module_tag": "TRANSLATE"})
+        except Exception as e:
+            logger.warning(f"[STARTUP] Cảnh báo làm ấm Translation: {e}", exc_info=True, extra={"module_tag": "TRANSLATE"})
 
-            # 3. Prewarm VAD model trên CPU
+    def _prewarm_vad():
+        try:
             vad = VADProcessor(vad_engine=config.vad.vad_engine)
             vad.feed_chunk(bytes(800))
-
-            logger.info("✅ [STARTUP] Toàn bộ mô hình đã được làm ấm và sẵn sàng phục vụ!")
-
+            logger.info("[STARTUP] VAD engine đã được làm ấm thành công!", extra={"module_tag": "VAD"})
         except Exception as e:
-            logger.warning(f"Cảnh báo trong quá trình Pre-warm: {e}", exc_info=True)
+            logger.warning(f"[STARTUP] Cảnh báo làm ấm VAD: {e}", exc_info=True, extra={"module_tag": "VAD"})
 
-    await asyncio.to_thread(_warmup)
+    results = await asyncio.gather(
+        asyncio.to_thread(_prewarm_asr),
+        asyncio.to_thread(_prewarm_translation),
+        asyncio.to_thread(_prewarm_vad),
+        return_exceptions=True,
+    )
+    for res in results:
+        if isinstance(res, Exception):
+            logger.warning(f"[STARTUP] Lỗi thành phần trong quá trình prewarm: {res}", extra={"module_tag": "MAIN"})
+
+    logger.info("[STARTUP] Toàn bộ mô hình đã được làm ấm song song và sẵn sàng phục vụ!", extra={"module_tag": "MAIN"})
     yield
-    logger.info("🛑 [SHUTDOWN] Đang giải phóng toàn bộ tài nguyên GPU & RAM...")
+    logger.info("[SHUTDOWN] Đang giải phóng toàn bộ tài nguyên GPU & RAM...")
     for t in list(_background_tasks):
         if not t.done():
             t.cancel()
@@ -129,7 +157,13 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.debug(f"TTS cleanup notice: {e}")
 
-    logger.info("✅ [SHUTDOWN] Hoàn tất tắt máy chủ an toàn.")
+    try:
+        from backend.ws.handler import shutdown_vad_executor
+        shutdown_vad_executor(wait=False)
+    except Exception as e:
+        logger.debug(f"VAD cleanup notice: {e}")
+
+    logger.info("[SHUTDOWN] Hoàn tất tắt máy chủ an toàn.")
 
 
 
@@ -312,6 +346,37 @@ async def update_backend_config(req: SwitchModelRequest):
     if req.tts_speed is not None:
         config.tts.speed = req.tts_speed
 
+    # Thông báo rõ ràng trên console khi popup cập nhật giá trị
+    updated_items = []
+    if req.model_id or req.asr_engine:
+        updated_items.append(f"asr='{target_model}'")
+    if req.vad_engine is not None:
+        updated_items.append(f"vad='{req.vad_engine}'")
+    if req.vad_threshold is not None:
+        updated_items.append(f"threshold={req.vad_threshold}")
+    if req.silence_duration_ms is not None:
+        updated_items.append(f"silence={req.silence_duration_ms}ms")
+    if req.min_words_to_commit is not None:
+        updated_items.append(f"min_words={req.min_words_to_commit}")
+    if req.source_lang is not None:
+        updated_items.append(f"src='{req.source_lang}'")
+    if req.target_lang is not None:
+        updated_items.append(f"tgt='{req.target_lang}'")
+    if req.translation_model is not None:
+        updated_items.append(f"trans='{req.translation_model}'")
+    if req.tts_enabled is not None:
+        updated_items.append(f"tts={req.tts_enabled}")
+    if req.tts_voice is not None:
+        updated_items.append(f"voice='{req.tts_voice}'")
+    if req.tts_speed is not None:
+        updated_items.append(f"speed={req.tts_speed}")
+
+    if updated_items:
+        logger.info(
+            f"[POPUP CONFIG UPDATE] Thay đổi từ Extension Popup: {', '.join(updated_items)}",
+            extra={"module_tag": "CONFIG"},
+        )
+
     return _build_config_response(include_catalog=True)
 
 
@@ -346,7 +411,7 @@ def main():
         "ssl_certfile": cert_path,
         "ssl_keyfile": key_path,
     }
-    logger.info(f"🔒 Chế độ WSS (SSL) kích hoạt với cert: {cert_path}")
+    logger.info(f"Chế độ WSS (SSL) kích hoạt với cert: {cert_path}")
 
     try:
         uvicorn.run(

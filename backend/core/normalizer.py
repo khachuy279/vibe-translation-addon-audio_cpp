@@ -47,7 +47,7 @@ class SpeechNormalizer:
         """Tính giá trị RMS (Root Mean Square) của mảng âm thanh."""
         if audio is None or len(audio) == 0:
             return 0.0
-        return float(np.sqrt(np.mean(np.square(audio, dtype=np.float64))))
+        return float(np.sqrt(np.mean(audio * audio)))
 
     def calculate_peak(self, audio: np.ndarray) -> float:
         """Tính giá trị đỉnh biên độ tuyệt đối."""

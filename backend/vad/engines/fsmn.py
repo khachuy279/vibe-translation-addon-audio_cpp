@@ -69,9 +69,10 @@ class FsmnVADEngine(BaseVADEngine):
 
     def is_speech(
         self,
-        chunk_float32: np.ndarray,
+        chunk_float32: Optional[np.ndarray],
         state: VADStreamState,
         threshold: float,
+        chunk_raw: Optional[bytes] = None,
     ) -> VADResult:
         if not state.fsmn_cache:
             init_s = self.create_initial_state(threshold)
@@ -81,6 +82,12 @@ class FsmnVADEngine(BaseVADEngine):
             stats = state.fsmn_cache["stats"]
             if getattr(stats, "speech_noise_thres", None) != threshold:
                 stats.speech_noise_thres = float(threshold)
+
+        if chunk_float32 is None:
+            if chunk_raw is not None:
+                chunk_float32 = np.frombuffer(chunk_raw, dtype=np.int16).astype(np.float32) / 32768.0
+            else:
+                raise ValueError("Cần cung cấp ít nhất chunk_raw hoặc chunk_float32 cho FSMN VAD")
 
         if len(chunk_float32) != self.native_frame_samples:
             if len(chunk_float32) < self.native_frame_samples:

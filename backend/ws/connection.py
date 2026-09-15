@@ -13,6 +13,18 @@ from backend.utils.logger import get_logger
 
 logger = get_logger("ws.connection")
 
+# P2-2: orjson nhanh hon 3-10x cho Unicode. Graceful fallback ve stdlib json.
+try:
+    import orjson as _orjson_lib
+    def _fast_dumps(obj: Any) -> str:
+        """Serialize dict thanh JSON string dung orjson (fast path)."""
+        return _orjson_lib.dumps(obj).decode("utf-8")
+    logger.debug("[WS] Dung orjson cho JSON serialization")
+except ImportError:
+    def _fast_dumps(obj: Any) -> str:  # type: ignore[misc]
+        """Serialize dict thanh JSON string dung stdlib json (fallback)."""
+        return json.dumps(obj, ensure_ascii=False)
+
 
 class SafeWebSocketConnection:
     """Bao bọc WebSocket với asyncio.Lock để tuần tự hóa việc gửi tin nhắn ra ngoài."""
@@ -60,14 +72,14 @@ class SafeWebSocketConnection:
             return False
 
     async def send_json(self, payload: Dict[str, Any]) -> bool:
-        """Tuần tự hóa payload thành JSON và gửi an toàn."""
+        """Tuan tu hoa payload thanh JSON va gui an toan (dung orjson neu co)."""
         if self._is_closed:
             return False
         try:
-            raw_text = json.dumps(payload, ensure_ascii=False)
+            raw_text = _fast_dumps(payload)
             return await self.send_text(raw_text)
         except (TypeError, ValueError) as e:
-            logger.error(f"Lỗi tuần tự hóa JSON payload: {e}")
+            logger.error(f"Loi tuan tu hoa JSON payload: {e}")
             return False
 
     async def close(self, code: int = 1000) -> None:

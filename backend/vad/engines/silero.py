@@ -44,6 +44,10 @@ class SileroVADEngine(BaseVADEngine):
 
         from silero_vad.utils_vad import init_jit_model
         self._prototype_model = init_jit_model(str(self.model_path))
+
+        if torch.get_num_threads() > 2:
+            torch.set_num_threads(2)
+
         logger.info(f"Loaded Silero VAD JIT Model from: {self.model_path}", extra={"module_tag": "VAD"})
 
     def _resolve_model_path(self, explicit_path: Optional[Union[str, Path]]) -> Path:
@@ -86,15 +90,22 @@ class SileroVADEngine(BaseVADEngine):
 
     def is_speech(
         self,
-        chunk_float32: np.ndarray,
+        chunk_float32: Optional[np.ndarray],
         state: VADStreamState,
         threshold: float,
+        chunk_raw: Optional[bytes] = None,
     ) -> VADResult:
         if state.silero_iterator is None or state.silero_model is None:
             init_s = self.create_initial_state(threshold)
             state.silero_model = init_s.silero_model
             state.silero_probe = init_s.silero_probe
             state.silero_iterator = init_s.silero_iterator
+
+        if chunk_float32 is None:
+            if chunk_raw is not None:
+                chunk_float32 = np.frombuffer(chunk_raw, dtype=np.int16).astype(np.float32) / 32768.0
+            else:
+                raise ValueError("Cần cung cấp ít nhất chunk_raw hoặc chunk_float32 cho Silero VAD")
 
         # Căn chỉnh kích thước frame 512 samples
         if len(chunk_float32) != self.native_frame_samples:

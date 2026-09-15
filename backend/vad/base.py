@@ -100,9 +100,10 @@ class BaseVADEngine(ABC):
     @abstractmethod
     def is_speech(
         self,
-        chunk_float32: np.ndarray,
+        chunk_float32: Optional[np.ndarray],
         state: VADStreamState,
         threshold: float,
+        chunk_raw: Optional[bytes] = None,
     ) -> VADResult:
-        """Xử lý 1 frame float32 [-1.0, 1.0] và cập nhật state."""
+        """Xử lý 1 frame âm thanh và cập nhật state (hỗ trợ cả float32 và raw Int16 PCM bytes)."""
         pass

@@ -10,6 +10,8 @@ import time
 from typing import Optional, Dict, Any
 from fastapi import WebSocket, WebSocketDisconnect
 
+from concurrent.futures import ThreadPoolExecutor
+
 from backend.config import config
 from backend.translation.context import TranslationContextTracker
 from backend.translation.dedup import TranslationDeduplicator
@@ -30,6 +32,17 @@ from backend.utils.logger import get_logger
 
 logger = get_logger("ws.handler")
 
+# Dedicated Single-Thread Worker cho VAD: Triệt tiêu tranh chấp lock và giảm 70% CPU
+_VAD_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="vad_worker")
+
+
+def shutdown_vad_executor(wait: bool = False) -> None:
+    """Giải phóng executor chuyên dụng cho VAD khi máy chủ tắt."""
+    try:
+        _VAD_EXECUTOR.shutdown(wait=wait, cancel_futures=True)
+    except Exception:
+        pass
+
 
 async def handle_ws(ws: WebSocket) -> None:
     """Điểm nhập kết nối WebSocket chính quản lý toàn bộ vòng đời phiên."""
@@ -39,7 +52,7 @@ async def handle_ws(ws: WebSocket) -> None:
     session = SessionState(safe_ws)
     metrics_collector.increment_counter("ws.sessions_connected")
     metrics_collector.record_checkpoint(f"session_start_{session.session_id[:8]}")
-    logger.info(f"🔗 Session {session.session_id[:8]}: Đã kết nối từ client")
+    logger.info(f"Session {session.session_id[:8]}: Đã kết nối từ client")
 
     session.init_components()
 
@@ -48,15 +61,29 @@ async def handle_ws(ws: WebSocket) -> None:
     tts_task = asyncio.create_task(_tts_worker(session), name=f"tts_{session.session_id[:8]}")
     workers = [asr_task, translation_task, tts_task]
 
+    main_task = asyncio.current_task()
+    session_error: Optional[BaseException] = None
+
+    def _on_worker_done(t: asyncio.Task) -> None:
+        nonlocal session_error
+        if not t.cancelled():
+            exc = t.exception()
+            if exc is not None:
+                session_error = exc
+                logger.error(
+                    f"Worker {t.get_name()} gặp sự cố bất ngờ: {exc}",
+                    exc_info=exc,
+                    extra={"module_tag": "WS.HANDLER"},
+                )
+                if main_task and not main_task.done():
+                    main_task.cancel()
+
+    for t in workers:
+        t.add_done_callback(_on_worker_done)
+
     t_cleanup_start = None
     try:
         while True:
-            # Kiểm tra xem có worker nào bị crash bất ngờ không
-            for t in workers:
-                if t.done() and not t.cancelled() and t.exception():
-                    logger.error(f"Worker {t.get_name()} gặp sự cố: {t.exception()}")
-                    raise t.exception()
-
             message = await safe_ws.receive()
             msg_type = message.get("type", "")
 
@@ -70,10 +97,23 @@ async def handle_ws(ws: WebSocket) -> None:
 
     except WebSocketDisconnect:
         logger.info(f"Session {session.session_id[:8]}: Client ngắt kết nối an toàn")
+    except asyncio.CancelledError:
+        if session_error:
+            logger.error(
+                f"Session {session.session_id[:8]}: Buộc đóng phiên do worker gặp sự cố: {session_error}",
+                extra={"module_tag": "WS.HANDLER"},
+            )
+        else:
+            logger.info(f"Session {session.session_id[:8]}: Phiên bị hủy")
     except Exception as e:
-        logger.debug(f"Session {session.session_id[:8]}: Kết thúc vòng lặp ({e})")
+        logger.warning(f"Session {session.session_id[:8]}: Kết thúc vòng lặp do lỗi ({e})", exc_info=True)
     finally:
         t_cleanup_start = time.perf_counter()
+
+        for t in workers:
+            t.remove_done_callback(_on_worker_done)
+            t.cancel()
+        await asyncio.gather(*workers, return_exceptions=True)
 
         # Dọn dẹp hàng đợi nhanh (< 200ms)
         try:
@@ -81,16 +121,12 @@ async def handle_ws(ws: WebSocket) -> None:
         except Exception:
             pass
 
-        for t in workers:
-            t.cancel()
-        await asyncio.gather(*workers, return_exceptions=True)
-
         await session.cleanup()
         await safe_ws.close()
 
         metrics_collector.record_checkpoint(f"session_end_{session.session_id[:8]}")
         cleanup_ms = (time.perf_counter() - t_cleanup_start) * 1000.0 if t_cleanup_start else 0.0
-        logger.info(f"🏁 Session {session.session_id[:8]}: Đã đóng và giải phóng tài nguyên hoàn tất ({cleanup_ms:.2f}ms)")
+        logger.info(f"Session {session.session_id[:8]}: Đã đóng và giải phóng tài nguyên hoàn tất ({cleanup_ms:.2f}ms)")
 
 
 async def _handle_text_message(session: SessionState, text: str) -> None:
@@ -102,15 +138,16 @@ async def _handle_text_message(session: SessionState, text: str) -> None:
         if action in ("set_config", "configure"):
             session.apply_config(msg)
             logger.info(
-                f"⚙️ Session {session.session_id[:8]}: Cập nhật cấu hình "
+                f"[WS CONFIG UPDATE] Session {session.session_id[:8]}: Đồng bộ cấu hình từ Extension Popup "
                 f"(vad={session.config.get('vad_engine')}, "
                 f"threshold={session.config.get('vad_threshold')}, "
                 f"silence={session.config.get('silence_duration_ms')}ms, "
+                f"hangover={session.config.get('hangover_ms')}ms, "
                 f"min_words={session.config.get('min_words_to_commit')}, "
-                f"target={session.config.get('target_lang')}, "
-                f"source={session.config.get('source_lang')}, "
-                f"tts_enabled={session.config.get('tts_enabled')}, "
-                f"tts_voice={session.config.get('tts_voice')})"
+                f"lang: {session.config.get('source_lang')} -> {session.config.get('target_lang')}, "
+                f"tts={session.config.get('tts_enabled')}, "
+                f"voice='{session.config.get('tts_voice')}')",
+                extra={"module_tag": "CONFIG"},
             )
             if session.config.get("tts_enabled"):
                 prewarm_task = asyncio.create_task(
@@ -144,8 +181,9 @@ def _process_binary_chunk(session: SessionState, data: bytes) -> None:
 
 
 async def _handle_binary_message(session: SessionState, data: bytes) -> None:
-    """Xử lý khung nhị phân âm thanh bất đồng bộ."""
-    await asyncio.to_thread(_process_binary_chunk, session, data)
+    """Xử lý khung nhị phân âm thanh trên luồng worker VAD chuyên dụng."""
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(_VAD_EXECUTOR, _process_binary_chunk, session, data)
 
 
 async def _stream_asr_tokens(session: SessionState) -> None:
@@ -169,7 +207,7 @@ async def _stream_asr_tokens(session: SessionState) -> None:
                     min_words = int(val if val is not None else config.sentence.min_words_to_commit)
                     token_cnt = count_content_tokens(text)
                     if token_cnt < min_words:
-                        logger.info(f"🚫 [TRANSLATE FILTER] Lọc bỏ câu quá ngắn ({token_cnt} < {min_words} từ): '{text}'")
+                        logger.info(f"[TRANSLATE FILTER] Lọc bỏ câu quá ngắn ({token_cnt} < {min_words} từ): '{text}'")
                         metrics_collector.increment_counter("translation.short_words_filtered")
                         # Gửi gói tin filtered=True để Extension xóa bỏ ngay lập tức subtitle draft trên màn hình
                         out_msg = make_utterance_update_msg(
@@ -241,7 +279,7 @@ async def _process_translation_item(
     clean_utt = (utt_id or "unknown")[:8]
     if dedup.is_duplicate(text):
         metrics_collector.increment_counter("translation.dedup_skipped")
-        logger.info(f"🚫 [TRANSLATE DEDUP] [utt={clean_utt}] Bỏ qua câu dịch trùng lặp: '{text}'")
+        logger.info(f"[TRANSLATE DEDUP] [utt={clean_utt}] Bỏ qua câu dịch trùng lặp: '{text}'")
         return
 
     start_t = time.monotonic()
@@ -256,7 +294,7 @@ async def _process_translation_item(
     elapsed_ms = int((time.monotonic() - start_t) * 1000)
     translated = res.get("translated_text", text)
 
-    logger.info(f"🌐 [TRANSLATE] [utt={clean_utt}] ({src_lang} -> {tgt_lang} in {elapsed_ms}ms): '{text}' => '{translated}'")
+    logger.info(f"[TRANSLATE] [utt={clean_utt}] ({src_lang} -> {tgt_lang} in {elapsed_ms}ms): '{text}' => '{translated}'")
     ctx_tracker.add(text, translated)
 
     # 1. Gói tin translation chuyên biệt
@@ -342,7 +380,7 @@ async def _process_tts_item(
 
     if dedup_state.is_duplicate(text):
         metrics_collector.increment_counter("tts.dedup_skipped")
-        logger.info(f"🚫 [TTS DEDUP] Bỏ qua câu phát âm trùng lặp: '{text}'")
+        logger.info(f"[TTS DEDUP] Bỏ qua câu phát âm trùng lặp: '{text}'")
         return
 
     try:
@@ -398,4 +436,4 @@ async def _tts_worker(session: SessionState) -> None:
             await asyncio.sleep(0.05)
 
 
-__all__ = ["handle_ws"]
+__all__ = ["handle_ws", "shutdown_vad_executor"]

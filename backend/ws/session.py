@@ -281,4 +281,4 @@ class SessionState:
             await self.asr_engine.cleanup()
 
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
-        logger.info(f"⚡ Session {self.session_id[:8]}: Fast Cleanup hoàn tất trong {elapsed_ms:.2f}ms")
+        logger.info(f"Session {self.session_id[:8]}: Fast Cleanup hoàn tất trong {elapsed_ms:.2f}ms")

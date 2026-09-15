@@ -79,5 +79,5 @@ def ensure_ssl_certificates() -> Tuple[str, str]:
     os.replace(tmp_key_path, key_path)
     os.replace(tmp_cert_path, cert_path)
 
-    logger.info(f"✅ Đã tạo chứng chỉ SSL thành công: {cert_path}")
+    logger.info(f"Đã tạo chứng chỉ SSL thành công: {cert_path}")
     return str(cert_path), str(key_path)

@@ -87,17 +87,22 @@ class AudioProcessor:
             frac_t = time_steps - int_t
             spec_stretched = (1 - frac_t) * spec[:, int_t] + frac_t * spec[:, int_t + 1]
 
-            phase = np.angle(spec[:, 0])
-            spec_out = np.zeros_like(spec_stretched, dtype=complex)
-            spec_out[:, 0] = spec_stretched[:, 0]
-            expected_phase_advance = 2 * np.pi * hop * np.arange(spec.shape[0]) / n_fft
+            expected_phase_advance = (
+                2 * np.pi * hop * np.arange(spec.shape[0]) / n_fft * rate
+            )[:, np.newaxis]
 
-            for i in range(1, spec_stretched.shape[1]):
-                dphase = np.angle(spec_stretched[:, i]) - np.angle(spec_stretched[:, i - 1])
-                dphase = dphase - expected_phase_advance * rate
-                dphase = dphase - 2 * np.pi * np.round(dphase / (2 * np.pi))
-                phase = phase + expected_phase_advance * rate + dphase
-                spec_out[:, i] = np.abs(spec_stretched[:, i]) * np.exp(1j * phase)
+            angles = np.angle(spec_stretched)
+            delta_angles = np.diff(angles, axis=1)
+            delta_angles -= expected_phase_advance
+            delta_angles -= 2 * np.pi * np.round(delta_angles / (2 * np.pi))
+            delta_angles += expected_phase_advance
+
+            phases = np.empty_like(angles)
+            phases[:, 0] = angles[:, 0]
+            np.cumsum(delta_angles, axis=1, out=phases[:, 1:])
+            phases[:, 1:] += angles[:, :1]
+
+            spec_out = np.abs(spec_stretched) * np.exp(1j * phases)
 
             _, stretched = signal.istft(spec_out, fs=sample_rate, nperseg=n_fft, noverlap=n_fft - hop)
             return stretched.astype(np.float32)

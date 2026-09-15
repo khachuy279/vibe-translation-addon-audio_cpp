@@ -108,9 +108,11 @@ class TranscribeEngine(BaseASREngine):
         self._speech_start_sample: int = 0
         self._last_committed_sample: int = 0
         from collections import deque
-        self._pending_commits: deque = deque()
+        self._pending_commits: deque = deque(maxlen=8)  # Bounded: max 8 pending sentences, oldest dropped if ASR blocked
 
         self._preview_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
+        self._commit_event: asyncio.Event = asyncio.Event()  # P2-1: wake stream_tokens immediately on commit
+        self._event_loop: Optional[asyncio.AbstractEventLoop] = None  # Set when stream_tokens starts
         self._is_running: bool = True
         self._lock = threading.RLock()
 
@@ -224,20 +226,25 @@ class TranscribeEngine(BaseASREngine):
             self._speech_start_sample = max(0, self.audio_buffer.total_written - 4800)  # pre-roll 300ms
 
     def on_speech_end(self, reason: str = "VAD_SILENCE") -> None:
-        """Callback khi VAD phát hiện kết thúc nói (kích hoạt chốt câu)."""
+        """Callback khi VAD phat hien ket thuc noi (kich hoat chot cau)."""
         with self._lock:
             if not self._speech_active:
                 return
             self._speech_active = False
             end_sample = self.audio_buffer.total_written
-            
-            # Đưa vào hàng đợi commit câu
+
+            # Dua vao hang doi commit cau
             self._pending_commits.append({
                 "utterance_id": self._active_utterance_id,
                 "start_sample": self._speech_start_sample,
                 "end_sample": end_sample,
                 "reason": reason,
             })
+
+        # P2-1: Wake up stream_tokens ngay lap tuc (thread-safe, goi tu sync VAD thread)
+        loop = self._event_loop
+        if loop is not None and loop.is_running():
+            loop.call_soon_threadsafe(self._commit_event.set)
 
     def set_language(self, language: str) -> None:
         """Cập nhật ngôn ngữ nhận dạng."""
@@ -299,24 +306,29 @@ class TranscribeEngine(BaseASREngine):
             return clean_transcript_text(raw_text)
 
     async def stream_tokens(self) -> AsyncIterator[Dict[str, Any]]:
-        """Async generator liên tục thăm dò preview và xuất bản kết quả ASR."""
+        """Async generator lien tuc tham do preview va xuat ban ket qua ASR."""
         poll_interval = self.poll_interval_ms / 1000.0
 
+        # P2-1: Luu loop reference de on_speech_end (sync thread) co the goi call_soon_threadsafe
+        self._event_loop = asyncio.get_running_loop()
+
         while self._is_running:
-            # 1. Kiểm tra nếu có pending commit cần xử lý ưu tiên
+            # 1. Kiem tra neu co pending commit can xu ly uu tien
             commit_req = None
             with self._lock:
                 if self._pending_commits:
                     commit_req = self._pending_commits.popleft()
 
             if commit_req:
+                # P2-1: Reset event sau khi lay commit (tranh spin neu co them commit den)
+                self._commit_event.clear()
                 utt_id = commit_req["utterance_id"]
                 start_s = commit_req["start_sample"]
                 end_s = commit_req["end_sample"]
                 reason = commit_req["reason"]
 
                 audio_slice = self.audio_buffer.get_slice(start_s, end_s)
-                
+
                 t0 = time.perf_counter()
                 loop = asyncio.get_running_loop()
                 final_text = await loop.run_in_executor(_EXECUTOR, self._run_inference_sync, audio_slice)
@@ -324,7 +336,7 @@ class TranscribeEngine(BaseASREngine):
 
                 if final_text:
                     logger.info(
-                        f"[ASR COMMIT] [utt={utt_id}] [{self.model_key}] [{reason}] '{final_text}' (infer={infer_ms:.1f}ms)",
+                        f"[utt={utt_id}] [{self.model_key}] [{reason}] '{final_text}' (infer={infer_ms:.1f}ms)",
                         extra={"module_tag": "ASR_COMMIT"},
                     )
                     yield {
@@ -338,14 +350,14 @@ class TranscribeEngine(BaseASREngine):
                     }
                 continue
 
-            # 2. Nếu đang trong trạng thái nói -> Thăm dò preview text
+            # 2. Neu dang trong trang thai noi -> Tham do preview text
             if self._speech_active:
                 current_total = self.audio_buffer.total_written
                 start_s = self._speech_start_sample
-                
+
                 if current_total - start_s >= int(16000 * self.min_transcribe_sec):
                     audio_slice = self.audio_buffer.get_slice(start_s, current_total)
-                    
+
                     t0 = time.perf_counter()
                     loop = asyncio.get_running_loop()
                     preview_text = await loop.run_in_executor(_EXECUTOR, self._run_inference_sync, audio_slice)
@@ -363,11 +375,25 @@ class TranscribeEngine(BaseASREngine):
                             "inference_ms": infer_ms,
                         }
 
-            await asyncio.sleep(poll_interval)
+            # 3. Doi: preview sleep (khi dang speech) hoac event wait (khi idle)
+            if self._speech_active:
+                # Dang speech: poll theo interval cho preview
+                await asyncio.sleep(poll_interval)
+            else:
+                # P2-1: Idle - khong waste CPU voi sleep, doi commit event
+                # Timeout sau poll_interval de dam bao khong bi stuck neu event miss
+                try:
+                    await asyncio.wait_for(
+                        self._commit_event.wait(),
+                        timeout=poll_interval,
+                    )
+                except asyncio.TimeoutError:
+                    pass
 
     async def cleanup(self) -> None:
         """Dừng generator và giải phóng tài nguyên session."""
         self._is_running = False
+        self._commit_event.set()  # Đánh thức stream_tokens ngay lập tức để thoát generator
         with self._lock:
             self._speech_active = False
             self._pending_commits.clear()
